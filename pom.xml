@@ -7,6 +7,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>core</module>
+        <module>gateway</module>
+        <module>test-unit</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -6,7 +6,7 @@
         <artifactId>ribbon2</artifactId>
         <version>0.1</version>
     </parent>
-    <artifactId>core</artifactId>
+    <artifactId>test-unit</artifactId>
     <packaging>jar</packaging>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -23,10 +23,9 @@
     </developers>
     <dependencies>
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.16.18</version>
-            <scope>provided</scope>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-stomp</artifactId>
+            <version>3.4.2</version>
         </dependency>
     </dependencies>
 </project>
