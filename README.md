@@ -10,6 +10,6 @@ It delivers similar concepts with completely new tech stack and features.
 1. Still not so demanding for hardware or memory;
 
 ### Tech stack
-System based on Spark Java (REST API provider), Vertx.io (event bus and STOMP server and client) and JOOQ.
+System based on Spark Java (REST API provider), MessageBus 4.0 and JOOQ.
 
 Source code of Ribbon2 system distributed under terms of the GNU LGPLv3 license.

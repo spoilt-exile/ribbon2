@@ -1,0 +1,16 @@
+{
+    "threadPoolConfig": {
+        "type": "FIXED_POOL",
+        "threadCount": 8
+    },
+    "bridgeServer": {
+        "nested": false,
+        "httpPort": 4444,
+        "sparkThreadPoolMaxSize": 16
+    },
+    "bridgeClient": {
+        "address": "127.0.0.1",
+        "port": 8080,
+        "heartbeatRate": 10
+    }
+}

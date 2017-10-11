@@ -18,9 +18,8 @@
  */
 package tk.freaxsoftware.ribbon2.test.unit;
 
-import io.vertx.core.Vertx;
-import io.vertx.ext.stomp.StompClient;
-import io.vertx.ext.stomp.StompClientConnection;
+import tk.freaxsoftware.extras.bus.MessageBus;
+import tk.freaxsoftware.ribbon2.core.data.Message;
 
 /**
  * Unit main class.
@@ -33,16 +32,12 @@ public class UnitMain {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        StompClient client = StompClient.create(Vertx.vertx())
-                .connect(ar -> {
-                    if (ar.succeeded()) {
-                        StompClientConnection connection = ar.result();
-                        connection.subscribe("/test",
-                                frame -> System.out.println("Just received a frame from /queue : " + frame.getBodyAsString()));
-                    } else {
-                        System.out.println("Failed to connect to the STOMP server: " + ar.cause().toString());
-                    }
-                });
+        MessageBus.addSubscription(Message.MESSAGE_ID_ADD_MESSAGE, (holder) -> {
+            Message content = (Message) holder.getContent();
+            System.out.println(content.getContent());
+            content.setContent("Hello gateway!");
+            holder.getResponse().setContent(content);
+        });
     }
 
 }

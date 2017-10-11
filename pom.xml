@@ -13,4 +13,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <name>Ribbon System ${project.version}</name>
+    <description>Ribbon System root pom project;</description>
 </project>

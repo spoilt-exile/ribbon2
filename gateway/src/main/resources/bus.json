@@ -1,0 +1,10 @@
+{
+    "threadPoolConfig": {
+        "type": "FIXED_POOL",
+        "threadCount": 8
+    },
+    "bridgeServer": {
+        "nested": true,
+        "heartbeatRate": 30
+    }
+}

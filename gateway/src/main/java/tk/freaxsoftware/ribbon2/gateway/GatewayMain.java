@@ -18,13 +18,12 @@
  */
 package tk.freaxsoftware.ribbon2.gateway;
 
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.bridge.PermittedOptions;
-import io.vertx.ext.stomp.BridgeOptions;
-import io.vertx.ext.stomp.StompServer;
-import io.vertx.ext.stomp.StompServerHandler;
+import java.util.UUID;
 import spark.Spark;
+import tk.freaxsoftware.extras.bus.HeaderBuilder;
+import tk.freaxsoftware.extras.bus.MessageBus;
+import tk.freaxsoftware.extras.bus.MessageOptions;
+import tk.freaxsoftware.ribbon2.core.data.Message;
 
 /**
  * Main class for API gateway.
@@ -38,21 +37,19 @@ public class GatewayMain {
      */
     public static void main(String[] args) {
         Spark.port(8080);
-        
-        Vertx vertx = Vertx.vertx();
-        StompServer server = StompServer.create(vertx)
-                .handler(StompServerHandler.create(vertx)
-                        .bridge(new BridgeOptions()
-                                .addInboundPermitted(new PermittedOptions())
-                                .addOutboundPermitted(new PermittedOptions())
-                        )
-                )
-                .listen();
+        MessageBus.init();
+        System.out.println("TEST!!");
         Spark.get("/", (req, res) -> {return "OK:200";});
-        
         Spark.post("/call", (req,res) -> {
-            vertx.eventBus().publish("/test", new JsonObject().put("message", "Hello from gateway!"));
-            return "OK";
+            String id = UUID.randomUUID().toString();
+            Message message = new Message();
+            message.setId(Long.MIN_VALUE);
+            message.setHeader("Test message to module!");
+            message.setContent("Hello there!");
+            MessageBus.fire(Message.MESSAGE_ID_ADD_MESSAGE, message, HeaderBuilder.newInstance().build(), MessageOptions.Builder.newInstance().ensure().callback((holder) -> {
+                System.out.println(holder.getContent());
+            }).build());
+            return "";
         });
     }
 

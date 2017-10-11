@@ -29,6 +29,8 @@ import lombok.Data;
 @Data
 public class Message {
     
+    public final static String MESSAGE_ID_ADD_MESSAGE = "Ribbon.Global.AddMessage";
+    
     private Long id;
     
     private Long parentId;
