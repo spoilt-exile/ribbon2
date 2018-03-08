@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.test.unit;
 
+import java.util.UUID;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.ribbon2.core.data.Message;
 
@@ -32,10 +33,13 @@ public class UnitMain {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        
+        String hostId = UUID.randomUUID().toString();
+        
         MessageBus.addSubscription(Message.MESSAGE_ID_ADD_MESSAGE, (holder) -> {
             Message content = (Message) holder.getContent();
             System.out.println(content.getContent());
-            content.setContent("Hello gateway!");
+            content.setContent("Hello gateway!\nFrom: " + hostId);
             holder.getResponse().setContent(content);
         });
     }

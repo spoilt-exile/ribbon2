@@ -5,12 +5,12 @@
     },
     "bridgeServer": {
         "nested": false,
-        "httpPort": 4444,
+        "httpPort": 9100,
         "sparkThreadPoolMaxSize": 16
     },
     "bridgeClient": {
         "address": "127.0.0.1",
-        "port": 8080,
+        "port": 9000,
         "heartbeatRate": 10
     }
 }
