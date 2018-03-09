@@ -48,7 +48,6 @@ public class GatewayMain {
         System.out.println("TEST!!");
         Spark.get("/", (req, res) -> {return "OK:200";});
         Spark.post("/call", (req,res) -> {
-            String id = UUID.randomUUID().toString();
             Message message = new Message();
             message.setId(Long.MIN_VALUE);
             message.setHeader("Test message to module!");
