@@ -19,9 +19,7 @@
 package tk.freaxsoftware.ribbon2.gateway;
 
 import com.google.gson.Gson;
-import java.util.UUID;
 import spark.Spark;
-import tk.freaxsoftware.extras.bus.HeaderBuilder;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.ResponseHolder;
@@ -53,7 +51,7 @@ public class GatewayMain {
             message.setHeader("Test message to module!");
             message.setContent("Hello there!");
             ResponseHolder receivedHolder = new ResponseHolder();
-            MessageBus.fire(Message.MESSAGE_ID_ADD_MESSAGE, message, HeaderBuilder.newInstance().build(), MessageOptions.Builder.newInstance().ensure().callback((holder) -> {
+            MessageBus.fire(Message.MESSAGE_ID_ADD_MESSAGE, message, MessageOptions.Builder.newInstance().deliveryCall().callback((holder) -> {
                 receivedHolder.setContent(holder);
             }).build());
             return receivedHolder.getContent();

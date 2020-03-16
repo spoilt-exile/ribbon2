@@ -20,13 +20,11 @@
 package tk.freaxsoftware.ribbon2.core.data;
 
 import java.util.Set;
-import lombok.Data;
 
 /**
  * User group data class.
  * @author Stanislav Nepochatov
  */
-@Data
 public class Group {
     
     /**
@@ -48,5 +46,38 @@ public class Group {
      * Group users.
      */
     private Set<User> users;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Set<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
+    }
+    
     
 }

@@ -34,13 +34,11 @@ public class NotificationService {
     private static final MessageOptions notificationOptions = MessageOptions.Builder.newInstance()
             .async()
             .broadcast()
-            .notification()
             .build();
     
     private static final MessageOptions strokeOptions = MessageOptions.Builder.newInstance()
             .async()
             .pointToPoint()
-            .notification()
             .build();
     
     private static final Map dummyHeaders = Collections.EMPTY_MAP;
@@ -53,13 +51,13 @@ public class NotificationService {
     public static void notify(RibbonMessages messageDestination, Object content) {
         if (messageDestination != null && messageDestination.getStrokes() != null) {
             for (String strokeId: messageDestination.getStrokes()) {
-                MessageBus.fire(strokeId, content, dummyHeaders, strokeOptions);
+                MessageBus.fire(strokeId, content, strokeOptions);
             }
         }
         
         if (messageDestination != null && messageDestination.getStrokes() != null) {
             for (String notificationId: messageDestination.getNotifications()) {
-                MessageBus.fire(notificationId, content, dummyHeaders, notificationOptions);
+                MessageBus.fire(notificationId, content, notificationOptions);
             }
         }
     }

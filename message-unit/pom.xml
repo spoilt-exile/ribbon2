@@ -6,11 +6,11 @@
         <artifactId>ribbon2</artifactId>
         <version>0.1</version>
     </parent>
-    <artifactId>test-unit</artifactId>
+    <artifactId>message-unit</artifactId>
     <packaging>jar</packaging>
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
     </properties>
     <developers>
         <developer>
@@ -25,7 +25,7 @@
         <dependency>
             <groupId>tk.freaxsoftware.extras</groupId>
             <artifactId>messagebus</artifactId>
-            <version>4.1</version>
+            <version>5.0</version>
         </dependency>
         <dependency>
             <groupId>tk.freaxsoftware.ribbon2</groupId>
@@ -72,4 +72,5 @@
             </resource>
         </resources>
     </build>
+    <name>Ribbon Messanger ${project.version}</name>
 </project>

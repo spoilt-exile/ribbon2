@@ -19,13 +19,11 @@
 
 package tk.freaxsoftware.ribbon2.core.data;
 
-import lombok.Data;
 
 /**
  * Message directory data class.
  * @author Stanislav Nepochatov
  */
-@Data
 public class Directory {
     
     /**
@@ -52,5 +50,47 @@ public class Directory {
      * Directory description.
      */
     private String description;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    
     
 }

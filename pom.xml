@@ -8,7 +8,7 @@
     <modules>
         <module>core</module>
         <module>gateway</module>
-        <module>test-unit</module>
+        <module>message-unit</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
