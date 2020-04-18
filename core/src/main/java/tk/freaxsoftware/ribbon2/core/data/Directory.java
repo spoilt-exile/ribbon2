@@ -19,6 +19,8 @@
 
 package tk.freaxsoftware.ribbon2.core.data;
 
+import java.util.Map;
+
 
 /**
  * Message directory data class.
@@ -91,6 +93,39 @@ public class Directory {
         this.description = description;
     }
     
-    
-    
+    public static class AccessEntry {
+        
+        private String name;
+        private Type type;
+        private Map<String, String> permissions;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Type getType() {
+            return type;
+        }
+
+        public void setType(Type type) {
+            this.type = type;
+        }
+
+        public Map<String, String> getPermissions() {
+            return permissions;
+        }
+
+        public void setPermissions(Map<String, String> permissions) {
+            this.permissions = permissions;
+        }
+        
+        public static enum Type {
+            USER,
+            GROUP;
+        }
+    }
 }

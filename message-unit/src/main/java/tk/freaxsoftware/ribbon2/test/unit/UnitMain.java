@@ -19,8 +19,12 @@
 package tk.freaxsoftware.ribbon2.test.unit;
 
 import java.util.UUID;
+import tk.freaxsoftware.extras.bus.Callback;
 import tk.freaxsoftware.extras.bus.MessageBus;
+import tk.freaxsoftware.extras.bus.MessageOptions;
+import tk.freaxsoftware.extras.bus.ResponseHolder;
 import tk.freaxsoftware.ribbon2.core.data.Message;
+import tk.freaxsoftware.ribbon2.core.data.User;
 
 /**
  * Unit main class.
@@ -36,11 +40,16 @@ public class UnitMain {
         
         String hostId = UUID.randomUUID().toString();
         
-        MessageBus.addSubscription(Message.MESSAGE_ID_ADD_MESSAGE, (holder) -> {
+        MessageBus.addSubscription(Message.CALL_CREATE_MESSAGE, (holder) -> {
+            User user = new User();
+            MessageBus.fire(User.CALL_CHECK_AUTH, null, MessageOptions.callOptions(null, (Callback) (ResponseHolder response) -> {
+                user.setLogin((String) response.getContent());
+                System.out.println(user.getLogin());
+            }));
             Message content = (Message) holder.getContent();
             System.out.println(content.getContent());
             content.setContent("Hello gateway!\nFrom: " + hostId);
-            holder.getResponse().setContent(content);
+            //holder.getResponse().setContent(content);
         });
     }
 

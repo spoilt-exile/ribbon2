@@ -27,19 +27,23 @@ import java.time.ZonedDateTime;
  */
 public class Message {
     
-    public final static String MESSAGE_ID_ADD_MESSAGE = "Ribbon.Global.AddMessage";
+    public final static String CALL_CREATE_MESSAGE = "Ribbon.Global.CreateMessage";
     
     private Long id;
     
     private Long parentId;
     
-    private Long childId;
-    
-    private User createdBy;
+    private String createdBy;
     
     private ZonedDateTime created;
     
+    private String updatedBy;
+    
+    private ZonedDateTime updated;
+    
     private String header;
+    
+    private String language;
     
     private String content;
     
@@ -63,19 +67,11 @@ public class Message {
         this.parentId = parentId;
     }
 
-    public Long getChildId() {
-        return childId;
-    }
-
-    public void setChildId(Long childId) {
-        this.childId = childId;
-    }
-
-    public User getCreatedBy() {
+    public String getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(User createdBy) {
+    public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -87,12 +83,36 @@ public class Message {
         this.created = created;
     }
 
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public ZonedDateTime getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(ZonedDateTime updated) {
+        this.updated = updated;
+    }
+
     public String getHeader() {
         return header;
     }
 
     public void setHeader(String header) {
         this.header = header;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
     public String getContent() {

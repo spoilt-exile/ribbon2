@@ -51,10 +51,8 @@ public class GatewayMain {
             message.setHeader("Test message to module!");
             message.setContent("Hello there!");
             ResponseHolder receivedHolder = new ResponseHolder();
-            MessageBus.fire(Message.MESSAGE_ID_ADD_MESSAGE, message, MessageOptions.Builder.newInstance().deliveryCall().callback((holder) -> {
-                receivedHolder.setContent(holder);
-            }).build());
-            return receivedHolder.getContent();
+            MessageBus.fire(Message.CALL_CREATE_MESSAGE, message, MessageOptions.Builder.newInstance().deliveryNotification(5).build());
+            return "OK";
         }, gson::toJson);
     }
 

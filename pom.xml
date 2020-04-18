@@ -9,10 +9,11 @@
         <module>core</module>
         <module>gateway</module>
         <module>message-unit</module>
+        <module>authprovider</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <name>Ribbon System ${project.version}</name>
+    <name>Ribbon2 System ${project.version}</name>
     <description>Ribbon System root pom project;</description>
 </project>

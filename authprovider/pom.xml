@@ -6,7 +6,7 @@
         <artifactId>ribbon2</artifactId>
         <version>0.1</version>
     </parent>
-    <artifactId>gateway</artifactId>
+    <artifactId>directory</artifactId>
     <packaging>jar</packaging>
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -23,24 +23,16 @@
     </developers>
     <dependencies>
         <dependency>
-            <groupId>tk.freaxsoftware.ribbon2</groupId>
-            <artifactId>core</artifactId>
-            <version>0.1</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.sparkjava</groupId>
-            <artifactId>spark-core</artifactId>
-            <version>2.6.0</version>
-        </dependency>
-        <dependency>
             <groupId>tk.freaxsoftware.extras</groupId>
             <artifactId>messagebus</artifactId>
             <version>5.0</version>
         </dependency>
+        <dependency>
+            <groupId>tk.freaxsoftware.ribbon2</groupId>
+            <artifactId>core</artifactId>
+            <version>0.1</version>
+        </dependency>
     </dependencies>
-    <name>Ribbon2 Gateway</name>
-    <description>API gateway for units.</description>
     
     <build>
         <plugins>
@@ -51,7 +43,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>tk.freaxsoftware.ribbon2.gateway.GatewayMain</mainClass>
+                            <mainClass>tk.freaxsoftware.ribbon2.test.unit.UnitMain</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -63,7 +55,7 @@
                         <id>make-my-jar-with-dependencies</id>
                         <phase>package</phase>
                         <configuration>
-                            <finalName>gateway-static</finalName>
+                            <finalName>test-static</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <goals>
@@ -80,4 +72,6 @@
             </resource>
         </resources>
     </build>
+    <name>Ribbon2 Directory Unit</name>
+    <description>Unit for storing directories structure.</description>
 </project>

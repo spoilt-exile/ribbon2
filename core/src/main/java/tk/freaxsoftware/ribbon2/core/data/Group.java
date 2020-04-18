@@ -27,6 +27,10 @@ import java.util.Set;
  */
 public class Group {
     
+    public final static String NOTIFICATION_GROUP_CREATED = "Ribbon.Global.Notification.GroupCreated";
+    public final static String NOTIFICATION_GROUP_UPDATED = "Ribbon.Global.Notification.GroupUpdated";
+    public final static String NOTIFICATION_GROUP_DELETED = "Ribbon.Global.Notification.GroupDeleted";
+    
     /**
      * Group id.
      */

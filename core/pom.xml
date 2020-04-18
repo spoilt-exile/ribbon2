@@ -22,13 +22,46 @@
         </developer>
     </developers>
     <dependencies>
-        
         <dependency>
             <groupId>tk.freaxsoftware.extras</groupId>
             <artifactId>messagebus</artifactId>
             <version>5.0</version>
         </dependency>
+        <dependency>
+            <groupId>io.ebean</groupId>
+            <artifactId>ebean</artifactId>
+            <version>12.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ebean</groupId>
+            <artifactId>ebean-querybean</artifactId>
+            <version>12.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ebean</groupId>
+            <artifactId>querybean-generator</artifactId>
+            <version>12.2.3</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
-    <name>Ribbon Core ${project.version}</name>
+    
+    <build>
+        <plugins>
+            <plugin>
+              <groupId>io.repaint.maven</groupId>
+              <artifactId>tiles-maven-plugin</artifactId>
+              <version>2.16</version>
+              <extensions>true</extensions>
+              <configuration>
+                <tiles>
+                  <!-- other tiles ... -->
+                  <tile>io.ebean.tile:enhancement:12.2.3</tile>
+                </tiles>
+              </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <name>Ribbon2 Core</name>
     <description>Core library for Ribbon System;</description>
 </project>

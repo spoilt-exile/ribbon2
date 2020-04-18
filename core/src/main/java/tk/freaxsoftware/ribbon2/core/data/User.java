@@ -27,6 +27,16 @@ import java.util.Set;
  */
 public class User {
     
+    public final static String CALL_CHECK_AUTH = "Ribbon.Global.CheckAuth";
+    
+    public final static String NOTIFICATION_USER_CREATED = "Ribbon.Global.Notification.UserCreated";
+    public final static String NOTIFICATION_USER_UPDATED = "Ribbon.Global.Notification.UserUpdated";
+    public final static String NOTIFICATION_USER_DELETED = "Ribbon.Global.Notification.UserDeleted";
+    
+    public final static String AUTH_HEADER_USERNAME = "Auth.Username";
+    public final static String AUTH_HEADER_FULLNAME = "Auth.Fullname";
+    public final static String AUTH_HEADER_GROUPS_ARR = "Auth.Groups";
+    
     /**
      * Id of the user.
      */

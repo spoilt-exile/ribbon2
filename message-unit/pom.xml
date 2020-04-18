@@ -72,5 +72,6 @@
             </resource>
         </resources>
     </build>
-    <name>Ribbon Messanger ${project.version}</name>
+    <name>Ribbon2 Messanger</name>
+    <description>Unit for handling message posting;</description>
 </project>

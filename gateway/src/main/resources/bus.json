@@ -5,6 +5,15 @@
     },
     "bridgeServer": {
         "nested": true,
-        "heartbeatRate": 30
+        "heartbeatRate": 30,
+        "crossConnections": true
+    },
+    "storage": {
+        "storageClass": "tk.freaxsoftware.extras.bus.storage.InMemoryMessageStorage",
+        "redeliveryPeriod": 10,
+        "topicPattern": "Ribbon.*",
+        "storeCalls": false,
+        "removeProcessed": true,
+        "redeliveryOnlyIfListenersExists": true
     }
 }
