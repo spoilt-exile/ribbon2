@@ -37,31 +37,37 @@ public class DBMessageStorage implements MessageStorage {
 
     @Override
     public void saveMessage(MessageHolder message) {
-        DB.save(converter.convert(message));
+        DbMessage dbMessage = converter.convert(message);
+        if (dbMessage.getId() == null) {
+            DB.save(dbMessage);
+        } else {
+            DB.update(dbMessage);
+        }
+        message.getHeaders().put(DbMessageConverter.DB_ID_HEADER, dbMessage.getId().toString());
     }
 
     @Override
     public Set<MessageHolder> getUnprocessedMessages() {
-        Set<DbMessage> messages = DB.find(DbMessage.class).where()
-                .ne("deliveryPolicy", MessageOptions.DeliveryPolicy.CALL).and()
-                .eq("status", MessageStatus.ERROR).findSet();
+        Set<DbMessage> messages = DB.find(DbMessage.class).setDisableLazyLoading(true).where()
+                .jsonNotEqualTo("options", "deliveryPolicy", MessageOptions.DeliveryPolicy.CALL.name())
+                .and().eq("status", MessageStatus.ERROR.name()).findSet();
         return messages.stream().map(ms -> converter.convertBack(ms)).collect(Collectors.toSet());
     }
 
     @Override
     public Set<MessageHolder> getUnprocessedMessagesByTopic(String topic) {
-        Set<DbMessage> messages = DB.find(DbMessage.class).where()
-                .ne("deliveryPolicy", MessageOptions.DeliveryPolicy.CALL).and()
-                .eq("status", MessageStatus.ERROR)
+        Set<DbMessage> messages = DB.find(DbMessage.class).setDisableLazyLoading(true).where()
+                .jsonNotEqualTo("options", "deliveryPolicy", MessageOptions.DeliveryPolicy.CALL.name())
+                .and().eq("status", MessageStatus.ERROR.name())
                 .and().eq("topic", topic).findSet();
         return messages.stream().map(ms -> converter.convertBack(ms)).collect(Collectors.toSet());
     }
 
     @Override
     public Set<MessageHolder> getGroupingMessagesByTopic(String topic) {
-        Set<DbMessage> messages = DB.find(DbMessage.class).where()
-                .ne("deliveryPolicy", MessageOptions.DeliveryPolicy.CALL).and()
-                .eq("status", MessageStatus.GROUPING)
+        Set<DbMessage> messages = DB.find(DbMessage.class).setDisableLazyLoading(true).where()
+                .jsonNotEqualTo("options", "deliveryPolicy", MessageOptions.DeliveryPolicy.CALL.name())
+                .and().eq("status", MessageStatus.GROUPING.name())
                 .and().eq("topic", topic).findSet();
         return messages.stream().map(ms -> converter.convertBack(ms)).collect(Collectors.toSet());
     }

@@ -20,6 +20,8 @@ package tk.freaxsoftware.ribbon2.core.data.convert.impl;
 
 import com.google.gson.Gson;
 import tk.freaxsoftware.extras.bus.MessageHolder;
+import tk.freaxsoftware.extras.bus.ResponseHolder;
+import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.data.convert.TwoWayConverter;
 import tk.freaxsoftware.ribbon2.core.data.messagestorage.DbMessage;
 
@@ -29,9 +31,9 @@ import tk.freaxsoftware.ribbon2.core.data.messagestorage.DbMessage;
  */
 public class DbMessageConverter implements TwoWayConverter<MessageHolder, DbMessage> {
     
-    private static final String DB_ID_HEADER = "Ribbon2.Header.DbId";
+    public static final String DB_ID_HEADER = "Ribbon2.Header.DbId";
     
-    private Gson gson = new Gson();
+    private Gson gson = GsonUtils.getGson();
 
     @Override
     public MessageHolder convertBack(DbMessage destination) {
@@ -48,6 +50,7 @@ public class DbMessageConverter implements TwoWayConverter<MessageHolder, DbMess
         holder.setRedeliveryCounter(destination.getRedeliveryCounter());
         holder.setContent(getByClass(destination.getContent(), 
                 destination.getContentClass()));
+        holder.setResponse(new ResponseHolder());
         holder.getResponse().setHeaders(destination.getResponseHeaders());
         holder.getResponse().setContent(getByClass(destination.getResponse(), 
                 destination.getResponseClass()));

@@ -9,11 +9,11 @@
         "crossConnections": true
     },
     "storage": {
-        "storageClass": "tk.freaxsoftware.extras.bus.storage.InMemoryMessageStorage",
-        "redeliveryPeriod": 10,
+        "storageClass": "tk.freaxsoftware.ribbon2.core.data.messagestorage.DBMessageStorage",
+        "redeliveryPeriod": 15,
         "topicPattern": "Ribbon.*",
-        "storeCalls": false,
-        "removeProcessed": true,
-        "redeliveryOnlyIfListenersExists": true
+        "storeCalls": true,
+        "removeProcessed": false,
+        "redeliveryOnlyIfReceiversExists": true
     }
 }

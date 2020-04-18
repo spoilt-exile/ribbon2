@@ -24,6 +24,8 @@ import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.MessageStatus;
@@ -64,6 +66,7 @@ public class DbMessage extends Model implements Serializable {
     /**
      * Status of the message.
      */
+    @Enumerated(EnumType.STRING)
     private MessageStatus status;
     
     /**
