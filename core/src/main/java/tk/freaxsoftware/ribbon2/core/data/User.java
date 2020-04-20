@@ -75,7 +75,7 @@ public class User {
     /**
      * Groups of this user.
      */
-    private Set<Group> groups;
+    private Set<String> groups;
 
     public Long getId() {
         return id;
@@ -133,11 +133,11 @@ public class User {
         this.enabled = enabled;
     }
 
-    public Set<Group> getGroups() {
+    public Set<String> getGroups() {
         return groups;
     }
 
-    public void setGroups(Set<Group> groups) {
+    public void setGroups(Set<String> groups) {
         this.groups = groups;
     }
     

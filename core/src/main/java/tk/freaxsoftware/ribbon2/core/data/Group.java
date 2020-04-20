@@ -45,11 +45,6 @@ public class Group {
      * Group description.
      */
     private String description;
-    
-    /**
-     * Group users.
-     */
-    private Set<User> users;
 
     public Long getId() {
         return id;
@@ -74,14 +69,5 @@ public class Group {
     public void setDescription(String description) {
         this.description = description;
     }
-
-    public Set<User> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Set<User> users) {
-        this.users = users;
-    }
-    
     
 }
