@@ -21,10 +21,14 @@ package tk.freaxsoftware.ribbon2.gateway.entity;
 import io.ebean.Model;
 import java.io.Serializable;
 import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.Table;
 
 /**
  * User entity class.
@@ -78,6 +82,10 @@ public class UserEntity extends Model implements Serializable {
      * Groups of this user.
      */
     @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_entity_group_entity", 
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id")
+    )
     private Set<GroupEntity> groups;
 
     public Long getId() {

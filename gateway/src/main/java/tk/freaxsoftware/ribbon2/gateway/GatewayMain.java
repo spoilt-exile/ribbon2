@@ -28,8 +28,11 @@ import spark.utils.IOUtils;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.ResponseHolder;
+import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.data.Message;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
+import tk.freaxsoftware.ribbon2.gateway.routes.GroupRoutes;
+import tk.freaxsoftware.ribbon2.gateway.routes.UserRoutes;
 
 /**
  * Main class for API gateway.
@@ -43,7 +46,7 @@ public class GatewayMain {
     /**
      * Gson instance.
      */
-    private static final Gson gson = new Gson();
+    public static final Gson gson = GsonUtils.getGson();
     
     /**
      * Current application config;
@@ -58,6 +61,8 @@ public class GatewayMain {
         config = gson.fromJson(IOUtils.toString(GatewayMain.class.getClassLoader().getResourceAsStream("appconfig.json")), ApplicationConfig.class);
         LOGGER.info("System started, config: {}", config);
         Init.init(config);
+        UserRoutes.init();
+        GroupRoutes.init();
         
         Spark.get("/", (req, res) -> {return "OK:200";});
         Spark.post("/api/call", (req,res) -> {

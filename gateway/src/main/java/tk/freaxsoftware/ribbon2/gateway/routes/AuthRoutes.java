@@ -27,9 +27,12 @@ import org.slf4j.LoggerFactory;
 import spark.QueryParamsMap;
 import spark.Spark;
 import static spark.Spark.before;
+import static spark.Spark.get;
 import static spark.Spark.post;
+import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
 import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
+import tk.freaxsoftware.ribbon2.gateway.entity.converters.UserConverter;
 import tk.freaxsoftware.ribbon2.gateway.utils.JWTTokenService;
 import tk.freaxsoftware.ribbon2.gateway.utils.SHAHash;
 import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
@@ -75,6 +78,10 @@ public class AuthRoutes {
             }
             return null;
         });
+        
+        get("/api/account", (request, response) -> {
+            return new UserConverter().convert(UserContext.getUser());
+        }, GatewayMain.gson::toJson);
     }
     
 }
