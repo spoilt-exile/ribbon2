@@ -9,7 +9,7 @@
         <module>core</module>
         <module>gateway</module>
         <module>message-unit</module>
-        <module>authprovider</module>
+        <module>directory-unit</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
