@@ -1,0 +1,16 @@
+{
+    "http": {
+        "port": 9000,
+        "url": "http://localhost:9000",
+        "authType": "HEADER",
+        "authTokenName": "x-ribbon2-auth",
+        "authTokenSecret": "d1d97a4a-00af-454a-bd9a-b617d3297ceb",
+        "authTokenValidDays": 30
+    },
+    "db": {
+        "jdbcUrl": "jdbc:postgresql://localhost:5432/ribbon2-gateway",
+        "driver": "org.postgresql.ds.PGSimpleDataSource",
+        "username": "ribbon2",
+        "password": "ribbon2"
+    }
+}

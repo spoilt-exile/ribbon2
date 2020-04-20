@@ -48,12 +48,57 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.10.3</version>
         </dependency>
+        <dependency>
+            <groupId>io.ebean</groupId>
+            <artifactId>ebean</artifactId>
+            <version>12.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ebean</groupId>
+            <artifactId>querybean-generator</artifactId>
+            <version>12.2.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.1</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
+            <version>0.11.1</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
     <name>Ribbon2 Gateway</name>
     <description>API gateway for units.</description>
     
     <build>
         <plugins>
+            <plugin>
+              <groupId>io.ebean</groupId>
+              <artifactId>ebean-maven-plugin</artifactId>
+              <version>12.2.4</version>
+              <executions>
+                <execution>
+                  <id>main</id>
+                  <phase>process-classes</phase>
+                  <configuration>
+                    <transformArgs>debug=1</transformArgs>
+                  </configuration>
+                  <goals>
+                    <goal>enhance</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
