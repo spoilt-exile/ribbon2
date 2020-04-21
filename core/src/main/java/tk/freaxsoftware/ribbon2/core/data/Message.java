@@ -28,6 +28,12 @@ import java.time.ZonedDateTime;
 public class Message {
     
     public final static String CALL_CREATE_MESSAGE = "Ribbon.Global.CreateMessage";
+    public final static String CALL_UPDATE_MESSAGE = "Ribbon.Global.UpdateMessage";
+    public final static String CALL_DELETE_MESSAGE = "Ribbon.Global.DeleteMessage";
+    
+    public final static String NOTIFICATION_MESSAGE_CREATED = "Ribbon.Global.Notification.MessageCreated";
+    public final static String NOTIFICATION_MESSAGE_UPDATED = "Ribbon.Global.Notification.MessageUpdated";
+    public final static String NOTIFICATION_MESSAGE_DELETED = "Ribbon.Global.Notification.MessageDeleted";
     
     private Long id;
     

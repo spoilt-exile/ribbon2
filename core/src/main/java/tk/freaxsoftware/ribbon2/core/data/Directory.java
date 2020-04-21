@@ -28,6 +28,14 @@ import java.util.Map;
  */
 public class Directory {
     
+    public final static String CALL_CREATE_DIRECTORY = "Ribbon.Global.CreateDirectory";
+    public final static String CALL_UPDATE_DIRECTORY = "Ribbon.Global.UpdateDirectory";
+    public final static String CALL_DELETE_DIRECTORY = "Ribbon.Global.DeleteDirectory";
+    
+    public final static String NOTIFICATION_DIRECTORY_CREATED = "Ribbon.Global.Notification.DirectoryCreated";
+    public final static String NOTIFICATION_DIRECTORY_UPDATED = "Ribbon.Global.Notification.DirectoryUpdated";
+    public final static String NOTIFICATION_DIRECTORY_DELETED = "Ribbon.Global.Notification.DirectoryDeleted";
+    
     /**
      * Id of directory.
      */
