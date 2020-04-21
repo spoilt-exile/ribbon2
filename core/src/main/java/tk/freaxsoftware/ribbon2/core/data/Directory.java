@@ -20,6 +20,7 @@
 package tk.freaxsoftware.ribbon2.core.data;
 
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -60,6 +61,11 @@ public class Directory {
      * Directory description.
      */
     private String description;
+    
+    /**
+     * Access config of the directory.
+     */
+    private Set<AccessEntry> access;
 
     public Long getId() {
         return id;
@@ -105,7 +111,7 @@ public class Directory {
         
         private String name;
         private Type type;
-        private Map<String, String> permissions;
+        private Map<String, Boolean> permissions;
 
         public String getName() {
             return name;
@@ -123,15 +129,16 @@ public class Directory {
             this.type = type;
         }
 
-        public Map<String, String> getPermissions() {
+        public Map<String, Boolean> getPermissions() {
             return permissions;
         }
 
-        public void setPermissions(Map<String, String> permissions) {
+        public void setPermissions(Map<String, Boolean> permissions) {
             this.permissions = permissions;
         }
         
         public static enum Type {
+            ALL,
             USER,
             GROUP;
         }
