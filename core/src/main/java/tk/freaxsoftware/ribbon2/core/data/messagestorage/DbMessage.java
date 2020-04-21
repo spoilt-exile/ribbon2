@@ -19,7 +19,7 @@
 package tk.freaxsoftware.ribbon2.core.data.messagestorage;
 
 import io.ebean.Model;
-import io.ebean.annotation.DbJson;
+import io.ebean.annotation.DbJsonB;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -77,7 +77,7 @@ public class DbMessage extends Model implements Serializable {
     /**
      * Options provided to message bus during sending of the message.
      */
-    @DbJson
+    @DbJsonB
     private MessageOptions options;
     
     /**
@@ -88,7 +88,7 @@ public class DbMessage extends Model implements Serializable {
     /**
      * Headers of the message.
      */
-    @DbJson
+    @DbJsonB
     private Map<String, String> headers;
     
     /**
