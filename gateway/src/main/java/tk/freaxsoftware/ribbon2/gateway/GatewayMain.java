@@ -21,6 +21,8 @@ package tk.freaxsoftware.ribbon2.gateway;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.time.ZonedDateTime;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Spark;
@@ -52,6 +54,11 @@ public class GatewayMain {
      * Current application config;
      */
     public static ApplicationConfig config;
+    
+    /**
+     * Available thread pool for various needs;
+     */
+    public static ExecutorService executor = Executors.newFixedThreadPool(4);
 
     /**
      * @param args the command line arguments

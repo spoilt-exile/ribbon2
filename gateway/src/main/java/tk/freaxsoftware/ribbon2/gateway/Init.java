@@ -18,7 +18,6 @@
  */
 package tk.freaxsoftware.ribbon2.gateway;
 
-import io.ebean.DB;
 import io.ebean.Database;
 import io.ebean.DatabaseFactory;
 import io.ebean.config.AutoTuneConfig;
@@ -27,6 +26,8 @@ import io.ebean.config.DatabaseConfig;
 import io.ebean.datasource.DataSourceConfig;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import liquibase.Liquibase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -37,10 +38,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Spark;
 import tk.freaxsoftware.extras.bus.MessageBus;
+import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
-import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
 import tk.freaxsoftware.ribbon2.gateway.routes.AuthRoutes;
-import tk.freaxsoftware.ribbon2.gateway.utils.SHAHash;
 
 /**
  * Main init of the gateway.
@@ -49,6 +49,8 @@ import tk.freaxsoftware.ribbon2.gateway.utils.SHAHash;
 public class Init {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(Init.class);
+    
+    public static List<MessageHolder> appendixMessages = new CopyOnWriteArrayList<>();
     
     public static void init(ApplicationConfig config) {
         
@@ -70,13 +72,20 @@ public class Init {
         LOGGER.info("Init MessagBus...");
         MessageBus.init();
         
-        UserEntity root = new UserEntity();
-        root.setEnabled(true);
-        root.setLogin("root");
-        root.setPassword(SHAHash.hashPassword("root"));
-        root.setEmail("localhost@localhost");
-        root.setDescription("Admin");
-        DB.getDefault().save(root);
+        if (!appendixMessages.isEmpty()) {
+            GatewayMain.executor.submit(() -> {
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException ex) {
+                    //Do nothing;
+                }
+                for (MessageHolder holder: appendixMessages) {
+                    LOGGER.info("Sending appendix message {}", holder.getTopic());
+                    MessageBus.fire(holder);
+                }
+            });
+
+        }
     }
     
     private static void initHttp(ApplicationConfig.HttpConfig httpConfig) {
