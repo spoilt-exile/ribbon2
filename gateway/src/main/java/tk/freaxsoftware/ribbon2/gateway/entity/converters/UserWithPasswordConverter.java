@@ -38,8 +38,8 @@ public class UserWithPasswordConverter implements Converter<UserWithPassword, Us
         UserEntity user = new UserEntity();
         user.setId(source.getId());
         user.setLogin(source.getLogin());
-        user.setFirstName(source.getFirstName());
-        user.setSecondName(source.getSecondName());
+        user.setFirstname(source.getFirstName());
+        user.setLastname(source.getLastName());
         user.setEnabled(source.getEnabled());
         user.setEmail(source.getEmail());
         user.setDescription(source.getDescription());

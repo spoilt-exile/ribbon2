@@ -66,8 +66,8 @@ public class UserRoutes {
                 if (!StringUtils.isEmpty(user.getPassword())) {
                     updateUser.setPassword(SHAHash.hashPassword(user.getPassword()));
                 }
-                updateUser.setFirstName(user.getFirstName());
-                updateUser.setSecondName(user.getSecondName());
+                updateUser.setFirstname(user.getFirstName());
+                updateUser.setLastname(user.getLastName());
                 updateUser.setEmail(user.getEmail());
                 updateUser.setDescription(user.getDescription());
                 updateUser.getGroups().clear();

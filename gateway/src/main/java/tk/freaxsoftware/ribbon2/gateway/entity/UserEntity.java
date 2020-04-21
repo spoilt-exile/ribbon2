@@ -21,14 +21,12 @@ package tk.freaxsoftware.ribbon2.gateway.entity;
 import io.ebean.Model;
 import java.io.Serializable;
 import java.util.Set;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.Table;
 
 /**
  * User entity class.
@@ -56,12 +54,12 @@ public class UserEntity extends Model implements Serializable {
     /**
      * User's firstname.
      */
-    private String firstName;
+    private String firstname;
     
     /**
      * User's secondname.
      */
-    private String secondName;
+    private String lastname;
     
     /**
      * User's description for useful info like phones etc.
@@ -112,20 +110,20 @@ public class UserEntity extends Model implements Serializable {
         this.password = password;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getFirstname() {
+        return firstname;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
     }
 
-    public String getSecondName() {
-        return secondName;
+    public String getLastname() {
+        return lastname;
     }
 
-    public void setSecondName(String secondName) {
-        this.secondName = secondName;
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
     }
 
     public String getDescription() {

@@ -35,8 +35,8 @@ public class UserConverter implements Converter<UserEntity, User>{
         User user = new User();
         user.setId(source.getId());
         user.setLogin(source.getLogin());
-        user.setFirstName(source.getFirstName());
-        user.setSecondName(source.getSecondName());
+        user.setFirstName(source.getFirstname());
+        user.setLastName(source.getLastname());
         user.setEnabled(source.getEnabled());
         user.setEmail(source.getEmail());
         user.setDescription(source.getDescription());

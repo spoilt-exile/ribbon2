@@ -35,7 +35,6 @@ public class User {
     
     public final static String AUTH_HEADER_USERNAME = "Auth.Username";
     public final static String AUTH_HEADER_FULLNAME = "Auth.Fullname";
-    public final static String AUTH_HEADER_GROUPS_ARR = "Auth.Groups";
     
     /**
      * Id of the user.
@@ -53,9 +52,9 @@ public class User {
     private String firstName;
     
     /**
-     * User's secondname.
+     * User's lastname.
      */
-    private String secondName;
+    private String lastName;
     
     /**
      * User's description for useful info like phones etc.
@@ -101,12 +100,12 @@ public class User {
         this.firstName = firstName;
     }
 
-    public String getSecondName() {
-        return secondName;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setSecondName(String secondName) {
-        this.secondName = secondName;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getDescription() {
