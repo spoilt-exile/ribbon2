@@ -1,0 +1,42 @@
+{
+    "directory": {
+        "createDirs": [
+            "System.Test",
+            "System.Error"
+        ],
+        "defaultAllPermissions": {
+            "canCreateDir": false,
+            "canUpdateDir": false,
+            "canDeleteDir": false,
+            "canEditDirAccess": false
+        },
+        "permissions": [
+            {
+                "key": "canCreateDir",
+                "description": "Allows user to create child directory",
+                "tag": "directory"
+            },
+            {
+                "key": "canUpdateDir",
+                "description": "Allows user to update current or child directory",
+                "tag": "directory"
+            },
+            {
+                "key": "canDeleteDir",
+                "description": "Allows user to delete current or child directory",
+                "tag": "directory"
+            },
+            {
+                "key": "canEditDirAccess",
+                "description": "Allows user to change access control list on directory",
+                "tag": "directory"
+            }
+        ]
+    },
+    "db": {
+        "jdbcUrl": "jdbc:postgresql://localhost:5432/ribbon2-gateway",
+        "driver": "org.postgresql.ds.PGSimpleDataSource",
+        "username": "ribbon2",
+        "password": "ribbon2"
+    }
+}
