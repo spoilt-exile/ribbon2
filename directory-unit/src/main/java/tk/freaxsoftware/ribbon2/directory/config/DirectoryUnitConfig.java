@@ -47,6 +47,11 @@ public class DirectoryUnitConfig {
     public void setDirectory(DirectoryConfig directory) {
         this.directory = directory;
     }
+
+    @Override
+    public String toString() {
+        return "{" + "db=" + db + ", directory=" + directory + '}';
+    }
     
     public static class DirectoryConfig {
         private String[] createDirs;
@@ -75,6 +80,11 @@ public class DirectoryUnitConfig {
 
         public void setPermissions(Set<DirectoryPermissionModel> permissions) {
             this.permissions = permissions;
+        }
+
+        @Override
+        public String toString() {
+            return "{" + "createDirs=" + createDirs + ", defaultAllPermissions=" + defaultAllPermissions + ", permissions=" + permissions + '}';
         }
     }
     

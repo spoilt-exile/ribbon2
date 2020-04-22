@@ -34,7 +34,7 @@
         ]
     },
     "db": {
-        "jdbcUrl": "jdbc:postgresql://localhost:5432/ribbon2-gateway",
+        "jdbcUrl": "jdbc:postgresql://localhost:5432/ribbon2-directory",
         "driver": "org.postgresql.ds.PGSimpleDataSource",
         "username": "ribbon2",
         "password": "ribbon2"

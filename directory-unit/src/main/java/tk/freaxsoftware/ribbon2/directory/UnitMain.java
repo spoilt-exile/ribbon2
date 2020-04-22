@@ -20,6 +20,8 @@ package tk.freaxsoftware.ribbon2.directory;
 
 import com.google.gson.Gson;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.utils.IOUtils;
@@ -47,12 +49,19 @@ public class UnitMain {
     public static DirectoryUnitConfig config;
     
     /**
+     * Available thread pool for various needs;
+     */
+    public static ExecutorService executor = Executors.newFixedThreadPool(4);
+    
+    /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
         LOGGER.info("\n{}", IOUtils.toString(UnitMain.class.getClassLoader().getResourceAsStream("header")));
         config = gson.fromJson(IOUtils.toString(UnitMain.class.getClassLoader().getResourceAsStream("dirconfig.json")), DirectoryUnitConfig.class);
+        LOGGER.info("Directory started, config: {}", config);
         
+        Init.init(config);
         
         AnnotationUtil.subscribeReceiverInstance(new DirectoryService());
     }
