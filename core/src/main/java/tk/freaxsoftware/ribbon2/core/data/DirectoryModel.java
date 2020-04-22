@@ -106,6 +106,14 @@ public class DirectoryModel {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public Set<AccessEntry> getAccess() {
+        return access;
+    }
+
+    public void setAccess(Set<AccessEntry> access) {
+        this.access = access;
+    }
     
     public static class AccessEntry {
         
