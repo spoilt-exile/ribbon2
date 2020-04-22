@@ -27,7 +27,7 @@ import java.util.Set;
  * Message directory data class.
  * @author Stanislav Nepochatov
  */
-public class Directory {
+public class DirectoryModel {
     
     public final static String CALL_CREATE_DIRECTORY = "Ribbon.Global.CreateDirectory";
     public final static String CALL_UPDATE_DIRECTORY = "Ribbon.Global.UpdateDirectory";

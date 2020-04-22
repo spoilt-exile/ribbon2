@@ -26,7 +26,7 @@ import static spark.Spark.post;
 import static spark.Spark.put;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
-import tk.freaxsoftware.ribbon2.core.data.Group;
+import tk.freaxsoftware.ribbon2.core.data.GroupModel;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.converters.GroupConverter;
@@ -41,24 +41,24 @@ public class GroupRoutes {
     
     public static void init() {
         post("/api/group", (req, res) -> {
-            Group group = GatewayMain.gson.fromJson(req.body(), Group.class);
+            GroupModel group = GatewayMain.gson.fromJson(req.body(), GroupModel.class);
             LOGGER.info("Request to create Group");
             group.setId(null);
             GroupEntity newGroup = new GroupConverter().convertBack(group);
             newGroup.save();
-            Group savedGroup = new GroupConverter().convert(newGroup);
-            MessageBus.fire(Group.NOTIFICATION_GROUP_CREATED, savedGroup, 
+            GroupModel savedGroup = new GroupConverter().convert(newGroup);
+            MessageBus.fire(GroupModel.NOTIFICATION_GROUP_CREATED, savedGroup, 
                     MessageOptions.Builder.newInstance().deliveryNotification(5).build());
             return savedGroup;
         }, GatewayMain.gson::toJson);
         
         put("/api/group", (req, res) -> {
-            Group group = GatewayMain.gson.fromJson(req.body(), Group.class);
+            GroupModel group = GatewayMain.gson.fromJson(req.body(), GroupModel.class);
             LOGGER.info("Request to create Group: {}", group.getId());
             GroupEntity updateGroup = new GroupConverter().convertBack(group);
             updateGroup.update();
-            Group savedGroup = new GroupConverter().convert(updateGroup);
-            MessageBus.fire(Group.NOTIFICATION_GROUP_UPDATED, savedGroup, 
+            GroupModel savedGroup = new GroupConverter().convert(updateGroup);
+            MessageBus.fire(GroupModel.NOTIFICATION_GROUP_UPDATED, savedGroup, 
                     MessageOptions.Builder.newInstance().deliveryNotification(5).build());
             return savedGroup;
         }, GatewayMain.gson::toJson);
@@ -68,7 +68,7 @@ public class GroupRoutes {
             GroupEntity entity = DB.getDefault().find(GroupEntity.class).where().idEq(Long.parseLong(req.params("id"))).findOne();
             if (entity != null) {
                 DB.getDefault().delete(entity);
-                MessageBus.fire(Group.NOTIFICATION_GROUP_DELETED, new GroupConverter().convert(entity), 
+                MessageBus.fire(GroupModel.NOTIFICATION_GROUP_DELETED, new GroupConverter().convert(entity), 
                         MessageOptions.Builder.newInstance().deliveryNotification(5).build());
             } else {
                 LOGGER.error("Unable to find Group with id {}", req.params("id"));

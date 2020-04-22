@@ -25,7 +25,7 @@ import java.time.ZonedDateTime;
  * News message data class.
  * @author Stanislav Nepochatov
  */
-public class Message {
+public class MessageModel {
     
     public final static String CALL_CREATE_MESSAGE = "Ribbon.Global.CreateMessage";
     public final static String CALL_UPDATE_MESSAGE = "Ribbon.Global.UpdateMessage";

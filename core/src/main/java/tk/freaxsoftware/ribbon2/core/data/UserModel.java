@@ -25,7 +25,7 @@ import java.util.Set;
  * User data class.
  * @author Stanislav Nepochatov
  */
-public class User {
+public class UserModel {
     
     public final static String CALL_CHECK_AUTH = "Ribbon.Global.CheckAuth";
     

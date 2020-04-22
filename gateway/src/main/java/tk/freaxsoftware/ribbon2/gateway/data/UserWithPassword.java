@@ -18,13 +18,13 @@
  */
 package tk.freaxsoftware.ribbon2.gateway.data;
 
-import tk.freaxsoftware.ribbon2.core.data.User;
+import tk.freaxsoftware.ribbon2.core.data.UserModel;
 
 /**
  * User extended data type with password field.
  * @author Stanislav Nepochatov
  */
-public class UserWithPassword extends User {
+public class UserWithPassword extends UserModel {
     
     /**
      * Raw password.

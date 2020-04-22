@@ -29,8 +29,8 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.MessageOptions;
-import tk.freaxsoftware.ribbon2.core.data.Group;
-import tk.freaxsoftware.ribbon2.core.data.User;
+import tk.freaxsoftware.ribbon2.core.data.GroupModel;
+import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.gateway.Init;
 import tk.freaxsoftware.ribbon2.gateway.utils.SHAHash;
 
@@ -43,7 +43,7 @@ public class UserGroupCustomChange implements CustomSqlChange {
     @Override
     public SqlStatement[] generateStatements(Database database) throws CustomChangeException {
         
-        User rootUser = new User();
+        UserModel rootUser = new UserModel();
         rootUser.setId(1l);
         rootUser.setLogin("root");
         rootUser.setDescription("Root admin");
@@ -52,7 +52,7 @@ public class UserGroupCustomChange implements CustomSqlChange {
         rootUser.setGroups(new HashSet<>());
         rootUser.getGroups().add("adm");
         
-        Group admGroup = new Group();
+        GroupModel admGroup = new GroupModel();
         admGroup.setId(1l);
         admGroup.setName("adm");
         admGroup.setDescription("Administrator group");
@@ -75,8 +75,8 @@ public class UserGroupCustomChange implements CustomSqlChange {
         
         MessageOptions options = MessageOptions.Builder.newInstance().deliveryNotification(5).build();
         
-        Init.appendixMessages.add(new MessageHolder(User.NOTIFICATION_USER_CREATED, options, rootUser));
-        Init.appendixMessages.add(new MessageHolder(Group.NOTIFICATION_GROUP_CREATED, options, admGroup));
+        Init.appendixMessages.add(new MessageHolder(UserModel.NOTIFICATION_USER_CREATED, options, rootUser));
+        Init.appendixMessages.add(new MessageHolder(GroupModel.NOTIFICATION_GROUP_CREATED, options, admGroup));
         
         return statements;
     }

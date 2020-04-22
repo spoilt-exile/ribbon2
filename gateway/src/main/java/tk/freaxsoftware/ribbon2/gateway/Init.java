@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import spark.Spark;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageHolder;
+import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
 import tk.freaxsoftware.ribbon2.gateway.routes.AuthRoutes;
 
@@ -93,7 +94,7 @@ public class Init {
         AuthRoutes.init(httpConfig);
     }
     
-    private static void initLiquibase(ApplicationConfig.DbConfig dbConfig) throws SQLException, LiquibaseException {
+    private static void initLiquibase(DbConfig dbConfig) throws SQLException, LiquibaseException {
         DatabaseConnection conn = new JdbcConnection(DriverManager
                 .getConnection(dbConfig.getJdbcUrl(), dbConfig.getUsername(), dbConfig.getPassword()));
         ResourceAccessor accessor = new ClassLoaderResourceAccessor(Init.class.getClassLoader());
@@ -101,7 +102,7 @@ public class Init {
         base.update("");
     }
     
-    private static void initDb(ApplicationConfig.DbConfig dbConfig) {
+    private static void initDb(DbConfig dbConfig) {
         DataSourceConfig dataSourceConfig = new DataSourceConfig();
         dataSourceConfig.setUsername(dbConfig.getUsername());
         dataSourceConfig.setPassword(dbConfig.getPassword());

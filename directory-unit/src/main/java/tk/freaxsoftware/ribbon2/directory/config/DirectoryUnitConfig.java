@@ -21,7 +21,7 @@ package tk.freaxsoftware.ribbon2.directory.config;
 import java.util.Map;
 import java.util.Set;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
-import tk.freaxsoftware.ribbon2.core.data.DirectoryPermission;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionModel;
 
 /**
  * Directory unit config.
@@ -51,7 +51,7 @@ public class DirectoryUnitConfig {
     public static class DirectoryConfig {
         private String[] createDirs;
         private Map<String, Boolean> defaultAllPermissions;
-        private Set<DirectoryPermission> permissions;
+        private Set<DirectoryPermissionModel> permissions;
 
         public String[] getCreateDirs() {
             return createDirs;
@@ -69,11 +69,11 @@ public class DirectoryUnitConfig {
             this.defaultAllPermissions = defaultAllPermissions;
         }
 
-        public Set<DirectoryPermission> getPermissions() {
+        public Set<DirectoryPermissionModel> getPermissions() {
             return permissions;
         }
 
-        public void setPermissions(Set<DirectoryPermission> permissions) {
+        public void setPermissions(Set<DirectoryPermissionModel> permissions) {
             this.permissions = permissions;
         }
     }

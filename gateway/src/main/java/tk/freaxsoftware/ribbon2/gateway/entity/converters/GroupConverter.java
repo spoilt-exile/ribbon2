@@ -18,7 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.gateway.entity.converters;
 
-import tk.freaxsoftware.ribbon2.core.data.Group;
+import tk.freaxsoftware.ribbon2.core.data.GroupModel;
 import tk.freaxsoftware.ribbon2.core.data.convert.TwoWayConverter;
 import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
 
@@ -26,10 +26,10 @@ import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
  * Group converter.
  * @author Stanislav Nepochatov
  */
-public class GroupConverter implements TwoWayConverter<GroupEntity, Group> {
+public class GroupConverter implements TwoWayConverter<GroupEntity, GroupModel> {
 
     @Override
-    public GroupEntity convertBack(Group destination) {
+    public GroupEntity convertBack(GroupModel destination) {
         GroupEntity entity = new GroupEntity();
         entity.setId(destination.getId());
         entity.setName(destination.getName());
@@ -38,8 +38,8 @@ public class GroupConverter implements TwoWayConverter<GroupEntity, Group> {
     }
 
     @Override
-    public Group convert(GroupEntity source) {
-        Group group = new Group();
+    public GroupModel convert(GroupEntity source) {
+        GroupModel group = new GroupModel();
         group.setId(source.getId());
         group.setName(source.getName());
         group.setDescription(source.getDescription());

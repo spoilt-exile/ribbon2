@@ -31,7 +31,7 @@ import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.ResponseHolder;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
-import tk.freaxsoftware.ribbon2.core.data.Message;
+import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
 import tk.freaxsoftware.ribbon2.gateway.routes.GroupRoutes;
 import tk.freaxsoftware.ribbon2.gateway.routes.UserRoutes;
@@ -70,17 +70,5 @@ public class GatewayMain {
         Init.init(config);
         UserRoutes.init();
         GroupRoutes.init();
-        
-        Spark.get("/", (req, res) -> {return "OK:200";});
-        Spark.post("/api/call", (req,res) -> {
-            Message message = new Message();
-            message.setId(Long.MIN_VALUE);
-            message.setHeader("Test message to module!");
-            message.setContent("Hello there!");
-            message.setCreated(ZonedDateTime.now());
-            ResponseHolder receivedHolder = new ResponseHolder();
-            MessageBus.fire(Message.CALL_CREATE_MESSAGE, message, MessageOptions.Builder.newInstance().deliveryNotification(5).build());
-            return "OK";
-        }, gson::toJson);
     }
 }

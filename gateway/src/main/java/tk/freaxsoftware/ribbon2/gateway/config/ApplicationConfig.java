@@ -18,6 +18,8 @@
  */
 package tk.freaxsoftware.ribbon2.gateway.config;
 
+import tk.freaxsoftware.ribbon2.core.config.DbConfig;
+
 /**
  * Main application config.
  * @author Stanislav Nepochatov
@@ -112,50 +114,6 @@ public class ApplicationConfig {
         public static enum AuthType {
             HEADER,
             COOKIE;
-        }
-    }
-    
-    public static class DbConfig {
-        private String jdbcUrl;
-        private String driver;
-        private String username;
-        private String password;
-
-        public String getJdbcUrl() {
-            return jdbcUrl;
-        }
-
-        public void setJdbcUrl(String jdbcUrl) {
-            this.jdbcUrl = jdbcUrl;
-        }
-
-        public String getDriver() {
-            return driver;
-        }
-
-        public void setDriver(String driver) {
-            this.driver = driver;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-
-        @Override
-        public String toString() {
-            return "{" + "jdbcUrl=" + jdbcUrl + ", driver=" + driver + ", username=" + username + ", password=" + password + '}';
         }
     }
 }

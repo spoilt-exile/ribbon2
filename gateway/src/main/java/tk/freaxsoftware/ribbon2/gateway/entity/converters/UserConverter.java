@@ -20,7 +20,7 @@ package tk.freaxsoftware.ribbon2.gateway.entity.converters;
 
 import java.util.Set;
 import java.util.stream.Collectors;
-import tk.freaxsoftware.ribbon2.core.data.User;
+import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.data.convert.Converter;
 import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
 
@@ -28,11 +28,11 @@ import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
  * Converter for users;
  * @author Stanislav Nepochatov
  */
-public class UserConverter implements Converter<UserEntity, User>{
+public class UserConverter implements Converter<UserEntity, UserModel>{
 
     @Override
-    public User convert(UserEntity source) {
-        User user = new User();
+    public UserModel convert(UserEntity source) {
+        UserModel user = new UserModel();
         user.setId(source.getId());
         user.setLogin(source.getLogin());
         user.setFirstName(source.getFirstname());

@@ -20,7 +20,7 @@ package tk.freaxsoftware.ribbon2.directory.service;
 
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.annotation.Receive;
-import tk.freaxsoftware.ribbon2.core.data.Directory;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 
 /**
  * Directory service to receive calls from gateway.
@@ -28,17 +28,17 @@ import tk.freaxsoftware.ribbon2.core.data.Directory;
  */
 public class DirectoryService {
     
-    @Receive(Directory.CALL_CREATE_DIRECTORY)
-    public void createDirectory(MessageHolder<Directory> createMessage) {
+    @Receive(DirectoryModel.CALL_CREATE_DIRECTORY)
+    public void createDirectory(MessageHolder<DirectoryModel> createMessage) {
         
     }
     
-    @Receive(Directory.CALL_UPDATE_DIRECTORY)
-    public void updateDirectory(MessageHolder<Directory> updateMessage) {
+    @Receive(DirectoryModel.CALL_UPDATE_DIRECTORY)
+    public void updateDirectory(MessageHolder<DirectoryModel> updateMessage) {
         
     }
     
-    @Receive(Directory.CALL_DELETE_DIRECTORY)
+    @Receive(DirectoryModel.CALL_DELETE_DIRECTORY)
     public void deleteDirectory(MessageHolder<Long> deleteMessage) {
         
     }

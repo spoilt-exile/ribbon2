@@ -27,7 +27,7 @@ import static spark.Spark.put;
 import spark.utils.StringUtils;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
-import tk.freaxsoftware.ribbon2.core.data.User;
+import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.data.UserWithPassword;
 import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
@@ -51,8 +51,8 @@ public class UserRoutes {
             user.setId(null);
             UserEntity newUser = new UserWithPasswordConverter().convert(user);
             newUser.save();
-            User savedUser = new UserConverter().convert(newUser);
-            MessageBus.fire(User.NOTIFICATION_USER_CREATED, savedUser, 
+            UserModel savedUser = new UserConverter().convert(newUser);
+            MessageBus.fire(UserModel.NOTIFICATION_USER_CREATED, savedUser, 
                     MessageOptions.Builder.newInstance().deliveryNotification(5).build());
             return savedUser;
         }, GatewayMain.gson::toJson);
@@ -73,8 +73,8 @@ public class UserRoutes {
                 updateUser.getGroups().clear();
                 updateUser.getGroups().addAll(DB.getDefault().find(GroupEntity.class).where().in("name", user.getGroups()).findSet());
                 updateUser.update();
-                User savedUser = new UserConverter().convert(updateUser);
-                MessageBus.fire(User.NOTIFICATION_USER_UPDATED, savedUser, 
+                UserModel savedUser = new UserConverter().convert(updateUser);
+                MessageBus.fire(UserModel.NOTIFICATION_USER_UPDATED, savedUser, 
                         MessageOptions.Builder.newInstance().deliveryNotification(5).build());
                 return savedUser;
             } else {
@@ -89,7 +89,7 @@ public class UserRoutes {
             LOGGER.info("Request to delete User: {}", req.params("id"));
             if (entity != null) {
                 DB.getDefault().delete(entity);
-                MessageBus.fire(User.NOTIFICATION_USER_DELETED, new UserConverter().convert(entity), 
+                MessageBus.fire(UserModel.NOTIFICATION_USER_DELETED, new UserConverter().convert(entity), 
                         MessageOptions.Builder.newInstance().deliveryNotification(5).build());
             } else {
                 LOGGER.error("Unable to find User with id {}", req.params("id"));
