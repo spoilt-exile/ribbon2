@@ -20,18 +20,12 @@ package tk.freaxsoftware.ribbon2.gateway;
 
 import com.google.gson.Gson;
 import java.io.IOException;
-import java.time.ZonedDateTime;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spark.Spark;
 import spark.utils.IOUtils;
-import tk.freaxsoftware.extras.bus.MessageBus;
-import tk.freaxsoftware.extras.bus.MessageOptions;
-import tk.freaxsoftware.extras.bus.ResponseHolder;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
-import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
 import tk.freaxsoftware.ribbon2.gateway.routes.GroupRoutes;
 import tk.freaxsoftware.ribbon2.gateway.routes.UserRoutes;
@@ -66,7 +60,7 @@ public class GatewayMain {
     public static void main(String[] args) throws IOException {
         LOGGER.info("\n{}", IOUtils.toString(GatewayMain.class.getClassLoader().getResourceAsStream("header")));
         config = gson.fromJson(IOUtils.toString(GatewayMain.class.getClassLoader().getResourceAsStream("appconfig.json")), ApplicationConfig.class);
-        LOGGER.info("System started, config: {}", config);
+        LOGGER.info("Gateway started, config: {}", config);
         Init.init(config);
         UserRoutes.init();
         GroupRoutes.init();
