@@ -18,37 +18,46 @@
  */
 package tk.freaxsoftware.ribbon2.core.data;
 
+import java.util.Map;
+
 /**
- * Directory permission metadata.
+ * Directory access config entry model.
  * @author Stanislav Nepochatov
  */
-public class DirectoryPermissionModel {
+public class DirectoryAccessModel {
     
-    public static final String CALL_INIT_PERMISSIONS = "Ribbon.Global.InitPermissions";
+    private String name;
+    private Type type;
+    private Map<String, Boolean> permissions;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public Map<String, Boolean> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(Map<String, Boolean> permissions) {
+        this.permissions = permissions;
+    }
+
+    public static enum Type {
+        ALL,
+        USER,
+        GROUP;
+    }
     
-    /**
-     * Id of the permission.
-     */
-    private String key;
-    
-    /**
-     * Detail description of the permission.
-     */
-    private String description;
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 }

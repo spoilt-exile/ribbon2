@@ -61,11 +61,6 @@ public class DirectoryModel {
      * Directory description.
      */
     private String description;
-    
-    /**
-     * Access config of the directory.
-     */
-    private Set<AccessEntry> access;
 
     public Long getId() {
         return id;
@@ -105,50 +100,5 @@ public class DirectoryModel {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Set<AccessEntry> getAccess() {
-        return access;
-    }
-
-    public void setAccess(Set<AccessEntry> access) {
-        this.access = access;
-    }
-    
-    public static class AccessEntry {
-        
-        private String name;
-        private Type type;
-        private Map<String, Boolean> permissions;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public Type getType() {
-            return type;
-        }
-
-        public void setType(Type type) {
-            this.type = type;
-        }
-
-        public Map<String, Boolean> getPermissions() {
-            return permissions;
-        }
-
-        public void setPermissions(Map<String, Boolean> permissions) {
-            this.permissions = permissions;
-        }
-        
-        public static enum Type {
-            ALL,
-            USER,
-            GROUP;
-        }
     }
 }

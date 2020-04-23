@@ -18,37 +18,38 @@
  */
 package tk.freaxsoftware.ribbon2.core.data;
 
+import java.util.Set;
+
 /**
- * Directory permission metadata.
+ * Directory permission holder.
  * @author Stanislav Nepochatov
  */
-public class DirectoryPermissionModel {
+public class DirectoryPermissionHolder {
     
-    public static final String CALL_INIT_PERMISSIONS = "Ribbon.Global.InitPermissions";
+    private String tag;
     
-    /**
-     * Id of the permission.
-     */
-    private String key;
+    private Set<DirectoryPermissionModel> access;
     
-    /**
-     * Detail description of the permission.
-     */
-    private String description;
+    public DirectoryPermissionHolder() {}
 
-    public String getKey() {
-        return key;
+    public DirectoryPermissionHolder(Set<DirectoryPermissionModel> access, String tag) {
+        this.access = access;
+        this.tag = tag;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public String getTag() {
+        return tag;
     }
 
-    public String getDescription() {
-        return description;
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+    
+    public Set<DirectoryPermissionModel> getAccess() {
+        return access;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setAccess(Set<DirectoryPermissionModel> access) {
+        this.access = access;
     }
 }
