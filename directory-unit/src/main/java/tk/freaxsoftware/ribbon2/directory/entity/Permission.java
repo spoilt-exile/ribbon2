@@ -19,53 +19,38 @@
 package tk.freaxsoftware.ribbon2.directory.entity;
 
 import io.ebean.Model;
-import java.util.Set;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
-import javax.persistence.OneToMany;
 
 /**
- * Directory entity.
+ * Permission entity class.
  * @author Stanislav Nepochatov
  */
 @Entity
-public class Direcotry extends Model {
+public class Permission extends Model {
     
     /**
-     * Id of directory.
+     * Id of entity;
      */
     @Id
     private Long id;
     
     /**
-     * Id of parent directory.
+     * Id of the permission.
      */
-    private Long parentId;
+    private String key;
     
     /**
-     * Name of directory.
-     */
-    private String name;
-    
-    /**
-     * Full name of directory (path).
-     */
-    private String fullName;
-    
-    /**
-     * Directory description.
+     * Detail description of the permission.
      */
     @Lob
     private String description;
     
     /**
-     * Access config of the directory.
+     * Tag displays from which unit this permission came from.
      */
-    @OneToMany(mappedBy = "directory", fetch = FetchType.EAGER, 
-            cascade = javax.persistence.CascadeType.REMOVE)
-    private Set<DirectoryAccess> access;
+    private String tag;
 
     public Long getId() {
         return id;
@@ -75,28 +60,12 @@ public class Direcotry extends Model {
         this.id = id;
     }
 
-    public Long getParentId() {
-        return parentId;
+    public String getKey() {
+        return key;
     }
 
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getDescription() {
@@ -107,11 +76,11 @@ public class Direcotry extends Model {
         this.description = description;
     }
 
-    public Set<DirectoryAccess> getAccess() {
-        return access;
+    public String getTag() {
+        return tag;
     }
 
-    public void setAccess(Set<DirectoryAccess> access) {
-        this.access = access;
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 }

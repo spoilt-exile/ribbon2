@@ -18,54 +18,35 @@
  */
 package tk.freaxsoftware.ribbon2.directory.entity;
 
-import io.ebean.Model;
 import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToMany;
 
 /**
- * Directory entity.
+ * Group compact entity.
  * @author Stanislav Nepochatov
  */
 @Entity
-public class Direcotry extends Model {
+public class GroupEntity {
     
     /**
-     * Id of directory.
+     * Entity id.
      */
     @Id
     private Long id;
     
     /**
-     * Id of parent directory.
-     */
-    private Long parentId;
-    
-    /**
-     * Name of directory.
+     * Name of the group.
      */
     private String name;
     
     /**
-     * Full name of directory (path).
+     * Group users.
      */
-    private String fullName;
-    
-    /**
-     * Directory description.
-     */
-    @Lob
-    private String description;
-    
-    /**
-     * Access config of the directory.
-     */
-    @OneToMany(mappedBy = "directory", fetch = FetchType.EAGER, 
-            cascade = javax.persistence.CascadeType.REMOVE)
-    private Set<DirectoryAccess> access;
+    @ManyToMany(mappedBy = "groups", fetch = FetchType.LAZY)
+    private Set<UserEntity> users;
 
     public Long getId() {
         return id;
@@ -73,14 +54,6 @@ public class Direcotry extends Model {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Long getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
     }
 
     public String getName() {
@@ -91,27 +64,12 @@ public class Direcotry extends Model {
         this.name = name;
     }
 
-    public String getFullName() {
-        return fullName;
+    public Set<UserEntity> getUsers() {
+        return users;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setUsers(Set<UserEntity> users) {
+        this.users = users;
     }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Set<DirectoryAccess> getAccess() {
-        return access;
-    }
-
-    public void setAccess(Set<DirectoryAccess> access) {
-        this.access = access;
-    }
+    
 }
