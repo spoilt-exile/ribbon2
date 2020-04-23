@@ -31,7 +31,7 @@ import javax.persistence.OneToMany;
  * @author Stanislav Nepochatov
  */
 @Entity
-public class Direcotry extends Model {
+public class Directory extends Model {
     
     /**
      * Id of directory.

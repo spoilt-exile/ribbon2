@@ -13,23 +13,19 @@
         "permissions": [
             {
                 "key": "canCreateDir",
-                "description": "Allows user to create child directory",
-                "tag": "directory"
+                "description": "Allows user to create child directory"
             },
             {
                 "key": "canUpdateDir",
-                "description": "Allows user to update current or child directory",
-                "tag": "directory"
+                "description": "Allows user to update current or child directory"
             },
             {
                 "key": "canDeleteDir",
-                "description": "Allows user to delete current or child directory",
-                "tag": "directory"
+                "description": "Allows user to delete current or child directory"
             },
             {
                 "key": "canEditDirAccess",
-                "description": "Allows user to change access control list on directory",
-                "tag": "directory"
+                "description": "Allows user to change access control list on directory"
             }
         ]
     },

@@ -16,31 +16,33 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package tk.freaxsoftware.ribbon2.directory.service;
+package tk.freaxsoftware.ribbon2.directory.facade;
 
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.annotation.Receive;
-import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionHolder;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionModel;
+import tk.freaxsoftware.ribbon2.directory.service.PermissionService;
 
 /**
- * Directory service to receive calls from gateway.
+ * Permission facade.
  * @author Stanislav Nepochatov
  */
-public class DirectoryService {
+public class PermissionFacade {
     
-    @Receive(DirectoryModel.CALL_CREATE_DIRECTORY)
-    public void createDirectory(MessageHolder<DirectoryModel> createMessage) {
-        
+    private final PermissionService permissionService;
+
+    public PermissionFacade(PermissionService permissionService) {
+        this.permissionService = permissionService;
     }
     
-    @Receive(DirectoryModel.CALL_UPDATE_DIRECTORY)
-    public void updateDirectory(MessageHolder<DirectoryModel> updateMessage) {
-        
-    }
-    
-    @Receive(DirectoryModel.CALL_DELETE_DIRECTORY)
-    public void deleteDirectory(MessageHolder<Long> deleteMessage) {
-        
+    /**
+     * Init permissions by message.
+     * @param holder holder with new or updated permissions;
+     */
+    @Receive(DirectoryPermissionModel.CALL_INIT_PERMISSIONS)
+    public void initPermissions(MessageHolder<DirectoryPermissionHolder> holder) {
+        permissionService.initPermissions(holder.getContent());
     }
     
 }

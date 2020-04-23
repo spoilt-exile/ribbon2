@@ -28,7 +28,9 @@ import spark.utils.IOUtils;
 import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.directory.config.DirectoryUnitConfig;
-import tk.freaxsoftware.ribbon2.directory.service.DirectoryService;
+import tk.freaxsoftware.ribbon2.directory.facade.DirectoryFacade;
+import tk.freaxsoftware.ribbon2.directory.facade.PermissionFacade;
+import tk.freaxsoftware.ribbon2.directory.service.PermissionService;
 
 /**
  * Main class of directory unit.
@@ -63,6 +65,7 @@ public class UnitMain {
         
         Init.init(config);
         
-        AnnotationUtil.subscribeReceiverInstance(new DirectoryService());
+        AnnotationUtil.subscribeReceiverInstance(new PermissionFacade(new PermissionService()));
+        AnnotationUtil.subscribeReceiverInstance(new DirectoryFacade());
     }
 }

@@ -24,7 +24,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
 
 /**
  * Access entry entity contains permissions for directory.
@@ -44,13 +44,13 @@ public class DirectoryAccess extends Model {
      */
     @ManyToOne
     @JoinColumn(name = "directory_id", referencedColumnName = "id")
-    private Direcotry directory;
+    private Directory directory;
     
     /**
      * Single access entry.
      */
     @DbJsonB
-    private DirectoryModel.AccessEntry accessEntry;
+    private DirectoryAccessModel accessEntry;
 
     public Long getId() {
         return id;
@@ -60,19 +60,19 @@ public class DirectoryAccess extends Model {
         this.id = id;
     }
 
-    public Direcotry getDirectory() {
+    public Directory getDirectory() {
         return directory;
     }
 
-    public void setDirectory(Direcotry directory) {
+    public void setDirectory(Directory directory) {
         this.directory = directory;
     }
 
-    public DirectoryModel.AccessEntry getAccessEntry() {
+    public DirectoryAccessModel getAccessEntry() {
         return accessEntry;
     }
 
-    public void setAccessEntry(DirectoryModel.AccessEntry accessEntry) {
+    public void setAccessEntry(DirectoryAccessModel accessEntry) {
         this.accessEntry = accessEntry;
     }
 }

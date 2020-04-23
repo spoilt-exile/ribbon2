@@ -30,7 +30,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageHolder;
+import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionHolder;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionModel;
 import tk.freaxsoftware.ribbon2.directory.config.DirectoryUnitConfig;
 
 /**
@@ -41,6 +44,8 @@ public class Init {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(Init.class);
     
+    private final static String TAG = "directory";
+    
     public static List<MessageHolder> appendixMessages = new CopyOnWriteArrayList<>();
     
     public static void init(DirectoryUnitConfig config) {
@@ -49,6 +54,10 @@ public class Init {
         
         LOGGER.info("Init MessagBus...");
         MessageBus.init();
+        
+        appendixMessages.add(new MessageHolder(DirectoryPermissionModel.CALL_INIT_PERMISSIONS, 
+                MessageOptions.Builder.newInstance().deliveryCall().async().build(),
+                new DirectoryPermissionHolder(config.getDirectory().getPermissions(), TAG)));
         
         if (!appendixMessages.isEmpty()) {
             UnitMain.executor.submit(() -> {
