@@ -24,8 +24,16 @@ import io.ebean.config.AutoTuneConfig;
 import io.ebean.config.AutoTuneMode;
 import io.ebean.config.DatabaseConfig;
 import io.ebean.datasource.DataSourceConfig;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import liquibase.Liquibase;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.LiquibaseException;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageBus;
@@ -49,6 +57,16 @@ public class Init {
     public static List<MessageHolder> appendixMessages = new CopyOnWriteArrayList<>();
     
     public static void init(DirectoryUnitConfig config) {
+        
+        LOGGER.info("Init Liquibase...");
+        try {
+            initLiquibase(config.getDb());
+        } catch (SQLException ex) { 
+            LOGGER.error("SQL exception ocurred during init of Liquibase: ", ex);
+        } catch (LiquibaseException ex) {
+            LOGGER.error("Error ocurred during init of Liquibase: ", ex);
+        }
+        
         LOGGER.info("Init Ebean...");
         initDb(config.getDb());
         
@@ -74,6 +92,13 @@ public class Init {
         }
     }
     
+    private static void initLiquibase(DbConfig dbConfig) throws SQLException, LiquibaseException {
+        DatabaseConnection conn = new JdbcConnection(DriverManager
+                .getConnection(dbConfig.getJdbcUrl(), dbConfig.getUsername(), dbConfig.getPassword()));
+        ResourceAccessor accessor = new ClassLoaderResourceAccessor(Init.class.getClassLoader());
+        liquibase.Liquibase base = new Liquibase("liquibase/master.xml", accessor, conn);
+        base.update("");
+    }
     
     private static void initDb(DbConfig dbConfig) {
         DataSourceConfig dataSourceConfig = new DataSourceConfig();
@@ -83,8 +108,6 @@ public class Init {
         dataSourceConfig.setDriver(dbConfig.getDriver());
         
         DatabaseConfig config = new DatabaseConfig();
-        config.setDdlGenerate(true);
-        config.setDdlRun(true);
         
         config.setDataSourceConfig(dataSourceConfig);
         AutoTuneConfig tuneConfig = new AutoTuneConfig();

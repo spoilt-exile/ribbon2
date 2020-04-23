@@ -14,5 +14,13 @@
         "heartbeatRate": 30,
         "crossConnectionsDemand": [],
         "crossConnectionsOffer": ["Ribbon.Global.CheckAuth"]
+    },
+    "storage": {
+        "storageClass": "tk.freaxsoftware.ribbon2.core.data.messagestorage.DBMessageStorage",
+        "redeliveryPeriod": 15,
+        "topicPattern": "Ribbon.*",
+        "storeCalls": true,
+        "removeProcessed": false,
+        "redeliveryOnlyIfReceiversExists": true
     }
 }
