@@ -18,9 +18,14 @@
  */
 package tk.freaxsoftware.ribbon2.directory.facade;
 
+import java.util.Set;
 import tk.freaxsoftware.extras.bus.MessageHolder;
+import tk.freaxsoftware.extras.bus.ResponseHolder;
 import tk.freaxsoftware.extras.bus.annotation.Receive;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.directory.entity.Directory;
+import tk.freaxsoftware.ribbon2.directory.entity.converters.DirectoryConverter;
+import tk.freaxsoftware.ribbon2.directory.service.DirectoryService;
 
 /**
  * Directory service to receive calls from gateway.
@@ -28,9 +33,21 @@ import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
  */
 public class DirectoryFacade {
     
+    private final DirectoryConverter converter = new DirectoryConverter();
+    
+    private final DirectoryService directoryService;
+
+    public DirectoryFacade(DirectoryService directoryService) {
+        this.directoryService = directoryService;
+    }
+    
     @Receive(DirectoryModel.CALL_CREATE_DIRECTORY)
     public void createDirectory(MessageHolder<DirectoryModel> createMessage) {
-        
+        String userLogin = directoryService.getAuthFromHeader(createMessage);
+        Directory directory = converter.convert(createMessage.getContent());
+        Directory saved = directoryService.createDirectory(directory, userLogin);
+        createMessage.setResponse(new ResponseHolder());
+        createMessage.getResponse().setContent(converter.convertBack(saved));
     }
     
     @Receive(DirectoryModel.CALL_UPDATE_DIRECTORY)
@@ -42,5 +59,4 @@ public class DirectoryFacade {
     public void deleteDirectory(MessageHolder<Long> deleteMessage) {
         
     }
-    
 }

@@ -27,8 +27,10 @@ import liquibase.resource.ResourceAccessor;
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.directory.Init;
 import tk.freaxsoftware.ribbon2.directory.UnitMain;
+import tk.freaxsoftware.ribbon2.directory.service.AuthService;
 
 /**
  * Populate default data custom change.
@@ -38,7 +40,7 @@ public class PopulateDataCustomChange implements CustomTaskChange {
 
     @Override
     public void execute(Database database) throws CustomChangeException {
-        MessageOptions options = MessageOptions.Builder.newInstance().deliveryCall().async().build();
+        MessageOptions options = MessageOptions.Builder.newInstance().header(UserModel.AUTH_HEADER_USERNAME, AuthService.ROOT_LOGIN).deliveryCall().build();
         for (String newDir: UnitMain.config.getDirectory().getCreateDirs()) {
             DirectoryModel newDirectory = new DirectoryModel();
             newDirectory.setFullName(newDir);
