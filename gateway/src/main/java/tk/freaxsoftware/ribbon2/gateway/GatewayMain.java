@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import spark.utils.IOUtils;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
+import tk.freaxsoftware.ribbon2.gateway.routes.DirectoryRoutes;
 import tk.freaxsoftware.ribbon2.gateway.routes.GroupRoutes;
 import tk.freaxsoftware.ribbon2.gateway.routes.UserRoutes;
 
@@ -64,5 +65,6 @@ public class GatewayMain {
         Init.init(config);
         UserRoutes.init();
         GroupRoutes.init();
+        DirectoryRoutes.init();
     }
 }
