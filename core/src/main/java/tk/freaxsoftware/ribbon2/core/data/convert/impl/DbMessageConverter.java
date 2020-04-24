@@ -20,6 +20,7 @@ package tk.freaxsoftware.ribbon2.core.data.convert.impl;
 
 import com.google.gson.Gson;
 import tk.freaxsoftware.extras.bus.MessageHolder;
+import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.ResponseHolder;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.data.convert.TwoWayConverter;
@@ -31,7 +32,7 @@ import tk.freaxsoftware.ribbon2.core.data.messagestorage.DbMessage;
  */
 public class DbMessageConverter implements TwoWayConverter<MessageHolder, DbMessage> {
     
-    public static final String DB_ID_HEADER = "Ribbon2.Header.DbId";
+    public static final String DB_ID_HEADER = "Trans.DbId";
     
     private Gson gson = GsonUtils.getGson();
 
@@ -81,7 +82,15 @@ public class DbMessageConverter implements TwoWayConverter<MessageHolder, DbMess
         message.setCreated(source.getCreated());
         message.setUpdated(source.getUpdated());
         message.setStatus(source.getStatus());
-        message.setOptions(source.getOptions());
+        
+        MessageOptions options = new MessageOptions();
+        options.setAsync(source.getOptions().isAsync());
+        options.setBroadcast(source.getOptions().isBroadcast());
+        options.setDeliveryPolicy(source.getOptions().getDeliveryPolicy());
+        options.setRedeliveryCounter(source.getOptions().getRedeliveryCounter());
+        options.setHeaders(source.getOptions().getHeaders());
+        message.setOptions(options);
+        
         message.setRedeliveryCounter(source.getRedeliveryCounter());
         message.setHeaders(source.getHeaders());
         Object content = source.getContent();
