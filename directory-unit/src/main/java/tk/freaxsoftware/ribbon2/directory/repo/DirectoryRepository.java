@@ -39,7 +39,7 @@ public class DirectoryRepository {
      * @return set of directories;
      */
     public Set<Directory> findDirByPaths(String[] dirPaths) {
-        return DB.getDefault().find(Directory.class).order().asc("id").where().in("fullName", dirPaths).findSet();
+        return DB.getDefault().find(Directory.class).setDisableLazyLoading(true).order().asc("id").where().in("fullName", dirPaths).findSet();
     }
     
     /**
@@ -48,7 +48,7 @@ public class DirectoryRepository {
      * @return single directory or null;
      */
     public Directory findDirectoryByPath(String fullPath) {
-        return DB.getDefault().find(Directory.class).where().eq("fullName", fullPath).findOne();
+        return DB.getDefault().find(Directory.class).setDisableLazyLoading(true).where().eq("fullName", fullPath).findOne();
     }
     
     /**
@@ -57,7 +57,7 @@ public class DirectoryRepository {
      * @return set of directories;
      */
     public Set<Directory> findDirectoriesByPath(String fullPath) {
-        return DB.getDefault().find(Directory.class).where().like("fullName", fullPath + "%").findSet();
+        return DB.getDefault().find(Directory.class).setDisableLazyLoading(true).where().like("fullName", fullPath + "%").findSet();
     }
     
     /**

@@ -74,7 +74,7 @@ public class DirectoryFacade {
         deleteMessage.setResponse(new ResponseHolder());
         deleteMessage.getResponse().setContent(true);
         for (Directory deleted: deletedDirectories) {
-            MessageBus.fire(DirectoryModel.NOTIFICATION_DIRECTORY_UPDATED, converter.convertBack(deleted), 
+            MessageBus.fire(DirectoryModel.NOTIFICATION_DIRECTORY_DELETED, converter.convertBack(deleted), 
                     MessageOptions.Builder.newInstance().deliveryNotification(5).build());
         }
     }
