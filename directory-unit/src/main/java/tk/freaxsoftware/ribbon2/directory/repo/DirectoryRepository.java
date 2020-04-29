@@ -20,6 +20,7 @@ package tk.freaxsoftware.ribbon2.directory.repo;
 
 import io.ebean.DB;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.directory.entity.Directory;
@@ -33,13 +34,50 @@ public class DirectoryRepository {
     private final static Logger LOGGER = LoggerFactory.getLogger(DirectoryRepository.class);
     
     /**
-     * Find directoris by array of paths.
+     * Find directories by array of paths.
      * @param dirPaths array with path names;
      * @return set of directories;
      */
     public Set<Directory> findDirByPaths(String[] dirPaths) {
-        LOGGER.info("Finding directories along path: {}", dirPaths);
         return DB.getDefault().find(Directory.class).order().asc("id").where().in("fullName", dirPaths).findSet();
+    }
+    
+    /**
+     * Find single directory by it's full path.
+     * @param fullPath full path to directory;
+     * @return single directory or null;
+     */
+    public Directory findDirectoryByPath(String fullPath) {
+        return DB.getDefault().find(Directory.class).where().eq("fullName", fullPath).findOne();
+    }
+    
+    /**
+     * Finds directories which begins on path.
+     * @param fullPath path to search;
+     * @return set of directories;
+     */
+    public Set<Directory> findDirectoriesByPath(String fullPath) {
+        return DB.getDefault().find(Directory.class).where().like("fullName", fullPath + "%").findSet();
+    }
+    
+    /**
+     * Save directory.
+     * @param directory directory to save;
+     * @return saved instance;
+     */
+    public Directory save(Directory directory) {
+        directory.save();
+        return directory;
+    }
+    
+    /**
+     * Deletes set of directories.
+     * @param directories directories to delete.
+     */
+    public void delete(Set<Directory> directories) {
+        LOGGER.warn("Deleting following directories: [{}]", 
+                directories.stream().map(dir -> dir.getFullName()).collect(Collectors.toSet()));
+        DB.getDefault().deleteAll(directories);
     }
     
 }

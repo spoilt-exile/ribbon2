@@ -19,7 +19,9 @@
 package tk.freaxsoftware.ribbon2.directory.facade;
 
 import java.util.Set;
+import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageHolder;
+import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.ResponseHolder;
 import tk.freaxsoftware.extras.bus.annotation.Receive;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
@@ -47,16 +49,33 @@ public class DirectoryFacade {
         Directory directory = converter.convert(createMessage.getContent());
         Directory saved = directoryService.createDirectory(directory, userLogin);
         createMessage.setResponse(new ResponseHolder());
-        createMessage.getResponse().setContent(converter.convertBack(saved));
+        DirectoryModel savedModel = converter.convertBack(saved);
+        createMessage.getResponse().setContent(savedModel);
+        MessageBus.fire(DirectoryModel.NOTIFICATION_DIRECTORY_CREATED, savedModel, 
+                MessageOptions.Builder.newInstance().deliveryNotification(5).build());
     }
     
     @Receive(DirectoryModel.CALL_UPDATE_DIRECTORY)
     public void updateDirectory(MessageHolder<DirectoryModel> updateMessage) {
-        
+        String userLogin = directoryService.getAuthFromHeader(updateMessage);
+        Directory directory = converter.convert(updateMessage.getContent());
+        Directory updated = directoryService.updateDirectory(directory, userLogin);
+        updateMessage.setResponse(new ResponseHolder());
+        DirectoryModel updatedModel = converter.convertBack(updated);
+        updateMessage.getResponse().setContent(updatedModel);
+        MessageBus.fire(DirectoryModel.NOTIFICATION_DIRECTORY_UPDATED, updatedModel, 
+                MessageOptions.Builder.newInstance().deliveryNotification(5).build());
     }
     
     @Receive(DirectoryModel.CALL_DELETE_DIRECTORY)
-    public void deleteDirectory(MessageHolder<Long> deleteMessage) {
-        
+    public void deleteDirectory(MessageHolder<String> deleteMessage) {
+        String userLogin = directoryService.getAuthFromHeader(deleteMessage);
+        Set<Directory> deletedDirectories = directoryService.deleteDirectory(deleteMessage.getContent(), userLogin);
+        deleteMessage.setResponse(new ResponseHolder());
+        deleteMessage.getResponse().setContent(true);
+        for (Directory deleted: deletedDirectories) {
+            MessageBus.fire(DirectoryModel.NOTIFICATION_DIRECTORY_UPDATED, converter.convertBack(deleted), 
+                    MessageOptions.Builder.newInstance().deliveryNotification(5).build());
+        }
     }
 }
