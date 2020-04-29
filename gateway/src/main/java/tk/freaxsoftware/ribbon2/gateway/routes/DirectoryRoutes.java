@@ -20,7 +20,9 @@ package tk.freaxsoftware.ribbon2.gateway.routes;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static spark.Spark.delete;
 import static spark.Spark.post;
+import static spark.Spark.put;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
@@ -52,6 +54,39 @@ public class DirectoryRoutes {
             }).build());
             return model;
         }, GatewayMain.gson::toJson);
+        
+        put("/api/directory", (req, res) -> {
+            DirectoryModel model = GatewayMain.gson.fromJson(req.body(), DirectoryModel.class);
+            LOGGER.info("Request to update directory {}", model.getFullName());
+            MessageBus.fire(DirectoryModel.CALL_UPDATE_DIRECTORY, model, MessageOptions.Builder.newInstance()
+                    .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                    .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                    .deliveryCall((resp) -> {
+                LOGGER.info("Directory Update: callback");
+                DirectoryModel saved = (DirectoryModel) resp.getContent();
+                model.setId(saved.getId());
+                model.setName(saved.getName());
+                model.setParentId(saved.getParentId());
+                model.setDescription(saved.getDescription());
+            }).build());
+            return model;
+        }, GatewayMain.gson::toJson);
+        
+        delete("/api/directory/:path", (req, res) -> {
+            LOGGER.info("Request to delete directory {}", req.params("path"));
+            MessageBus.fire(DirectoryModel.CALL_DELETE_DIRECTORY, req.params("path"), MessageOptions.Builder.newInstance()
+                    .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                    .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                    .deliveryCall((resp) -> {
+                LOGGER.info("Directory Delete: callback");
+                if (MessageBus.isSuccessful(resp.getHeaders())) {
+                    res.status(200);
+                } else {
+                    res.status(404);
+                }
+            }).build());
+            return "";
+        });
     }
     
 }
