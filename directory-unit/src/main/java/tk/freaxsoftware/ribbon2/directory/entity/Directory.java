@@ -39,11 +39,6 @@ public class Directory extends Model {
     private Long id;
     
     /**
-     * Id of parent directory.
-     */
-    private Long parentId;
-    
-    /**
      * Name of directory.
      */
     private String name;
@@ -72,14 +67,6 @@ public class Directory extends Model {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Long getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
     }
 
     public String getName() {

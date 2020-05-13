@@ -35,7 +35,6 @@ public class DirectoryConverter implements TwoWayConverter<DirectoryModel, Direc
         model.setName(destination.getName());
         model.setFullName(destination.getFullName());
         model.setDescription(destination.getDescription());
-        model.setParentId(destination.getParentId());
         return model;
     }
 
@@ -46,7 +45,6 @@ public class DirectoryConverter implements TwoWayConverter<DirectoryModel, Direc
         directory.setName(source.getName());
         directory.setFullName(source.getFullName());
         directory.setDescription(source.getDescription());
-        directory.setParentId(source.getParentId());
         return directory;
     }
     
