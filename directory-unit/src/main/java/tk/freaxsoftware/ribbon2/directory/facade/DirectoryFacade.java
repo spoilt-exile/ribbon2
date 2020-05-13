@@ -30,7 +30,7 @@ import tk.freaxsoftware.ribbon2.directory.entity.converters.DirectoryConverter;
 import tk.freaxsoftware.ribbon2.directory.service.DirectoryService;
 
 /**
- * Directory service to receive calls from gateway.
+ * Directory facade to receive calls from gateway.
  * @author Stanislav Nepochatov
  */
 public class DirectoryFacade {

@@ -30,8 +30,10 @@ import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.directory.config.DirectoryUnitConfig;
 import tk.freaxsoftware.ribbon2.directory.facade.DirectoryFacade;
 import tk.freaxsoftware.ribbon2.directory.facade.PermissionFacade;
+import tk.freaxsoftware.ribbon2.directory.facade.UserGroupFacade;
 import tk.freaxsoftware.ribbon2.directory.repo.DirectoryRepository;
-import tk.freaxsoftware.ribbon2.directory.repo.UserRespository;
+import tk.freaxsoftware.ribbon2.directory.repo.GroupRepository;
+import tk.freaxsoftware.ribbon2.directory.repo.UserRepository;
 import tk.freaxsoftware.ribbon2.directory.service.DirectoryService;
 import tk.freaxsoftware.ribbon2.directory.service.PermissionService;
 
@@ -69,6 +71,7 @@ public class UnitMain {
         Init.init(config);
         
         AnnotationUtil.subscribeReceiverInstance(new PermissionFacade(new PermissionService()));
-        AnnotationUtil.subscribeReceiverInstance(new DirectoryFacade(new DirectoryService(new DirectoryRepository(), new UserRespository())));
+        AnnotationUtil.subscribeReceiverInstance(new DirectoryFacade(new DirectoryService(new DirectoryRepository(), new UserRepository())));
+        AnnotationUtil.subscribeReceiverInstance(new UserGroupFacade(new UserRepository(), new GroupRepository()));
     }
 }

@@ -23,7 +23,7 @@ import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.directory.repo.DirectoryRepository;
-import tk.freaxsoftware.ribbon2.directory.repo.UserRespository;
+import tk.freaxsoftware.ribbon2.directory.repo.UserRepository;
 
 /**
  * Authentication service for checking access.
@@ -38,9 +38,9 @@ public abstract class AuthService {
     
     protected DirectoryRepository directoryRepository;
     
-    protected UserRespository userRespository;
+    protected UserRepository userRespository;
 
-    public AuthService(DirectoryRepository directoryRepository, UserRespository userRespository) {
+    public AuthService(DirectoryRepository directoryRepository, UserRepository userRespository) {
         this.directoryRepository = directoryRepository;
         this.userRespository = userRespository;
     }

@@ -18,10 +18,25 @@
  */
 package tk.freaxsoftware.ribbon2.directory.repo;
 
+import io.ebean.DB;
+import tk.freaxsoftware.ribbon2.directory.entity.UserEntity;
+
 /**
  * Persistance repository for users.
  * @author Stanislav Nepochatov
  */
-public class UserRespository {
+public class UserRepository {
     
+    public UserEntity save(UserEntity user) {
+        user.save();
+        return user;
+    }
+    
+    public UserEntity findByLogin(String login) {
+        return DB.getDefault().find(UserEntity.class).where().eq("login", login).findOne();
+    }
+    
+    public void deleteByLogin(String login) {
+        DB.getDefault().find(UserEntity.class).where().eq("login", login).delete();
+    } 
 }

@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.directory.entity.Directory;
 import tk.freaxsoftware.ribbon2.directory.repo.DirectoryRepository;
-import tk.freaxsoftware.ribbon2.directory.repo.UserRespository;
+import tk.freaxsoftware.ribbon2.directory.repo.UserRepository;
 
 /**
  * Directory service.
@@ -35,7 +35,7 @@ public class DirectoryService extends AuthService {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryService.class);
 
-    public DirectoryService(DirectoryRepository directoryRepository, UserRespository userRespository) {
+    public DirectoryService(DirectoryRepository directoryRepository, UserRepository userRespository) {
         super(directoryRepository, userRespository);
     }
     

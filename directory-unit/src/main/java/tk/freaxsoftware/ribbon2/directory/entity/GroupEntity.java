@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.directory.entity;
 
+import io.ebean.Model;
 import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -29,7 +30,7 @@ import javax.persistence.ManyToMany;
  * @author Stanislav Nepochatov
  */
 @Entity
-public class GroupEntity {
+public class GroupEntity extends Model {
     
     /**
      * Entity id.
