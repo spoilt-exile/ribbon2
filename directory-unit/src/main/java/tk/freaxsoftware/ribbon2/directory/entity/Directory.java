@@ -19,12 +19,11 @@
 package tk.freaxsoftware.ribbon2.directory.entity;
 
 import io.ebean.Model;
-import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 /**
  * Directory entity.
@@ -63,9 +62,9 @@ public class Directory extends Model {
     /**
      * Access config of the directory.
      */
-    @OneToMany(mappedBy = "directory", fetch = FetchType.EAGER, 
+    @OneToOne(mappedBy = "directory", fetch = FetchType.EAGER, 
             cascade = javax.persistence.CascadeType.REMOVE)
-    private Set<DirectoryAccess> access;
+    private DirectoryAccess access;
 
     public Long getId() {
         return id;
@@ -107,11 +106,11 @@ public class Directory extends Model {
         this.description = description;
     }
 
-    public Set<DirectoryAccess> getAccess() {
+    public DirectoryAccess getAccess() {
         return access;
     }
 
-    public void setAccess(Set<DirectoryAccess> access) {
+    public void setAccess(DirectoryAccess access) {
         this.access = access;
     }
 }

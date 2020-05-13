@@ -20,10 +20,11 @@ package tk.freaxsoftware.ribbon2.directory.entity;
 
 import io.ebean.Model;
 import io.ebean.annotation.DbJsonB;
+import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
 
 /**
@@ -42,7 +43,7 @@ public class DirectoryAccess extends Model {
     /**
      * Parent directory.
      */
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "directory_id", referencedColumnName = "id")
     private Directory directory;
     
@@ -50,7 +51,7 @@ public class DirectoryAccess extends Model {
      * Single access entry.
      */
     @DbJsonB
-    private DirectoryAccessModel accessEntry;
+    private Set<DirectoryAccessModel> accessEntries;
 
     public Long getId() {
         return id;
@@ -68,11 +69,11 @@ public class DirectoryAccess extends Model {
         this.directory = directory;
     }
 
-    public DirectoryAccessModel getAccessEntry() {
-        return accessEntry;
+    public Set<DirectoryAccessModel> getAccessEntries() {
+        return accessEntries;
     }
 
-    public void setAccessEntry(DirectoryAccessModel accessEntry) {
-        this.accessEntry = accessEntry;
+    public void setAccessEntries(Set<DirectoryAccessModel> accessEntries) {
+        this.accessEntries = accessEntries;
     }
 }
