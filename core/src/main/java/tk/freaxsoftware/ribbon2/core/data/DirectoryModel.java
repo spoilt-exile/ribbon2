@@ -19,9 +19,6 @@
 
 package tk.freaxsoftware.ribbon2.core.data;
 
-import java.util.Map;
-import java.util.Set;
-
 
 /**
  * Message directory data class.
@@ -41,11 +38,6 @@ public class DirectoryModel {
      * Id of directory.
      */
     private Long id;
-    
-    /**
-     * Id of parent directory.
-     */
-    private Long parentId;
     
     /**
      * Name of directory.
@@ -68,14 +60,6 @@ public class DirectoryModel {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Long getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
     }
 
     public String getName() {
