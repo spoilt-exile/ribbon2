@@ -78,7 +78,7 @@ public class Init {
                 new DirectoryPermissionHolder(config.getDirectory().getPermissions(), TAG)));
         
         if (!appendixMessages.isEmpty()) {
-            UnitMain.executor.submit(() -> {
+            DirectoryUnit.executor.submit(() -> {
                 try {
                     Thread.sleep(10000);
                 } catch (InterruptedException ex) {

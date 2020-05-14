@@ -91,7 +91,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>tk.freaxsoftware.ribbon2.directory.UnitMain</mainClass>
+                            <mainClass>tk.freaxsoftware.ribbon2.directory.DirectoryUnit</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

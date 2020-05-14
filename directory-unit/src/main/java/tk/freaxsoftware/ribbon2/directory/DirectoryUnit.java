@@ -41,9 +41,9 @@ import tk.freaxsoftware.ribbon2.directory.service.PermissionService;
  * Main class of directory unit.
  * @author Stanislav Nepochatov
  */
-public class UnitMain {
+public class DirectoryUnit {
     
-    private final static Logger LOGGER = LoggerFactory.getLogger(UnitMain.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(DirectoryUnit.class);
     
     /**
      * Gson instance.
@@ -64,8 +64,8 @@ public class UnitMain {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
-        LOGGER.info("\n{}", IOUtils.toString(UnitMain.class.getClassLoader().getResourceAsStream("header")));
-        config = gson.fromJson(IOUtils.toString(UnitMain.class.getClassLoader().getResourceAsStream("dirconfig.json")), DirectoryUnitConfig.class);
+        LOGGER.info("\n{}", IOUtils.toString(DirectoryUnit.class.getClassLoader().getResourceAsStream("header")));
+        config = gson.fromJson(IOUtils.toString(DirectoryUnit.class.getClassLoader().getResourceAsStream("dirconfig.json")), DirectoryUnitConfig.class);
         LOGGER.info("Directory started, config: {}", config);
         
         Init.init(config);

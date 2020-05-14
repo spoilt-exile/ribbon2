@@ -12,8 +12,15 @@
         "address": "127.0.0.1",
         "port": 9000,
         "heartbeatRate": 30,
-        "crossConnectionsDemand": [],
-        "crossConnectionsOffer": ["Ribbon.Global.CheckAuth"]
+        "crossConnectionsDemand": [
+            "Ribbon.Global.Notification.DirectoryCreated",
+            "Ribbon.Global.Notification.DirectoryUpdated",
+            "Ribbon.Global.Notification.DirectoryDeleted"
+        ],
+        "crossConnectionsOffer": [
+            "Ribbon.Global.CheckDirectoryAccess",
+            "Ribbon.Global.InitPermissions"
+        ]
     },
     "storage": {
         "storageClass": "tk.freaxsoftware.ribbon2.core.data.messagestorage.DBMessageStorage",

@@ -29,7 +29,7 @@ import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.directory.Init;
-import tk.freaxsoftware.ribbon2.directory.UnitMain;
+import tk.freaxsoftware.ribbon2.directory.DirectoryUnit;
 import tk.freaxsoftware.ribbon2.directory.service.AuthService;
 
 /**
@@ -41,7 +41,7 @@ public class PopulateDataCustomChange implements CustomTaskChange {
     @Override
     public void execute(Database database) throws CustomChangeException {
         MessageOptions options = MessageOptions.Builder.newInstance().header(UserModel.AUTH_HEADER_USERNAME, AuthService.ROOT_LOGIN).deliveryCall().build();
-        for (String newDir: UnitMain.config.getDirectory().getCreateDirs()) {
+        for (String newDir: DirectoryUnit.config.getDirectory().getCreateDirs()) {
             DirectoryModel newDirectory = new DirectoryModel();
             newDirectory.setFullName(newDir);
             newDirectory.setDescription("Created by default.");
