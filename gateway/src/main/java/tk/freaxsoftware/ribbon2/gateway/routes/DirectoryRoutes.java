@@ -60,7 +60,6 @@ public class DirectoryRoutes {
                     .deliveryCall().build(), DirectoryModel.class);
             model.setId(saved.getId());
             model.setName(saved.getName());
-            model.setParentId(saved.getParentId());
             model.setDescription(saved.getDescription());
             return model;
         }, GatewayMain.gson::toJson);
