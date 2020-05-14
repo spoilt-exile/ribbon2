@@ -1,0 +1,24 @@
+{
+    "messenger": {
+        "permissions": [
+            {
+                "key": "canCreateMessage",
+                "description": "Allows user to create message"
+            },
+            {
+                "key": "canUpdateMessage",
+                "description": "Allows user to update message"
+            },
+            {
+                "key": "canDeleteMessage",
+                "description": "Allows user to delete message"
+            }
+        ]
+    },
+    "db": {
+        "jdbcUrl": "jdbc:postgresql://localhost:5432/ribbon2-messenger",
+        "driver": "org.postgresql.ds.PGSimpleDataSource",
+        "username": "ribbon2",
+        "password": "ribbon2"
+    }
+}
