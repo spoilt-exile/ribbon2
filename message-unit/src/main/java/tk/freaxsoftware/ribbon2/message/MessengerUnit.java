@@ -25,8 +25,12 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.utils.IOUtils;
+import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.message.config.MessengerUnitConfig;
+import tk.freaxsoftware.ribbon2.message.entity.converters.DirectoryConverter;
+import tk.freaxsoftware.ribbon2.message.facade.DirectoryFacade;
+import tk.freaxsoftware.ribbon2.message.repo.DirectoryRepository;
 
 /**
  * Unit main class.
@@ -62,6 +66,8 @@ public class MessengerUnit {
         LOGGER.info("Messenger started, config: {}", config);
         
         Init.init(config);
+        
+        AnnotationUtil.subscribeReceiverInstance(new DirectoryFacade(new DirectoryRepository(), new DirectoryConverter()));
     }
 
 }

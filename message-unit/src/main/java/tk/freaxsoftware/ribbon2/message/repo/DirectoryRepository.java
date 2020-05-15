@@ -31,4 +31,13 @@ public class DirectoryRepository {
         return DB.getDefault().find(Directory.class).where().eq("fullName", fullName).findOne();
     }
     
+    public void deleteByFullname(String fullName) {
+        DB.getDefault().find(Directory.class).where().eq("fullName", fullName).delete();
+    }
+    
+    public Directory save(Directory directory) {
+        directory.save();
+        return directory;
+    }
+    
 }
