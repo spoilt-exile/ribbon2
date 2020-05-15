@@ -58,6 +58,23 @@
     <build>
         <plugins>
             <plugin>
+              <groupId>io.ebean</groupId>
+              <artifactId>ebean-maven-plugin</artifactId>
+              <version>12.2.4</version>
+              <executions>
+                <execution>
+                  <id>main</id>
+                  <phase>process-classes</phase>
+                  <configuration>
+                    <transformArgs>debug=1</transformArgs>
+                  </configuration>
+                  <goals>
+                    <goal>enhance</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <archive>
