@@ -41,7 +41,7 @@ public class Message extends Model {
     
     private String uid;
     
-    private Long parentUid;
+    private String parentUid;
     
     private String createdBy;
     
@@ -84,11 +84,11 @@ public class Message extends Model {
         this.uid = uid;
     }
 
-    public Long getParentUid() {
+    public String getParentUid() {
         return parentUid;
     }
 
-    public void setParentUid(Long parentUid) {
+    public void setParentUid(String parentUid) {
         this.parentUid = parentUid;
     }
 
