@@ -51,6 +51,7 @@ public class UserGroupFacade {
     @Receive(UserModel.NOTIFICATION_USER_CREATED)
     public void userCreated(MessageHolder<UserModel> holder) {
         UserModel created = holder.getContent();
+        LOGGER.info("Handling notification, user {} created;", created.getLogin());
         UserEntity user = new UserEntity();
         user.setId(created.getId());
         user.setLogin(created.getLogin());
@@ -61,6 +62,7 @@ public class UserGroupFacade {
     @Receive(UserModel.NOTIFICATION_USER_UPDATED)
     public void userUpdated(MessageHolder<UserModel> holder) {
         UserModel updated = holder.getContent();
+        LOGGER.info("Handling notification, user {} updated;", updated.getLogin());
         UserEntity updateTo = userRepository.findByLogin(updated.getLogin());
         if (updateTo != null) {
             updateTo.setGroups(prepareGroups(updated.getGroups()));
@@ -71,12 +73,14 @@ public class UserGroupFacade {
     @Receive(UserModel.NOTIFICATION_USER_DELETED)
     public void userDeleted(MessageHolder<UserModel> holder) {
         UserModel deleted = holder.getContent();
+        LOGGER.info("Handling notification, user {} deleted;", deleted.getLogin());
         userRepository.deleteByLogin(deleted.getLogin());
     }
     
     @Receive(GroupModel.NOTIFICATION_GROUP_CREATED)
     public void groupCreated(MessageHolder<GroupModel> holder) {
         GroupModel created = holder.getContent();
+        LOGGER.info("Handling notification, group {} created;", created.getName());
         GroupEntity group = new GroupEntity();
         group.setName(created.getName());
         groupRepository.save(group);
@@ -90,6 +94,7 @@ public class UserGroupFacade {
     @Receive(GroupModel.NOTIFICATION_GROUP_DELETED)
     public void groupDeleted(MessageHolder<GroupModel> holder) {
         GroupModel deleted = holder.getContent();
+        LOGGER.info("Handling notification, group {} deleted;", deleted.getName());
         groupRepository.deleteByName(deleted.getName());
     }
     
