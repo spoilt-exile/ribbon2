@@ -20,6 +20,7 @@
 package tk.freaxsoftware.ribbon2.core.data;
 
 import java.time.ZonedDateTime;
+import java.util.Set;
 
 /**
  * News message data class.
@@ -37,7 +38,9 @@ public class MessageModel {
     
     private Long id;
     
-    private Long parentId;
+    private String uid;
+    
+    private Long parentUid;
     
     private String createdBy;
     
@@ -47,15 +50,13 @@ public class MessageModel {
     
     private ZonedDateTime updated;
     
-    private String header;
+    private Set<String> directories;
     
-    private String language;
+    private String header;
     
     private String content;
     
     private String[] tags;
-    
-    private String copyright;
 
     public Long getId() {
         return id;
@@ -65,12 +66,20 @@ public class MessageModel {
         this.id = id;
     }
 
-    public Long getParentId() {
-        return parentId;
+    public String getUid() {
+        return uid;
     }
 
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public Long getParentUid() {
+        return parentUid;
+    }
+
+    public void setParentUid(Long parentUid) {
+        this.parentUid = parentUid;
     }
 
     public String getCreatedBy() {
@@ -105,20 +114,20 @@ public class MessageModel {
         this.updated = updated;
     }
 
+    public Set<String> getDirectories() {
+        return directories;
+    }
+
+    public void setDirectories(Set<String> directories) {
+        this.directories = directories;
+    }
+
     public String getHeader() {
         return header;
     }
 
     public void setHeader(String header) {
         this.header = header;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
     }
 
     public String getContent() {
@@ -136,13 +145,4 @@ public class MessageModel {
     public void setTags(String[] tags) {
         this.tags = tags;
     }
-
-    public String getCopyright() {
-        return copyright;
-    }
-
-    public void setCopyright(String copyright) {
-        this.copyright = copyright;
-    }
-    
 }
