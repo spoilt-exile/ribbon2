@@ -19,10 +19,11 @@
 package tk.freaxsoftware.ribbon2.message.entity;
 
 import io.ebean.Model;
+import java.util.Set;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.ManyToMany;
 
 /**
  * Directory entity (copy).
@@ -36,9 +37,8 @@ public class Directory extends Model {
     
     private String fullName;
     
-    @ManyToOne
-    @JoinColumn(name = "message_id", referencedColumnName = "id")
-    private Message message;
+    @ManyToMany(mappedBy = "directories", fetch = FetchType.LAZY)
+    private Set<Message> messages;
 
     public Long getId() {
         return id;
@@ -56,12 +56,12 @@ public class Directory extends Model {
         this.fullName = fullName;
     }
 
-    public Message getMessage() {
-        return message;
+    public Set<Message> getMessages() {
+        return messages;
     }
 
-    public void setMessage(Message message) {
-        this.message = message;
+    public void setMessages(Set<Message> messages) {
+        this.messages = messages;
     }
     
 }

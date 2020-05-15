@@ -25,7 +25,9 @@ import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 
 /**
  * Message entity.
@@ -49,8 +51,15 @@ public class Message extends Model {
     
     private ZonedDateTime updated;
     
-    @OneToMany(mappedBy = "message", fetch = FetchType.EAGER)
+    @ManyToMany
+    @JoinTable(name = "message_directory", 
+            joinColumns = @JoinColumn(name = "message_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "directory_id", referencedColumnName = "id")
+    )
     private Set<Directory> directories;
+    
+    @DbArray
+    private Set<String> directoryNames;
     
     private String header;
     
@@ -121,6 +130,14 @@ public class Message extends Model {
 
     public void setDirectories(Set<Directory> directories) {
         this.directories = directories;
+    }
+
+    public Set<String> getDirectoryNames() {
+        return directoryNames;
+    }
+
+    public void setDirectoryNames(Set<String> directoryNames) {
+        this.directoryNames = directoryNames;
     }
 
     public String getHeader() {

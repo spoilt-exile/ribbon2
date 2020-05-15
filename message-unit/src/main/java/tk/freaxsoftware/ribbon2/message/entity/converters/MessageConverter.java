@@ -33,12 +33,6 @@ import tk.freaxsoftware.ribbon2.message.repo.DirectoryRepository;
  * @author Stanislav Nepochatov
  */
 public class MessageConverter implements TwoWayConverter<MessageModel, Message> {
-    
-    private final DirectoryRepository directoryRepository;
-
-    public MessageConverter(DirectoryRepository directoryRepository) {
-        this.directoryRepository = directoryRepository;
-    }
 
     @Override
     public MessageModel convertBack(Message destination) {
@@ -53,8 +47,7 @@ public class MessageConverter implements TwoWayConverter<MessageModel, Message> 
         model.setHeader(destination.getHeader());
         model.setContent(destination.getContent());
         model.setTags(destination.getTags());
-        model.setDirectories(destination.getDirectories().stream()
-                .map(dir -> dir.getFullName()).collect(Collectors.toSet()));
+        model.setDirectories(destination.getDirectoryNames());
         return model;
     }
 
@@ -71,21 +64,7 @@ public class MessageConverter implements TwoWayConverter<MessageModel, Message> 
         message.setHeader(source.getHeader());
         message.setContent(source.getContent());
         message.setTags(source.getTags());
-        message.setDirectories(prepareDirectories(source.getDirectories()));
+        message.setDirectoryNames(source.getDirectories());
         return message;
-    }
-    
-    private Set<Directory> prepareDirectories(Set<String> directoryNames) {
-        Set<Directory> directories = new HashSet<>();
-        for (String directoryName: directoryNames) {
-            Directory finded = directoryRepository.findByFullName(directoryName);
-            if (finded != null) {
-                directories.add(finded);
-            } else {
-                throw new CoreException("DIR_NOT_FOUND", 
-                        String.format("Directory %s not found!", directoryName));
-            }
-        }
-        return directories;
     }
 }
