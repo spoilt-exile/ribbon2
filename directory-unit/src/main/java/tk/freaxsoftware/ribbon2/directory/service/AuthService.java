@@ -60,17 +60,4 @@ public abstract class AuthService {
         return false;
     }
     
-    /**
-     * Gets username from message header.
-     * @param holder message holder;
-     * @return login of current user;
-     * @throws CoreException if header not present in message;
-     */
-    public String getAuthFromHeader(MessageHolder holder) {
-        if (holder.getHeaders().containsKey(UserModel.AUTH_HEADER_USERNAME)) {
-            return (String) holder.getHeaders().get(UserModel.AUTH_HEADER_USERNAME);
-        }
-        throw new CoreException("ILLEGAL_ACCESS", "No auth header provided.");
-    }
-    
 }

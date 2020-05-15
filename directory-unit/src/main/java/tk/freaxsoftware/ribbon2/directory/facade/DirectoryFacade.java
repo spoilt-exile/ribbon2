@@ -25,6 +25,7 @@ import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.ResponseHolder;
 import tk.freaxsoftware.extras.bus.annotation.Receive;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
 import tk.freaxsoftware.ribbon2.directory.entity.Directory;
 import tk.freaxsoftware.ribbon2.directory.entity.converters.DirectoryConverter;
 import tk.freaxsoftware.ribbon2.directory.service.DirectoryService;
@@ -45,7 +46,7 @@ public class DirectoryFacade {
     
     @Receive(DirectoryModel.CALL_CREATE_DIRECTORY)
     public void createDirectory(MessageHolder<DirectoryModel> createMessage) {
-        String userLogin = directoryService.getAuthFromHeader(createMessage);
+        String userLogin = MessageUtils.getAuthFromHeader(createMessage);
         Directory directory = converter.convert(createMessage.getContent());
         Directory saved = directoryService.createDirectory(directory, userLogin);
         createMessage.setResponse(new ResponseHolder());
@@ -57,7 +58,7 @@ public class DirectoryFacade {
     
     @Receive(DirectoryModel.CALL_UPDATE_DIRECTORY)
     public void updateDirectory(MessageHolder<DirectoryModel> updateMessage) {
-        String userLogin = directoryService.getAuthFromHeader(updateMessage);
+        String userLogin = MessageUtils.getAuthFromHeader(updateMessage);
         Directory directory = converter.convert(updateMessage.getContent());
         Directory updated = directoryService.updateDirectory(directory, userLogin);
         updateMessage.setResponse(new ResponseHolder());
@@ -69,7 +70,7 @@ public class DirectoryFacade {
     
     @Receive(DirectoryModel.CALL_DELETE_DIRECTORY)
     public void deleteDirectory(MessageHolder<String> deleteMessage) {
-        String userLogin = directoryService.getAuthFromHeader(deleteMessage);
+        String userLogin = MessageUtils.getAuthFromHeader(deleteMessage);
         Set<Directory> deletedDirectories = directoryService.deleteDirectory(deleteMessage.getContent(), userLogin);
         deleteMessage.setResponse(new ResponseHolder());
         deleteMessage.getResponse().setContent(true);
