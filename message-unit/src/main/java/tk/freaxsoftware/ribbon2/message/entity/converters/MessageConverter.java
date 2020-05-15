@@ -82,7 +82,7 @@ public class MessageConverter implements TwoWayConverter<MessageModel, Message> 
             if (finded != null) {
                 directories.add(finded);
             } else {
-                throw new CoreException("NO_DIRECTORY_FOUND", 
+                throw new CoreException("DIR_NOT_FOUND", 
                         String.format("Directory %s not found!", directoryName));
             }
         }
