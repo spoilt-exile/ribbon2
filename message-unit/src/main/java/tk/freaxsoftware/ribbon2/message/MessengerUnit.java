@@ -30,7 +30,10 @@ import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.message.config.MessengerUnitConfig;
 import tk.freaxsoftware.ribbon2.message.entity.converters.DirectoryConverter;
 import tk.freaxsoftware.ribbon2.message.facade.DirectoryFacade;
+import tk.freaxsoftware.ribbon2.message.facade.MessageFacade;
 import tk.freaxsoftware.ribbon2.message.repo.DirectoryRepository;
+import tk.freaxsoftware.ribbon2.message.repo.MessageRepository;
+import tk.freaxsoftware.ribbon2.message.service.MessageService;
 
 /**
  * Unit main class.
@@ -68,6 +71,7 @@ public class MessengerUnit {
         Init.init(config);
         
         AnnotationUtil.subscribeReceiverInstance(new DirectoryFacade(new DirectoryRepository(), new DirectoryConverter()));
+        AnnotationUtil.subscribeReceiverInstance(new MessageFacade(new MessageService(new DirectoryRepository(), new MessageRepository())));
     }
 
 }
