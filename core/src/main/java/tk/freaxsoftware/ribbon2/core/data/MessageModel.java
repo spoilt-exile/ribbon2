@@ -56,7 +56,7 @@ public class MessageModel {
     
     private String content;
     
-    private String[] tags;
+    private Set<String> tags;
 
     public Long getId() {
         return id;
@@ -138,11 +138,11 @@ public class MessageModel {
         this.content = content;
     }
 
-    public String[] getTags() {
+    public Set<String> getTags() {
         return tags;
     }
 
-    public void setTags(String[] tags) {
+    public void setTags(Set<String> tags) {
         this.tags = tags;
     }
 }
