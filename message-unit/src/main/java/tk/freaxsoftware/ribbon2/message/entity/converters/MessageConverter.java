@@ -18,15 +18,9 @@
  */
 package tk.freaxsoftware.ribbon2.message.entity.converters;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.convert.TwoWayConverter;
-import tk.freaxsoftware.ribbon2.core.exception.CoreException;
-import tk.freaxsoftware.ribbon2.message.entity.Directory;
 import tk.freaxsoftware.ribbon2.message.entity.Message;
-import tk.freaxsoftware.ribbon2.message.repo.DirectoryRepository;
 
 /**
  * Message converter.
