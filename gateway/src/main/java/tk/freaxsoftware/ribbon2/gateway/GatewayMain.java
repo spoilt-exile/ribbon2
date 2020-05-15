@@ -29,6 +29,7 @@ import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
 import tk.freaxsoftware.ribbon2.gateway.routes.DirectoryRoutes;
 import tk.freaxsoftware.ribbon2.gateway.routes.GroupRoutes;
+import tk.freaxsoftware.ribbon2.gateway.routes.MessageRoutes;
 import tk.freaxsoftware.ribbon2.gateway.routes.UserRoutes;
 
 /**
@@ -66,5 +67,6 @@ public class GatewayMain {
         UserRoutes.init();
         GroupRoutes.init();
         DirectoryRoutes.init();
+        MessageRoutes.init();
     }
 }
