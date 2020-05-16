@@ -20,7 +20,9 @@ package tk.freaxsoftware.ribbon2.gateway.routes;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static spark.Spark.delete;
 import static spark.Spark.post;
+import static spark.Spark.put;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
@@ -46,6 +48,29 @@ public class MessageRoutes {
                     .deliveryCall().build(), MessageModel.class);
             return saved;
         }, GatewayMain.gson::toJson);
+        
+        put("/api/message", (req, res) -> {
+            MessageModel model = GatewayMain.gson.fromJson(req.body(), MessageModel.class);
+            LOGGER.info("Request to update message {}", model.getHeader());
+            MessageModel saved = MessageBus.fireCall(MessageModel.CALL_UPDATE_MESSAGE, model, MessageOptions.Builder.newInstance()
+                    .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                    .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                    .deliveryCall().build(), MessageModel.class);
+            return saved;
+        }, GatewayMain.gson::toJson);
+        
+        delete("/api/message/:uid", (req, res) -> {
+            LOGGER.info("Request to delete message {}", req.params("uid"));
+            Boolean deleted = MessageBus.fireCall(MessageModel.CALL_DELETE_MESSAGE, req.params("uid"), MessageOptions.Builder.newInstance()
+                    .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                    .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                    .deliveryCall().build(), Boolean.class);
+            if (deleted != null && deleted) {
+                res.status(200);
+            } else {
+                res.status(404);
+            }
+            return "";
+        });
     }
-    
 }
