@@ -27,6 +27,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 
 /**
@@ -63,6 +64,7 @@ public class Message extends Model {
     
     private String header;
     
+    @Lob
     private String content;
     
     @DbArray
