@@ -19,9 +19,8 @@
 package tk.freaxsoftware.ribbon2.directory.service;
 
 import java.util.Objects;
-import tk.freaxsoftware.extras.bus.MessageHolder;
-import tk.freaxsoftware.ribbon2.core.data.UserModel;
-import tk.freaxsoftware.ribbon2.core.exception.CoreException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.directory.repo.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.UserRepository;
 
@@ -30,6 +29,8 @@ import tk.freaxsoftware.ribbon2.directory.repo.UserRepository;
  * @author Stanislav Nepochatov
  */
 public abstract class AuthService {
+    
+    private final static Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
     
     /**
      * Admin login, skips checking of permissions.
@@ -53,6 +54,7 @@ public abstract class AuthService {
      * @return result of check: true - access granted, false - access denied;
      */
     public boolean checkDirAccess(String userLogin, String dirFullName, String permission) {
+        LOGGER.info("Checking directory {} for user {} by permission {}", dirFullName, userLogin, permission);
         if (Objects.equals(userLogin, ROOT_LOGIN)) {
             return true;
         }

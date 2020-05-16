@@ -28,12 +28,14 @@ import spark.utils.IOUtils;
 import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.directory.config.DirectoryUnitConfig;
+import tk.freaxsoftware.ribbon2.directory.facade.DirectoryAccessFacade;
 import tk.freaxsoftware.ribbon2.directory.facade.DirectoryFacade;
 import tk.freaxsoftware.ribbon2.directory.facade.PermissionFacade;
 import tk.freaxsoftware.ribbon2.directory.facade.UserGroupFacade;
 import tk.freaxsoftware.ribbon2.directory.repo.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.GroupRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.UserRepository;
+import tk.freaxsoftware.ribbon2.directory.service.AccessService;
 import tk.freaxsoftware.ribbon2.directory.service.DirectoryService;
 import tk.freaxsoftware.ribbon2.directory.service.PermissionService;
 
@@ -73,5 +75,6 @@ public class DirectoryUnit {
         AnnotationUtil.subscribeReceiverInstance(new PermissionFacade(new PermissionService()));
         AnnotationUtil.subscribeReceiverInstance(new DirectoryFacade(new DirectoryService(new DirectoryRepository(), new UserRepository())));
         AnnotationUtil.subscribeReceiverInstance(new UserGroupFacade(new UserRepository(), new GroupRepository()));
+        AnnotationUtil.subscribeReceiverInstance(new DirectoryAccessFacade(new AccessService(new DirectoryRepository(), new UserRepository())));
     }
 }
