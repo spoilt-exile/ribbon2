@@ -24,6 +24,9 @@ import java.util.Set;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tk.freaxsoftware.extras.bus.MessageBus;
+import tk.freaxsoftware.extras.bus.MessageOptions;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryCheckAccessRequest;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.message.entity.Directory;
 import tk.freaxsoftware.ribbon2.message.entity.Message;
@@ -59,6 +62,7 @@ public class MessageService {
         message.setCreated(ZonedDateTime.now());
         message.setCreatedBy(user);
         message.setDirectories(linkDirectories(message.getDirectoryNames()));
+        checkDirectoryAccess(user, message.getDirectoryNames(), Message.PERMISSION_CAN_CREATE_MESSAGE);
         return messageRepository.save(message);
     }
     
@@ -80,6 +84,7 @@ public class MessageService {
             existingMessage.setDirectoryNames(message.getDirectoryNames());
             existingMessage.setUpdated(ZonedDateTime.now());
             existingMessage.setCreatedBy(user);
+            checkDirectoryAccess(user, message.getDirectoryNames(), Message.PERMISSION_CAN_UPDATE_MESSAGE);
             return messageRepository.save(existingMessage);
         }
         throw new CoreException("MESSAGE_NOT_FOUND", 
@@ -92,11 +97,26 @@ public class MessageService {
         if (existingMessage != null) {
             LOGGER.warn("Deleting message {} from directories: {}", 
                     existingMessage.getUid(), existingMessage.getDirectoryNames());
+            checkDirectoryAccess(user, existingMessage.getDirectoryNames(), Message.PERMISSION_CAN_DELETE_MESSAGE);
             existingMessage.delete();
             return existingMessage;
         }
         throw new CoreException("MESSAGE_NOT_FOUND", 
                 String.format("Message by UID %s not found!", uid));
+    }
+    
+    private void checkDirectoryAccess(String user, Set<String> directories, String permission) {
+        LOGGER.info("Checking access for directories {} for user {} by permission.", directories, user, permission);
+        DirectoryCheckAccessRequest request = new DirectoryCheckAccessRequest(user, permission, directories);
+        try {
+            Boolean result = MessageBus.fireCall(DirectoryCheckAccessRequest.CALL_CHECK_DIR_ACCESS, request, MessageOptions.Builder.newInstance().deliveryCall().build(), Boolean.class);
+            if (result) {
+                return;
+            }
+        } catch (Exception ex) {
+            throw new CoreException("CALL_ERROR", ex.getMessage());
+        }
+        throw new CoreException("ILLEGAL_ACCESS", String.format("User %s doesn't have access for current operation.", user));
     }
     
     private Set<Directory> linkDirectories(Set<String> directoryNames) {
