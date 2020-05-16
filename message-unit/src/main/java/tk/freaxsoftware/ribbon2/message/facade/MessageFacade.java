@@ -56,12 +56,24 @@ public class MessageFacade {
     
     @Receive(MessageModel.CALL_UPDATE_MESSAGE)
     public void updateMessage(MessageHolder<MessageModel> updateMessage) {
-        
+        String userLogin = MessageUtils.getAuthFromHeader(updateMessage);
+        Message message = converter.convert(updateMessage.getContent());
+        Message saved = messageService.updateMessage(message, userLogin);
+        updateMessage.setResponse(new ResponseHolder());
+        MessageModel savedModel = converter.convertBack(saved);
+        updateMessage.getResponse().setContent(savedModel);
+        MessageBus.fire(MessageModel.NOTIFICATION_MESSAGE_UPDATED, savedModel, 
+                MessageOptions.Builder.newInstance().deliveryNotification(5).build());
     }
     
     @Receive(MessageModel.CALL_DELETE_MESSAGE)
-    public void deleteMessage(MessageHolder<MessageModel> deleteMessage) {
-        
+    public void deleteMessage(MessageHolder<String> deleteMessage) {
+        String userLogin = MessageUtils.getAuthFromHeader(deleteMessage);
+        Message deleted = messageService.deleteMessage(deleteMessage.getContent(), userLogin);
+        deleteMessage.setResponse(new ResponseHolder());
+        deleteMessage.getResponse().setContent(true);
+        MessageBus.fire(MessageModel.NOTIFICATION_MESSAGE_DELETED, converter.convertBack(deleted), 
+                MessageOptions.Builder.newInstance().deliveryNotification(5).build());
     }
     
 }

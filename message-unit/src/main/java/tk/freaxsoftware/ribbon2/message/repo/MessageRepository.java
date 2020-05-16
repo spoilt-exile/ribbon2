@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.message.repo;
 
+import io.ebean.DB;
 import tk.freaxsoftware.ribbon2.message.entity.Message;
 
 /**
@@ -25,6 +26,11 @@ import tk.freaxsoftware.ribbon2.message.entity.Message;
  * @author Stanislav Nepochatov
  */
 public class MessageRepository {
+    
+    public Message findByUid(String uid) {
+        return DB.getDefault().find(Message.class).setDisableLazyLoading(true)
+                .where().eq("uid", uid).findOne();
+    }
     
     public Message save(Message message) {
         message.save();

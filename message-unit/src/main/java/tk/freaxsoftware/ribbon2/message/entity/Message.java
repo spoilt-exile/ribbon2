@@ -52,7 +52,7 @@ public class Message extends Model {
     
     private ZonedDateTime updated;
     
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "message_directory", 
             joinColumns = @JoinColumn(name = "message_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "directory_id", referencedColumnName = "id")

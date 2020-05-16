@@ -62,6 +62,43 @@ public class MessageService {
         return messageRepository.save(message);
     }
     
+    /**
+     * Updates existing message after checking it.
+     * @param message message to update;
+     * @param user current user login;
+     * @return updated message;
+     */
+    public Message updateMessage(Message message, String user) {
+        LOGGER.info("Update message {} on directories {} by user {}", 
+                message.getUid(), message.getDirectoryNames(), user);
+        Message existingMessage = messageRepository.findByUid(message.getUid());
+        if (existingMessage != null) {
+            existingMessage.setHeader(message.getHeader());
+            existingMessage.setContent(message.getContent());
+            existingMessage.setTags(message.getTags());
+            existingMessage.setDirectories(linkDirectories(message.getDirectoryNames()));
+            existingMessage.setDirectoryNames(message.getDirectoryNames());
+            existingMessage.setUpdated(ZonedDateTime.now());
+            existingMessage.setCreatedBy(user);
+            return messageRepository.save(existingMessage);
+        }
+        throw new CoreException("MESSAGE_NOT_FOUND", 
+                String.format("Message by UID %s not found!", message.getUid()));
+    }
+    
+    public Message deleteMessage(String uid, String user) {
+        LOGGER.info("Delete message {} by user {}", uid, user);
+        Message existingMessage = messageRepository.findByUid(uid);
+        if (existingMessage != null) {
+            LOGGER.warn("Deleting message {} from directories: {}", 
+                    existingMessage.getUid(), existingMessage.getDirectoryNames());
+            existingMessage.delete();
+            return existingMessage;
+        }
+        throw new CoreException("MESSAGE_NOT_FOUND", 
+                String.format("Message by UID %s not found!", uid));
+    }
+    
     private Set<Directory> linkDirectories(Set<String> directoryNames) {
         Set<Directory> directories = new HashSet<>();
         if (directoryNames == null || (directoryNames != null && directoryNames.isEmpty())) {
