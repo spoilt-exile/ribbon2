@@ -40,7 +40,7 @@ import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
-import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionHolder;
+import tk.freaxsoftware.ribbon2.core.data.request.DirectoryPermissionHolder;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionModel;
 import tk.freaxsoftware.ribbon2.message.config.MessengerUnitConfig;
 

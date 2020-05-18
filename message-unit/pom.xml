@@ -91,7 +91,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>tk.freaxsoftware.ribbon2.test.unit.MessengerUnit</mainClass>
+                            <mainClass>tk.freaxsoftware.ribbon2.message.MessengerUnit</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -103,7 +103,7 @@
                         <id>make-my-jar-with-dependencies</id>
                         <phase>package</phase>
                         <configuration>
-                            <finalName>test-static</finalName>
+                            <finalName>messenger-static</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <goals>

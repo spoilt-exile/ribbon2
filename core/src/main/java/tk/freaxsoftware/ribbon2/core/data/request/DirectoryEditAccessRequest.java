@@ -35,6 +35,13 @@ public class DirectoryEditAccessRequest {
     
     private Set<DirectoryAccessModel> access;
 
+    public DirectoryEditAccessRequest() {}
+
+    public DirectoryEditAccessRequest(String directoryPath, Set<DirectoryAccessModel> access) {
+        this.directoryPath = directoryPath;
+        this.access = access;
+    }
+    
     public String getDirectoryPath() {
         return directoryPath;
     }
