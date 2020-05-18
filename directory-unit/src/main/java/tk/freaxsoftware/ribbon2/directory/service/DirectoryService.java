@@ -29,6 +29,7 @@ import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.directory.entity.Directory;
 import tk.freaxsoftware.ribbon2.directory.entity.converters.DirectoryConverter;
 import tk.freaxsoftware.ribbon2.directory.repo.DirectoryRepository;
+import tk.freaxsoftware.ribbon2.directory.repo.GroupRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.UserRepository;
 
 /**
@@ -41,8 +42,8 @@ public class DirectoryService extends AuthService {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryService.class);
 
-    public DirectoryService(DirectoryRepository directoryRepository, UserRepository userRespository) {
-        super(directoryRepository, userRespository);
+    public DirectoryService(DirectoryRepository directoryRepository, UserRepository userRespository, GroupRepository groupRepository) {
+        super(directoryRepository, userRespository, groupRepository);
     }
     
     /**
@@ -55,7 +56,7 @@ public class DirectoryService extends AuthService {
         LOGGER.info("Create directory {} by user {}", directory.getFullName(), user);
         Set<Directory> directoryBranch = directoryRepository.findDirByPaths(preparePathChunks(directory.getFullName(), ""));
         String lastCreatedDirPath = getPathOfLastDir(directoryBranch);
-        if (checkDirAccess(user, directory.getFullName(), "canCreateDir")) {
+        if (checkDirAccess(user, directory.getFullName(), DirectoryModel.PERMISSION_CAN_CREATE_DIRECTORY)) {
             String[] requiredDirs = preparePathChunks(directory.getFullName(), lastCreatedDirPath);
             for (String requiredDir: requiredDirs) {
                 if (!Objects.equals(requiredDir, directory.getFullName()) 
@@ -85,7 +86,7 @@ public class DirectoryService extends AuthService {
      */
     public Directory updateDirectory(Directory directory, String user) {
         LOGGER.info("Update directory {} by user {}", directory.getFullName(), user);
-        if (!checkDirAccess(user, directory.getFullName(), "canUpdateDir")) {
+        if (!checkDirAccess(user, directory.getFullName(), DirectoryModel.PERMISSION_CAN_UPDATE_DIRECTORY)) {
             throw new CoreException("NO_PERMISSION", "User doesn't have sufficient permission");
         }
         Directory existingDir = directoryRepository.findDirectoryByPath(directory.getFullName());
@@ -104,7 +105,7 @@ public class DirectoryService extends AuthService {
      */
     public Set<Directory> deleteDirectory(String fullPath, String user) {
         LOGGER.info("Delete directory and it's children {} by user {}", fullPath, user);
-        if (!checkDirAccess(user, fullPath, "canDeleteDir")) {
+        if (!checkDirAccess(user, fullPath, DirectoryModel.PERMISSION_CAN_DELETE_DIRECTORY)) {
             throw new CoreException("NO_PERMISSION", "User doesn't have sufficient permission");
         }
         Set<Directory> deleteDirs = directoryRepository.findDirectoriesByPath(fullPath);

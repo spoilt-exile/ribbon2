@@ -20,7 +20,7 @@ package tk.freaxsoftware.ribbon2.directory.facade;
 
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.annotation.Receive;
-import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionHolder;
+import tk.freaxsoftware.ribbon2.core.data.request.DirectoryPermissionHolder;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionModel;
 import tk.freaxsoftware.ribbon2.directory.service.PermissionService;
 

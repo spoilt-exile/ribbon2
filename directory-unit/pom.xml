@@ -103,7 +103,7 @@
                         <id>make-my-jar-with-dependencies</id>
                         <phase>package</phase>
                         <configuration>
-                            <finalName>test-static</finalName>
+                            <finalName>directory-static</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <goals>

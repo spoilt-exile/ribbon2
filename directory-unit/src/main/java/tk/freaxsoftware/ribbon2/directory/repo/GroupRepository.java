@@ -20,7 +20,6 @@ package tk.freaxsoftware.ribbon2.directory.repo;
 
 import io.ebean.DB;
 import tk.freaxsoftware.ribbon2.directory.entity.GroupEntity;
-import tk.freaxsoftware.ribbon2.directory.entity.UserEntity;
 
 /**
  * Persistance repository for group.

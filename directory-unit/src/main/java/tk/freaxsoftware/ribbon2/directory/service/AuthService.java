@@ -19,16 +19,25 @@
 package tk.freaxsoftware.ribbon2.directory.service;
 
 import java.util.Objects;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
+import tk.freaxsoftware.ribbon2.core.data.request.DirectoryEditAccessRequest;
+import tk.freaxsoftware.ribbon2.core.exception.CoreException;
+import tk.freaxsoftware.ribbon2.directory.entity.Directory;
+import tk.freaxsoftware.ribbon2.directory.entity.DirectoryAccess;
+import tk.freaxsoftware.ribbon2.directory.entity.GroupEntity;
+import tk.freaxsoftware.ribbon2.directory.entity.UserEntity;
 import tk.freaxsoftware.ribbon2.directory.repo.DirectoryRepository;
+import tk.freaxsoftware.ribbon2.directory.repo.GroupRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.UserRepository;
 
 /**
  * Authentication service for checking access.
  * @author Stanislav Nepochatov
  */
-public abstract class AuthService {
+public class AuthService {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
     
@@ -40,10 +49,13 @@ public abstract class AuthService {
     protected DirectoryRepository directoryRepository;
     
     protected UserRepository userRespository;
+    
+    protected GroupRepository groupRepository;
 
-    public AuthService(DirectoryRepository directoryRepository, UserRepository userRespository) {
+    public AuthService(DirectoryRepository directoryRepository, UserRepository userRespository, GroupRepository groupRepository) {
         this.directoryRepository = directoryRepository;
         this.userRespository = userRespository;
+        this.groupRepository = groupRepository;
     }
     
     /**
@@ -62,4 +74,77 @@ public abstract class AuthService {
         return false;
     }
     
+    /**
+     * Checks if current specified user has access by permission to specified directories.
+     * @param userLogin user to check login;
+     * @param directories set of directory names;
+     * @param permission permission to check;
+     */
+    public Boolean checkDirectoryAccess(String userLogin, Set<String> directories, String permission) {
+        for (String directory: directories) {
+            if (!checkDirAccess(userLogin, directory, permission)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Edits directory access if user has permission to it.
+     * @param request request to edit access;
+     * @param userLogin login of current user;
+     * @return boolean result of operation;
+     */
+    public boolean editDirAccess(DirectoryEditAccessRequest request, String userLogin) {
+        if (checkDirAccess(userLogin, request.getDirectoryPath(), DirectoryEditAccessRequest.PERMISSION_CAN_CREATE_DIRECTORY)) {
+            Directory finded = directoryRepository.findDirectoryByPath(request.getDirectoryPath());
+            if (finded == null) {
+                throw new CoreException("DIR_NOT_FOUND", "Can't find directory " + request.getDirectoryPath());
+            }
+            validateAccessEntries(request.getAccess());
+            DirectoryAccess access = finded.getAccess();
+            if (access == null) {
+                access = new DirectoryAccess();
+                access.setDirectory(finded);
+                finded.setAccess(access);
+            }
+            access.setAccessEntries(request.getAccess());
+            directoryRepository.save(finded);
+        } else {
+            throw new CoreException("NO_PERMISSION", "User doesn't have sufficient permission");
+        }
+        return true;
+    }
+    
+    private void validateAccessEntries(Set<DirectoryAccessModel> access) {
+        Boolean allDetected = false;
+        for (DirectoryAccessModel accessEntry: access) {
+            switch (accessEntry.getType()) {
+                case ALL:
+                    if (allDetected) {
+                        throw new CoreException("VALIDATION_FAILED", "System allows only single ALL entry in request!");
+                    } else {
+                        allDetected = true;
+                    }
+                    LOGGER.warn("Assign to ALL permissions: {}", accessEntry.getPermissions());
+                    break;
+                case USER:
+                    UserEntity findedUser = userRespository.findByLogin(accessEntry.getName());
+                    if (findedUser == null) {
+                        throw new CoreException("USER_NOT_FOUND", 
+                                String.format("Unable to find user %s specified in request.", accessEntry.getName()));
+                    }
+                    LOGGER.warn("Assign to user {} permissions: {}", findedUser.getLogin(), accessEntry.getPermissions());
+                    break;
+                case GROUP:
+                    GroupEntity findedGroup = groupRepository.findGroupByName(accessEntry.getName());
+                    if (findedGroup == null) {
+                        throw new CoreException("GROUP_NOT_FOUND", 
+                                String.format("Unable to find group %s specified in request.", accessEntry.getName()));
+                    }
+                    LOGGER.warn("Assign to group {} permissions: {}", findedGroup.getName(), accessEntry.getPermissions());
+                    break;
+            }
+        }
+    }
 }

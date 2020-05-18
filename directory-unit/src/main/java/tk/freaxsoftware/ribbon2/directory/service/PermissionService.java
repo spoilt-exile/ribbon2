@@ -22,7 +22,7 @@ import io.ebean.DB;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionHolder;
+import tk.freaxsoftware.ribbon2.core.data.request.DirectoryPermissionHolder;
 import tk.freaxsoftware.ribbon2.directory.entity.Permission;
 import tk.freaxsoftware.ribbon2.directory.entity.converters.PermissionConverter;
 

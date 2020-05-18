@@ -58,7 +58,7 @@ public class Directory extends Model {
      * Access config of the directory.
      */
     @OneToOne(mappedBy = "directory", fetch = FetchType.EAGER, 
-            cascade = javax.persistence.CascadeType.REMOVE)
+            cascade = javax.persistence.CascadeType.ALL)
     private DirectoryAccess access;
 
     public Long getId() {

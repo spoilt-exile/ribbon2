@@ -21,8 +21,10 @@ package tk.freaxsoftware.ribbon2.directory.facade;
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.ResponseHolder;
 import tk.freaxsoftware.extras.bus.annotation.Receive;
-import tk.freaxsoftware.ribbon2.core.data.DirectoryCheckAccessRequest;
-import tk.freaxsoftware.ribbon2.directory.service.AccessService;
+import tk.freaxsoftware.ribbon2.core.data.request.DirectoryEditAccessRequest;
+import tk.freaxsoftware.ribbon2.core.data.request.DirectoryCheckAccessRequest;
+import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
+import tk.freaxsoftware.ribbon2.directory.service.AuthService;
 
 /**
  * Facade for handling messages related to directory access.
@@ -30,18 +32,26 @@ import tk.freaxsoftware.ribbon2.directory.service.AccessService;
  */
 public class DirectoryAccessFacade {
     
-    private final AccessService accessService;
+    private final AuthService authService;
 
-    public DirectoryAccessFacade(AccessService accessService) {
-        this.accessService = accessService;
+    public DirectoryAccessFacade(AuthService authService) {
+        this.authService = authService;
     }
     
     @Receive(DirectoryCheckAccessRequest.CALL_CHECK_DIR_ACCESS)
     public void checkDirectoriesAccess(MessageHolder<DirectoryCheckAccessRequest> checkCall) {
         DirectoryCheckAccessRequest request = checkCall.getContent();
-        Boolean result = accessService.checkDirectoryAccess(request.getUser(), request.getDirectories(), request.getPermission());
+        Boolean result = authService.checkDirectoryAccess(request.getUser(), request.getDirectories(), request.getPermission());
         checkCall.setResponse(new ResponseHolder());
         checkCall.getResponse().setContent(result);
+    }
+    
+    public void editDirectoryAccess(MessageHolder<DirectoryEditAccessRequest> editCall) {
+        String userLogin = MessageUtils.getAuthFromHeader(editCall);
+        DirectoryEditAccessRequest request = editCall.getContent();
+        Boolean result = authService.editDirAccess(request, userLogin);
+        editCall.setResponse(new ResponseHolder());
+        editCall.getResponse().setContent(result);
     }
     
 }

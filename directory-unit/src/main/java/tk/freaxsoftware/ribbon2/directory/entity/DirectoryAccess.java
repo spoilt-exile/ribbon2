@@ -48,7 +48,7 @@ public class DirectoryAccess extends Model {
     private Directory directory;
     
     /**
-     * Single access entry.
+     * Set of access entries.
      */
     @DbJsonB
     private Set<DirectoryAccessModel> accessEntries;
