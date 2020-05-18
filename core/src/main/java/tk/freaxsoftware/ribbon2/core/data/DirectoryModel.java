@@ -34,6 +34,10 @@ public class DirectoryModel {
     public final static String NOTIFICATION_DIRECTORY_UPDATED = "Ribbon.Global.Notification.DirectoryUpdated";
     public final static String NOTIFICATION_DIRECTORY_DELETED = "Ribbon.Global.Notification.DirectoryDeleted";
     
+    public final static String PERMISSION_CAN_CREATE_DIRECTORY = "canCreateDir";
+    public final static String PERMISSION_CAN_UPDATE_DIRECTORY = "canUpdateDir";
+    public final static String PERMISSION_CAN_DELETE_DIRECTORY = "canDeleteDir";
+    
     /**
      * Id of directory.
      */
