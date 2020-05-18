@@ -18,8 +18,10 @@
  */
 package tk.freaxsoftware.ribbon2.directory.service;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
@@ -31,6 +33,7 @@ import tk.freaxsoftware.ribbon2.directory.entity.GroupEntity;
 import tk.freaxsoftware.ribbon2.directory.entity.UserEntity;
 import tk.freaxsoftware.ribbon2.directory.repo.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.GroupRepository;
+import tk.freaxsoftware.ribbon2.directory.repo.PermissionRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.UserRepository;
 
 /**
@@ -51,6 +54,8 @@ public class AuthService {
     protected UserRepository userRespository;
     
     protected GroupRepository groupRepository;
+    
+    protected PermissionRepository permissionRepository = new PermissionRepository();
 
     public AuthService(DirectoryRepository directoryRepository, UserRepository userRespository, GroupRepository groupRepository) {
         this.directoryRepository = directoryRepository;
@@ -118,6 +123,7 @@ public class AuthService {
     
     private void validateAccessEntries(Set<DirectoryAccessModel> access) {
         Boolean allDetected = false;
+        Set<String> permissions = permissionRepository.findAllPermissionNames();
         for (DirectoryAccessModel accessEntry: access) {
             switch (accessEntry.getType()) {
                 case ALL:
@@ -144,6 +150,18 @@ public class AuthService {
                     }
                     LOGGER.warn("Assign to group {} permissions: {}", findedGroup.getName(), accessEntry.getPermissions());
                     break;
+            }
+            validatePermissions(accessEntry.getPermissions(), permissions);
+        }
+    }
+    
+    private void validatePermissions(Map<String, Boolean> permissions, Set<String> presentPermissions) {
+        Set<String> accessPermissions = permissions.entrySet().stream()
+                .map(entry -> entry.getKey()).collect(Collectors.toSet());
+        for (String accessPermission: accessPermissions) {
+            if (!presentPermissions.contains(accessPermission)) {
+                throw new CoreException("PERMISSION_NOT_FOUND", 
+                        String.format("Can't assign %s permission since it doesn't exist.", accessPermission));
             }
         }
     }
