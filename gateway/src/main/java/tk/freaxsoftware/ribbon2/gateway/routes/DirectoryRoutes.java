@@ -18,6 +18,8 @@
  */
 package tk.freaxsoftware.ribbon2.gateway.routes;
 
+import com.google.gson.reflect.TypeToken;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static spark.Spark.delete;
@@ -25,8 +27,10 @@ import static spark.Spark.post;
 import static spark.Spark.put;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
+import tk.freaxsoftware.ribbon2.core.data.request.DirectoryEditAccessRequest;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
 
@@ -77,6 +81,18 @@ public class DirectoryRoutes {
             }
             return "";
         });
+        
+        post("/api/directory/access/:path", (req, res) -> {
+            Set<DirectoryAccessModel> entries = GatewayMain.gson.fromJson(req.body(), new TypeToken<Set<DirectoryAccessModel>>(){}.getType());
+            String path = req.params("path");
+            DirectoryEditAccessRequest request = new DirectoryEditAccessRequest(path, entries);
+            LOGGER.info("Request to edit directory access {}", request.getDirectoryPath());
+            Boolean saved = MessageBus.fireCall(DirectoryEditAccessRequest.CALL_EDIT_DIR_ACCESS, request, MessageOptions.Builder.newInstance()
+                    .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                    .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                    .deliveryCall().build(), Boolean.class);
+            return saved;
+        }, GatewayMain.gson::toJson);
     }
     
 }
