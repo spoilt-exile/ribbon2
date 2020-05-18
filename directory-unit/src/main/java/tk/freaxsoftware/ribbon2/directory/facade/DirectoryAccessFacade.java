@@ -46,6 +46,7 @@ public class DirectoryAccessFacade {
         checkCall.getResponse().setContent(result);
     }
     
+    @Receive(DirectoryEditAccessRequest.CALL_EDIT_DIR_ACCESS)
     public void editDirectoryAccess(MessageHolder<DirectoryEditAccessRequest> editCall) {
         String userLogin = MessageUtils.getAuthFromHeader(editCall);
         DirectoryEditAccessRequest request = editCall.getContent();
