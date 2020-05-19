@@ -28,8 +28,10 @@ import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.directory.entity.Directory;
 import tk.freaxsoftware.ribbon2.directory.entity.converters.DirectoryConverter;
+import tk.freaxsoftware.ribbon2.directory.repo.DirectoryAccessRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.GroupRepository;
+import tk.freaxsoftware.ribbon2.directory.repo.PermissionRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.UserRepository;
 
 /**
@@ -42,8 +44,10 @@ public class DirectoryService extends AuthService {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryService.class);
 
-    public DirectoryService(DirectoryRepository directoryRepository, UserRepository userRespository, GroupRepository groupRepository) {
-        super(directoryRepository, userRespository, groupRepository);
+    public DirectoryService(DirectoryRepository directoryRepository, UserRepository userRespository, 
+            GroupRepository groupRepository, PermissionRepository permissionRepository, 
+            DirectoryAccessRepository directoryAccessRepository) {
+        super(directoryRepository, userRespository, groupRepository, permissionRepository, directoryAccessRepository);
     }
     
     /**

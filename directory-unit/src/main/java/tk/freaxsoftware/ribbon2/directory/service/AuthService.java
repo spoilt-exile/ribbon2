@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.directory.service;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -31,6 +32,7 @@ import tk.freaxsoftware.ribbon2.directory.entity.Directory;
 import tk.freaxsoftware.ribbon2.directory.entity.DirectoryAccess;
 import tk.freaxsoftware.ribbon2.directory.entity.GroupEntity;
 import tk.freaxsoftware.ribbon2.directory.entity.UserEntity;
+import tk.freaxsoftware.ribbon2.directory.repo.DirectoryAccessRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.GroupRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.PermissionRepository;
@@ -55,12 +57,18 @@ public class AuthService {
     
     protected GroupRepository groupRepository;
     
-    protected PermissionRepository permissionRepository = new PermissionRepository();
+    protected PermissionRepository permissionRepository;
+    
+    protected DirectoryAccessRepository directoryAccessRepository;
 
-    public AuthService(DirectoryRepository directoryRepository, UserRepository userRespository, GroupRepository groupRepository) {
+    public AuthService(DirectoryRepository directoryRepository, UserRepository userRespository, 
+            GroupRepository groupRepository, PermissionRepository permissionRepository, 
+            DirectoryAccessRepository directoryAccessRepository) {
         this.directoryRepository = directoryRepository;
         this.userRespository = userRespository;
         this.groupRepository = groupRepository;
+        this.permissionRepository = permissionRepository;
+        this.directoryAccessRepository = directoryAccessRepository;
     }
     
     /**
@@ -107,14 +115,15 @@ public class AuthService {
                 throw new CoreException("DIR_NOT_FOUND", "Can't find directory " + request.getDirectoryPath());
             }
             validateAccessEntries(request.getAccess());
-            DirectoryAccess access = finded.getAccess();
+            DirectoryAccess access = directoryAccessRepository.findByDirectoryPath(finded.getFullName());
             if (access == null) {
                 access = new DirectoryAccess();
                 access.setDirectory(finded);
                 finded.setAccess(access);
             }
-            access.setAccessEntries(request.getAccess());
-            directoryRepository.save(finded);
+            access.getAccessEntries().clear();
+            access.getAccessEntries().addAll(request.getAccess());
+            directoryAccessRepository.save(access);
         } else {
             throw new CoreException("NO_PERMISSION", "User doesn't have sufficient permission");
         }

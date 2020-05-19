@@ -32,8 +32,10 @@ import tk.freaxsoftware.ribbon2.directory.facade.DirectoryAccessFacade;
 import tk.freaxsoftware.ribbon2.directory.facade.DirectoryFacade;
 import tk.freaxsoftware.ribbon2.directory.facade.PermissionFacade;
 import tk.freaxsoftware.ribbon2.directory.facade.UserGroupFacade;
+import tk.freaxsoftware.ribbon2.directory.repo.DirectoryAccessRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.GroupRepository;
+import tk.freaxsoftware.ribbon2.directory.repo.PermissionRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.UserRepository;
 import tk.freaxsoftware.ribbon2.directory.service.AuthService;
 import tk.freaxsoftware.ribbon2.directory.service.DirectoryService;
@@ -73,8 +75,10 @@ public class DirectoryUnit {
         Init.init(config);
         
         AnnotationUtil.subscribeReceiverInstance(new PermissionFacade(new PermissionService()));
-        AnnotationUtil.subscribeReceiverInstance(new DirectoryFacade(new DirectoryService(new DirectoryRepository(), new UserRepository(), new GroupRepository())));
+        AnnotationUtil.subscribeReceiverInstance(new DirectoryFacade(new DirectoryService(new DirectoryRepository(), 
+                new UserRepository(), new GroupRepository(), new PermissionRepository(), new DirectoryAccessRepository())));
         AnnotationUtil.subscribeReceiverInstance(new UserGroupFacade(new UserRepository(), new GroupRepository()));
-        AnnotationUtil.subscribeReceiverInstance(new DirectoryAccessFacade(new AuthService(new DirectoryRepository(), new UserRepository(), new GroupRepository())));
+        AnnotationUtil.subscribeReceiverInstance(new DirectoryAccessFacade(new AuthService(new DirectoryRepository(), 
+                new UserRepository(), new GroupRepository(), new PermissionRepository(), new DirectoryAccessRepository())));
     }
 }
