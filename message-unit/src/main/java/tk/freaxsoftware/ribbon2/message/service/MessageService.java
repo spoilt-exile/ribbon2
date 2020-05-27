@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
+import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryCheckAccessRequest;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.message.MessengerUnit;
@@ -124,7 +125,8 @@ public class MessageService {
             return;
         }
         try {
-            Boolean result = MessageBus.fireCall(DirectoryCheckAccessRequest.CALL_CHECK_DIR_ACCESS, request, MessageOptions.Builder.newInstance().deliveryCall().build(), Boolean.class);
+            Boolean result = MessageBus.fireCall(DirectoryCheckAccessRequest.CALL_CHECK_DIR_ACCESS, 
+                    request, MessageOptions.Builder.newInstance().header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true").deliveryCall().build(), Boolean.class);
             if (result) {
                 addToCache(request);
                 return;
@@ -155,7 +157,10 @@ public class MessageService {
         if (MessengerUnit.config.getMessenger().getEnablePermissionCaching()) {
             Instant expiry = Instant.now().plus(MessengerUnit.config.getMessenger().getPermissionCacheExpiry(), ChronoUnit.MINUTES);
             for (String directory: request.getDirectories()) {
-                permissionCache.put(getCacheKey(directory, request.getPermission(), request.getUser()), expiry);
+                String key = getCacheKey(directory, request.getPermission(), request.getUser());
+                if (!permissionCache.containsKey(key)) {
+                    permissionCache.put(key, expiry);
+                }
             }
         }
     }
