@@ -1,5 +1,7 @@
 {
     "messenger": {
+        "enablePermissionCaching": true,
+        "permissionCacheExpiry": 5,
         "permissions": [
             {
                 "key": "canReadMessage",

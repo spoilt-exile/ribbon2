@@ -18,16 +18,22 @@
  */
 package tk.freaxsoftware.ribbon2.message.service;
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryCheckAccessRequest;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
+import tk.freaxsoftware.ribbon2.message.MessengerUnit;
 import tk.freaxsoftware.ribbon2.message.entity.Directory;
 import tk.freaxsoftware.ribbon2.message.entity.Message;
 import tk.freaxsoftware.ribbon2.message.repo.DirectoryRepository;
@@ -43,10 +49,16 @@ public class MessageService {
     
     private final DirectoryRepository directoryRepository;
     private final MessageRepository messageRepository;
+    private final Map<String, Instant> permissionCache;
 
     public MessageService(DirectoryRepository directoryRepository, MessageRepository messageRepository) {
         this.directoryRepository = directoryRepository;
         this.messageRepository = messageRepository;
+        if (MessengerUnit.config.getMessenger().getEnablePermissionCaching()) {
+            permissionCache = new ConcurrentHashMap<>();
+        } else {
+            permissionCache = Collections.EMPTY_MAP;
+        }
     }
     
     /**
@@ -107,16 +119,49 @@ public class MessageService {
     
     private void checkDirectoryAccess(String user, Set<String> directories, String permission) {
         LOGGER.info("Checking access for directories {} for user {} by permission.", directories, user, permission);
-        DirectoryCheckAccessRequest request = new DirectoryCheckAccessRequest(user, permission, directories);
+        DirectoryCheckAccessRequest request = processByCache(new DirectoryCheckAccessRequest(user, permission, directories));
+        if (request.getDirectories().isEmpty()) {
+            return;
+        }
         try {
             Boolean result = MessageBus.fireCall(DirectoryCheckAccessRequest.CALL_CHECK_DIR_ACCESS, request, MessageOptions.Builder.newInstance().deliveryCall().build(), Boolean.class);
             if (result) {
+                addToCache(request);
                 return;
             }
         } catch (Exception ex) {
             throw new CoreException("CALL_ERROR", ex.getMessage());
         }
         throw new CoreException("ILLEGAL_ACCESS", String.format("User %s doesn't have access for current operation.", user));
+    }
+    
+    private DirectoryCheckAccessRequest processByCache(DirectoryCheckAccessRequest request) {
+        if (MessengerUnit.config.getMessenger().getEnablePermissionCaching()) {
+            Instant now = Instant.now();
+            Set<String> processedDirs = new HashSet<>();
+            for (String directory: request.getDirectories()) {
+                Instant expiry = permissionCache.get(getCacheKey(directory, request.getPermission(), request.getUser()));
+                if (expiry == null || (expiry != null && !expiry.isAfter(now))) {
+                    processedDirs.add(directory);
+                    permissionCache.remove(getCacheKey(directory, request.getPermission(), request.getUser()));
+                }
+            }
+            request.setDirectories(processedDirs);
+        }
+        return request;
+    }
+    
+    private void addToCache(DirectoryCheckAccessRequest request) {
+        if (MessengerUnit.config.getMessenger().getEnablePermissionCaching()) {
+            Instant expiry = Instant.now().plus(MessengerUnit.config.getMessenger().getPermissionCacheExpiry(), ChronoUnit.MINUTES);
+            for (String directory: request.getDirectories()) {
+                permissionCache.put(getCacheKey(directory, request.getPermission(), request.getUser()), expiry);
+            }
+        }
+    }
+    
+    private String getCacheKey(String directory, String permission, String user) {
+        return String.format("%s@%s@%s", user, permission, directory);
     }
     
     private Set<Directory> linkDirectories(Set<String> directoryNames) {

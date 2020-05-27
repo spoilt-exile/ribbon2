@@ -55,6 +55,10 @@ public class MessengerUnitConfig {
     public static class MessengerConfig {
         
         private Set<DirectoryPermissionModel> permissions;
+        
+        private Boolean enablePermissionCaching;
+        
+        private Integer permissionCacheExpiry;
 
         public Set<DirectoryPermissionModel> getPermissions() {
             return permissions;
@@ -64,9 +68,25 @@ public class MessengerUnitConfig {
             this.permissions = permissions;
         }
 
+        public Boolean getEnablePermissionCaching() {
+            return enablePermissionCaching;
+        }
+
+        public void setEnablePermissionCaching(Boolean enablePermissionCaching) {
+            this.enablePermissionCaching = enablePermissionCaching;
+        }
+
+        public Integer getPermissionCacheExpiry() {
+            return permissionCacheExpiry;
+        }
+
+        public void setPermissionCacheExpiry(Integer permissionCacheExpiry) {
+            this.permissionCacheExpiry = permissionCacheExpiry;
+        }
+
         @Override
         public String toString() {
-            return "{" + "permissions=" + permissions + '}';
+            return "{" + "permissions=" + permissions + ", enablePermissionCaching=" + enablePermissionCaching + ", permissionCacheExpiry=" + permissionCacheExpiry + '}';
         }
     }
 }
