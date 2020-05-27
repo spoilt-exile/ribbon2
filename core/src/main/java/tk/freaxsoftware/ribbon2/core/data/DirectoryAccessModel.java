@@ -30,6 +30,14 @@ public class DirectoryAccessModel {
     private Type type;
     private Map<String, Boolean> permissions;
 
+    public DirectoryAccessModel() {}
+
+    public DirectoryAccessModel(String name, Type type, Map<String, Boolean> permissions) {
+        this.name = name;
+        this.type = type;
+        this.permissions = permissions;
+    }
+
     public String getName() {
         return name;
     }
