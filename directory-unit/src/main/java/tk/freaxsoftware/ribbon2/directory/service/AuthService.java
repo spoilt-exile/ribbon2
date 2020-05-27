@@ -82,7 +82,7 @@ public class AuthService {
         if (user == null) {
             throw new CoreException("USER_NOT_FOUND", "Can't find user " + userLogin);
         }
-        Permission permissionEntry = permissionRepository.findByKey(userLogin);
+        Permission permissionEntry = permissionRepository.findByKey(permission);
         if (permissionEntry == null) {
             throw new CoreException("PEMISSION_NOT_FOUND", "Can't find permission " + permission);
         }
@@ -115,7 +115,7 @@ public class AuthService {
                             LOGGER.info("Granted for user {}", accessEntry.getName());
                             return true;
                         } else {
-                            isForbidden = true;
+                            isForbidden = accessEntry.getPermissions().containsKey(permission.getKey());
                         }
                     }
                     break;
@@ -125,7 +125,7 @@ public class AuthService {
                             LOGGER.info("Granted for group {}", accessEntry.getName());
                             return true;
                         } else {
-                            isForbidden = true;
+                            isForbidden = accessEntry.getPermissions().containsKey(permission.getKey());
                         }
                     }
                     break;
@@ -134,7 +134,7 @@ public class AuthService {
                     break;
             }
         }
-        return isForbidden ? false : (allRecord == null ? allRecord.getPermissions().getOrDefault(permission.getKey(), false) : permission.getDefaultValue());
+        return isForbidden ? false : (allRecord != null ? allRecord.getPermissions().getOrDefault(permission.getKey(), false) : permission.getDefaultValue());
     }
     
     /**

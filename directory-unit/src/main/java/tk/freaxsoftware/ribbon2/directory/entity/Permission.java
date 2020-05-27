@@ -57,6 +57,16 @@ public class Permission extends Model {
      */
     private String tag;
 
+    public Permission() {}
+
+    public Permission(Long id, String key, Boolean defaultValue, String description, String tag) {
+        this.id = id;
+        this.key = key;
+        this.defaultValue = defaultValue;
+        this.description = description;
+        this.tag = tag;
+    }
+
     public Long getId() {
         return id;
     }

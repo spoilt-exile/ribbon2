@@ -61,6 +61,16 @@ public class Directory extends Model {
     @DbJsonB
     private Set<DirectoryAccessModel> accessEntries;
 
+    public Directory() {}
+
+    public Directory(Long id, String name, String fullName, String description, Set<DirectoryAccessModel> accessEntries) {
+        this.id = id;
+        this.name = name;
+        this.fullName = fullName;
+        this.description = description;
+        this.accessEntries = accessEntries;
+    }
+
     public Long getId() {
         return id;
     }

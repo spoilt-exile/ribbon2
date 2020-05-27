@@ -49,6 +49,13 @@ public class GroupEntity extends Model {
     @ManyToMany(mappedBy = "groups", fetch = FetchType.LAZY)
     private Set<UserEntity> users;
 
+    public GroupEntity() {}
+
+    public GroupEntity(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     public Long getId() {
         return id;
     }

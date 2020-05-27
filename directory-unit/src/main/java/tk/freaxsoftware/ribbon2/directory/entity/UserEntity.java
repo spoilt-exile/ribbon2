@@ -55,6 +55,14 @@ public class UserEntity extends Model {
     )
     private Set<GroupEntity> groups;
 
+    public UserEntity() {}
+
+    public UserEntity(Long id, String login, Set<GroupEntity> groups) {
+        this.id = id;
+        this.login = login;
+        this.groups = groups;
+    }
+
     public Long getId() {
         return id;
     }
