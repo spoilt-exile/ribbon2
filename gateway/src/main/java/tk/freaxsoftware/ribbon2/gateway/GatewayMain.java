@@ -24,8 +24,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spark.Spark;
 import spark.utils.IOUtils;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
+import tk.freaxsoftware.ribbon2.core.exception.CoreError;
+import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
 import tk.freaxsoftware.ribbon2.gateway.routes.DirectoryRoutes;
 import tk.freaxsoftware.ribbon2.gateway.routes.GroupRoutes;
@@ -68,5 +71,11 @@ public class GatewayMain {
         GroupRoutes.init();
         DirectoryRoutes.init();
         MessageRoutes.init();
+        
+        Spark.exception(CoreException.class, (ex, req, res) -> {
+            LOGGER.error("Error occurred:", ex);
+            res.status(ex.getCode().getHttpCode());
+            res.body(gson.toJson(new CoreError(ex)));
+        });
     }
 }

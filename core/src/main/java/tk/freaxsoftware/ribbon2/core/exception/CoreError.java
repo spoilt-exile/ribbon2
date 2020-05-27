@@ -19,24 +19,35 @@
 package tk.freaxsoftware.ribbon2.core.exception;
 
 /**
- * Core exception with provided code.
+ * Core error is a holder for REST method errors.
  * @author Stanislav Nepochatov
  */
-public class CoreException extends RuntimeException {
+public class CoreError {
     
-    private final RibbonErrorCodes code;
-
-    public CoreException(RibbonErrorCodes code, String message) {
-        super(message);
-        this.code = code;
-    }
-
-    public CoreException(RibbonErrorCodes code, String message, Throwable cause) {
-        super(message, cause);
-        this.code = code;
+    private RibbonErrorCodes code;
+    
+    private String message;
+    
+    public CoreError() {}
+    
+    public CoreError(CoreException exception) {
+        this.code = exception.getCode();
+        this.message = exception.getMessage();
     }
 
     public RibbonErrorCodes getCode() {
         return code;
+    }
+
+    public void setCode(RibbonErrorCodes code) {
+        this.code = code;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

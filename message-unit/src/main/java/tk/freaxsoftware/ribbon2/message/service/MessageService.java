@@ -34,6 +34,11 @@ import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryCheckAccessRequest;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.ACCESS_DENIED;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.CALL_ERROR;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.DIRECTORY_NOT_FOUND;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.MESSAGE_DIRECORIES_REQUIRED;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.MESSAGE_NOT_FOUND;
 import tk.freaxsoftware.ribbon2.message.MessengerUnit;
 import tk.freaxsoftware.ribbon2.message.entity.Directory;
 import tk.freaxsoftware.ribbon2.message.entity.Message;
@@ -100,7 +105,7 @@ public class MessageService {
             checkDirectoryAccess(user, message.getDirectoryNames(), Message.PERMISSION_CAN_UPDATE_MESSAGE);
             return messageRepository.save(existingMessage);
         }
-        throw new CoreException("MESSAGE_NOT_FOUND", 
+        throw new CoreException(MESSAGE_NOT_FOUND, 
                 String.format("Message by UID %s not found!", message.getUid()));
     }
     
@@ -114,7 +119,7 @@ public class MessageService {
             existingMessage.delete();
             return existingMessage;
         }
-        throw new CoreException("MESSAGE_NOT_FOUND", 
+        throw new CoreException(MESSAGE_NOT_FOUND, 
                 String.format("Message by UID %s not found!", uid));
     }
     
@@ -132,9 +137,9 @@ public class MessageService {
                 return;
             }
         } catch (Exception ex) {
-            throw new CoreException("CALL_ERROR", ex.getMessage());
+            throw new CoreException(CALL_ERROR, ex.getMessage());
         }
-        throw new CoreException("ILLEGAL_ACCESS", String.format("User %s doesn't have access for current operation.", user));
+        throw new CoreException(ACCESS_DENIED, String.format("User %s doesn't have access for current operation.", user));
     }
     
     private DirectoryCheckAccessRequest processByCache(DirectoryCheckAccessRequest request) {
@@ -172,14 +177,14 @@ public class MessageService {
     private Set<Directory> linkDirectories(Set<String> directoryNames) {
         Set<Directory> directories = new HashSet<>();
         if (directoryNames == null || (directoryNames != null && directoryNames.isEmpty())) {
-            throw new CoreException("NO_DIR_SPECIFIED", "Can't create message without directories.");
+            throw new CoreException(MESSAGE_DIRECORIES_REQUIRED, "Can't create message without directories.");
         }
         for (String directoryName: directoryNames) {
             Directory finded = directoryRepository.findByFullName(directoryName);
             if (finded != null) {
                 directories.add(finded);
             } else {
-                throw new CoreException("DIR_NOT_FOUND", 
+                throw new CoreException(DIRECTORY_NOT_FOUND, 
                         String.format("Directory %s not found!", directoryName));
             }
         }

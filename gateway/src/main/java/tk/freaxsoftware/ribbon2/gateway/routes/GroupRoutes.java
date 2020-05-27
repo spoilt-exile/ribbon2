@@ -27,6 +27,8 @@ import static spark.Spark.put;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.GroupModel;
+import tk.freaxsoftware.ribbon2.core.exception.CoreException;
+import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.converters.GroupConverter;
@@ -54,7 +56,7 @@ public class GroupRoutes {
         
         put("/api/group", (req, res) -> {
             GroupModel group = GatewayMain.gson.fromJson(req.body(), GroupModel.class);
-            LOGGER.info("Request to create Group: {}", group.getId());
+            LOGGER.info("Request to update Group: {}", group.getId());
             GroupEntity updateGroup = new GroupConverter().convertBack(group);
             updateGroup.update();
             GroupModel savedGroup = new GroupConverter().convert(updateGroup);
@@ -71,8 +73,8 @@ public class GroupRoutes {
                 MessageBus.fire(GroupModel.NOTIFICATION_GROUP_DELETED, new GroupConverter().convert(entity), 
                         MessageOptions.Builder.newInstance().deliveryNotification(5).build());
             } else {
-                LOGGER.error("Unable to find Group with id {}", req.params("id"));
-                res.status(404);
+                throw new CoreException(RibbonErrorCodes.GROUP_NOT_FOUND, 
+                        String.format("Unable to find Group with id %s", req.params("id")));
             }
             return "";
         });

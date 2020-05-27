@@ -26,6 +26,8 @@ import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.ACCESS_DENIED;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.DIRECTORY_NOT_FOUND;
 import tk.freaxsoftware.ribbon2.directory.entity.Directory;
 import tk.freaxsoftware.ribbon2.directory.entity.converters.DirectoryConverter;
 import tk.freaxsoftware.ribbon2.directory.repo.DirectoryRepository;
@@ -76,7 +78,7 @@ public class DirectoryService extends AuthService {
             directory.setName(getNameFromPath(directory.getFullName()));
             return directoryRepository.save(directory);
         } else {
-            throw new CoreException("NO_PERMISSION", "User doesn't have sufficient permission");
+            throw new CoreException(ACCESS_DENIED, "User doesn't have sufficient permission");
         }
     }
     
@@ -89,14 +91,14 @@ public class DirectoryService extends AuthService {
     public Directory updateDirectory(Directory directory, String user) {
         LOGGER.info("Update directory {} by user {}", directory.getFullName(), user);
         if (!checkDirAccess(user, directory.getFullName(), DirectoryModel.PERMISSION_CAN_UPDATE_DIRECTORY)) {
-            throw new CoreException("NO_PERMISSION", "User doesn't have sufficient permission");
+            throw new CoreException(ACCESS_DENIED, "User doesn't have sufficient permission");
         }
         Directory existingDir = directoryRepository.findDirectoryByPath(directory.getFullName());
         if (existingDir != null) {
             existingDir.setDescription(directory.getDescription());
             return directoryRepository.save(existingDir);
         }
-        throw new CoreException("DIR_NOT_FOUND", "Can't find directory " + directory.getFullName());
+        throw new CoreException(DIRECTORY_NOT_FOUND, "Can't find directory " + directory.getFullName());
     }
     
     /**
@@ -108,14 +110,14 @@ public class DirectoryService extends AuthService {
     public Set<Directory> deleteDirectory(String fullPath, String user) {
         LOGGER.info("Delete directory and it's children {} by user {}", fullPath, user);
         if (!checkDirAccess(user, fullPath, DirectoryModel.PERMISSION_CAN_DELETE_DIRECTORY)) {
-            throw new CoreException("NO_PERMISSION", "User doesn't have sufficient permission");
+            throw new CoreException(ACCESS_DENIED, "User doesn't have sufficient permission");
         }
         Set<Directory> deleteDirs = directoryRepository.findDirectoriesByPath(fullPath);
         if (!deleteDirs.isEmpty()) {
             directoryRepository.delete(deleteDirs);
             return deleteDirs;
         }
-        throw new CoreException("DIR_NOT_FOUND", "Can't find directory " + fullPath);
+        throw new CoreException(DIRECTORY_NOT_FOUND, "Can't find directory " + fullPath);
     }
     
     private String getNameFromPath(String path) {

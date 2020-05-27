@@ -28,6 +28,8 @@ import spark.utils.StringUtils;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
+import tk.freaxsoftware.ribbon2.core.exception.CoreException;
+import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.data.UserWithPassword;
 import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
@@ -78,9 +80,8 @@ public class UserRoutes {
                         MessageOptions.Builder.newInstance().deliveryNotification(5).build());
                 return savedUser;
             } else {
-                LOGGER.error("Unable to find User with id {}", user.getId());
-                res.status(404);
-                return null;
+                throw new CoreException(RibbonErrorCodes.USER_NOT_FOUND, 
+                        String.format("Unable to find User with id %d", user.getId()));
             }
         }, GatewayMain.gson::toJson);
         
@@ -92,8 +93,8 @@ public class UserRoutes {
                 MessageBus.fire(UserModel.NOTIFICATION_USER_DELETED, new UserConverter().convert(entity), 
                         MessageOptions.Builder.newInstance().deliveryNotification(5).build());
             } else {
-                LOGGER.error("Unable to find User with id {}", req.params("id"));
-                res.status(404);
+                throw new CoreException(RibbonErrorCodes.USER_NOT_FOUND, 
+                        String.format("Unable to find User with id %s", req.params("id")));
             }
             return "";
         });

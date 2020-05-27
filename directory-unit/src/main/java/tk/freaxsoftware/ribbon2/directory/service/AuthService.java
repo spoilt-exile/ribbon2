@@ -28,6 +28,12 @@ import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryEditAccessRequest;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.ACCESS_DENIED;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.DIRECTORY_NOT_FOUND;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.GROUP_NOT_FOUND;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.PERMISSION_NOT_FOUND;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.PERMISSION_VALIDATION_FAILED;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.USER_NOT_FOUND;
 import tk.freaxsoftware.ribbon2.directory.entity.Directory;
 import tk.freaxsoftware.ribbon2.directory.entity.GroupEntity;
 import tk.freaxsoftware.ribbon2.directory.entity.Permission;
@@ -80,11 +86,11 @@ public class AuthService {
         }
         UserEntity user = userRespository.findByLogin(userLogin);
         if (user == null) {
-            throw new CoreException("USER_NOT_FOUND", "Can't find user " + userLogin);
+            throw new CoreException(USER_NOT_FOUND, "Can't find user " + userLogin);
         }
         Permission permissionEntry = permissionRepository.findByKey(permission);
         if (permissionEntry == null) {
-            throw new CoreException("PEMISSION_NOT_FOUND", "Can't find permission " + permission);
+            throw new CoreException(PERMISSION_NOT_FOUND, "Can't find permission " + permission);
         }
         Optional<Directory> accessDirectoryOpt = getDirectoryWithAccess(dirFullName);
         Boolean result;
@@ -162,13 +168,13 @@ public class AuthService {
         if (checkDirAccess(userLogin, request.getDirectoryPath(), DirectoryEditAccessRequest.PERMISSION_CAN_CREATE_DIRECTORY)) {
             Directory finded = directoryRepository.findDirectoryByPath(request.getDirectoryPath());
             if (finded == null) {
-                throw new CoreException("DIR_NOT_FOUND", "Can't find directory " + request.getDirectoryPath());
+                throw new CoreException(DIRECTORY_NOT_FOUND, "Can't find directory " + request.getDirectoryPath());
             }
             validateAccessEntries(request.getAccess());
             finded.setAccessEntries(request.getAccess());
             directoryRepository.save(finded);
         } else {
-            throw new CoreException("NO_PERMISSION", "User doesn't have sufficient permission");
+            throw new CoreException(ACCESS_DENIED, "User doesn't have sufficient permission");
         }
         return true;
     }
@@ -180,7 +186,7 @@ public class AuthService {
             switch (accessEntry.getType()) {
                 case ALL:
                     if (allDetected) {
-                        throw new CoreException("VALIDATION_FAILED", "System allows only single ALL entry in request!");
+                        throw new CoreException(PERMISSION_VALIDATION_FAILED, "System allows only single ALL entry in request!");
                     } else {
                         allDetected = true;
                     }
@@ -189,7 +195,7 @@ public class AuthService {
                 case USER:
                     UserEntity findedUser = userRespository.findByLogin(accessEntry.getName());
                     if (findedUser == null) {
-                        throw new CoreException("USER_NOT_FOUND", 
+                        throw new CoreException(USER_NOT_FOUND, 
                                 String.format("Unable to find user %s specified in request.", accessEntry.getName()));
                     }
                     LOGGER.warn("Assign to user {} permissions: {}", findedUser.getLogin(), accessEntry.getPermissions());
@@ -197,7 +203,7 @@ public class AuthService {
                 case GROUP:
                     GroupEntity findedGroup = groupRepository.findGroupByName(accessEntry.getName());
                     if (findedGroup == null) {
-                        throw new CoreException("GROUP_NOT_FOUND", 
+                        throw new CoreException(GROUP_NOT_FOUND, 
                                 String.format("Unable to find group %s specified in request.", accessEntry.getName()));
                     }
                     LOGGER.warn("Assign to group {} permissions: {}", findedGroup.getName(), accessEntry.getPermissions());
@@ -212,7 +218,7 @@ public class AuthService {
                 .map(entry -> entry.getKey()).collect(Collectors.toSet());
         for (String accessPermission: accessPermissions) {
             if (!presentPermissions.contains(accessPermission)) {
-                throw new CoreException("PERMISSION_NOT_FOUND", 
+                throw new CoreException(PERMISSION_NOT_FOUND, 
                         String.format("Can't assign %s permission since it doesn't exist.", accessPermission));
             }
         }

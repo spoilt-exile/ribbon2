@@ -19,24 +19,37 @@
 package tk.freaxsoftware.ribbon2.core.exception;
 
 /**
- * Core exception with provided code.
+ * Unified enum for all system error codes.
  * @author Stanislav Nepochatov
  */
-public class CoreException extends RuntimeException {
+public enum RibbonErrorCodes {
     
-    private final RibbonErrorCodes code;
-
-    public CoreException(RibbonErrorCodes code, String message) {
-        super(message);
-        this.code = code;
+    CALL_ERROR(504),
+    
+    ACCESS_DENIED(401),
+    
+    USER_NOT_FOUND(404),
+    
+    GROUP_NOT_FOUND(404),
+    
+    DIRECTORY_NOT_FOUND(404),
+    
+    PERMISSION_NOT_FOUND(404),
+    PERMISSION_VALIDATION_FAILED(400),
+    
+    MESSAGE_NOT_FOUND(404),
+    MESSAGE_DIRECORIES_REQUIRED(400);
+    
+    private int httpCode;
+    
+    private RibbonErrorCodes() {}
+    
+    private RibbonErrorCodes(int httpCode) {
+        this.httpCode = httpCode;
     }
-
-    public CoreException(RibbonErrorCodes code, String message, Throwable cause) {
-        super(message, cause);
-        this.code = code;
+    
+    public int getHttpCode() {
+        return this.httpCode;
     }
-
-    public RibbonErrorCodes getCode() {
-        return code;
-    }
+    
 }

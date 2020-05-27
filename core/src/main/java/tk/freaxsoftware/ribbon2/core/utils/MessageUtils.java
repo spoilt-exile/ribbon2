@@ -21,6 +21,7 @@ package tk.freaxsoftware.ribbon2.core.utils;
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.ACCESS_DENIED;
 
 /**
  * Utils methods for working with messages.
@@ -38,7 +39,7 @@ public class MessageUtils {
         if (holder.getHeaders().containsKey(UserModel.AUTH_HEADER_USERNAME)) {
             return (String) holder.getHeaders().get(UserModel.AUTH_HEADER_USERNAME);
         }
-        throw new CoreException("ILLEGAL_ACCESS", "No auth header provided.");
+        throw new CoreException(ACCESS_DENIED, "No auth header provided.");
     }
     
 }
