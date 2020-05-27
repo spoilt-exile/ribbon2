@@ -2,16 +2,24 @@
     "messenger": {
         "permissions": [
             {
+                "key": "canReadMessage",
+                "description": "Allows user to read message",
+                "defaultValue": true
+            },
+            {
                 "key": "canCreateMessage",
-                "description": "Allows user to create message"
+                "description": "Allows user to create message",
+                "defaultValue": false
             },
             {
                 "key": "canUpdateMessage",
-                "description": "Allows user to update message"
+                "description": "Allows user to update message",
+                "defaultValue": false
             },
             {
                 "key": "canDeleteMessage",
-                "description": "Allows user to delete message"
+                "description": "Allows user to delete message",
+                "defaultValue": false
             }
         ]
     },
