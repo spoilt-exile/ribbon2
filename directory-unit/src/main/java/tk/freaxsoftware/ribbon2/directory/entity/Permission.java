@@ -42,6 +42,11 @@ public class Permission extends Model {
     private String key;
     
     /**
+     * Default value used for ALL type access check.
+     */
+    private Boolean defaultValue;
+    
+    /**
      * Detail description of the permission.
      */
     @Lob
@@ -66,6 +71,14 @@ public class Permission extends Model {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public Boolean getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(Boolean defaultValue) {
+        this.defaultValue = defaultValue;
     }
 
     public String getDescription() {

@@ -55,7 +55,6 @@ public class DirectoryUnitConfig {
     
     public static class DirectoryConfig {
         private String[] createDirs;
-        private Map<String, Boolean> defaultAllPermissions;
         private Set<DirectoryPermissionModel> permissions;
 
         public String[] getCreateDirs() {
@@ -64,14 +63,6 @@ public class DirectoryUnitConfig {
 
         public void setCreateDirs(String[] createDirs) {
             this.createDirs = createDirs;
-        }
-
-        public Map<String, Boolean> getDefaultAllPermissions() {
-            return defaultAllPermissions;
-        }
-
-        public void setDefaultAllPermissions(Map<String, Boolean> defaultAllPermissions) {
-            this.defaultAllPermissions = defaultAllPermissions;
         }
 
         public Set<DirectoryPermissionModel> getPermissions() {
@@ -84,7 +75,7 @@ public class DirectoryUnitConfig {
 
         @Override
         public String toString() {
-            return "{" + "createDirs=" + createDirs + ", defaultAllPermissions=" + defaultAllPermissions + ", permissions=" + permissions + '}';
+            return "{" + "createDirs=" + createDirs + ", permissions=" + permissions + '}';
         }
     }
     

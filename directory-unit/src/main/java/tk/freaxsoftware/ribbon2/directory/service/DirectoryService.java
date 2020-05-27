@@ -28,7 +28,6 @@ import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.directory.entity.Directory;
 import tk.freaxsoftware.ribbon2.directory.entity.converters.DirectoryConverter;
-import tk.freaxsoftware.ribbon2.directory.repo.DirectoryAccessRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.GroupRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.PermissionRepository;
@@ -45,9 +44,8 @@ public class DirectoryService extends AuthService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryService.class);
 
     public DirectoryService(DirectoryRepository directoryRepository, UserRepository userRespository, 
-            GroupRepository groupRepository, PermissionRepository permissionRepository, 
-            DirectoryAccessRepository directoryAccessRepository) {
-        super(directoryRepository, userRespository, groupRepository, permissionRepository, directoryAccessRepository);
+            GroupRepository groupRepository, PermissionRepository permissionRepository) {
+        super(directoryRepository, userRespository, groupRepository, permissionRepository);
     }
     
     /**
@@ -123,22 +121,6 @@ public class DirectoryService extends AuthService {
     private String getNameFromPath(String path) {
         String[] splited = path.trim().split("\\.");
         return splited[splited.length - 1];
-    }
-    
-    private String[] preparePathChunks(String dirPath, String currentPath) {
-        String[] rawChunks = dirPath.substring(currentPath.length()).trim().split("\\.");
-        String[] chunks = new String[rawChunks.length];
-        for (int i=0; i<rawChunks.length; i++) {
-            if (currentPath.isEmpty()) {
-                currentPath = rawChunks[i];
-            } else {
-                if (!rawChunks[i].isBlank()) {
-                    currentPath = currentPath + "." + rawChunks[i];
-                }
-            }
-            chunks[i] = currentPath;
-        }
-        return chunks;
     }
     
     private String getPathOfLastDir(Set<Directory> directories) {

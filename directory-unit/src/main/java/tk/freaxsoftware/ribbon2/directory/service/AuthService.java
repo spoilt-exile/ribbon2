@@ -18,9 +18,9 @@
  */
 package tk.freaxsoftware.ribbon2.directory.service;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -29,10 +29,9 @@ import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryEditAccessRequest;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.directory.entity.Directory;
-import tk.freaxsoftware.ribbon2.directory.entity.DirectoryAccess;
 import tk.freaxsoftware.ribbon2.directory.entity.GroupEntity;
+import tk.freaxsoftware.ribbon2.directory.entity.Permission;
 import tk.freaxsoftware.ribbon2.directory.entity.UserEntity;
-import tk.freaxsoftware.ribbon2.directory.repo.DirectoryAccessRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.GroupRepository;
 import tk.freaxsoftware.ribbon2.directory.repo.PermissionRepository;
@@ -58,17 +57,13 @@ public class AuthService {
     protected GroupRepository groupRepository;
     
     protected PermissionRepository permissionRepository;
-    
-    protected DirectoryAccessRepository directoryAccessRepository;
 
     public AuthService(DirectoryRepository directoryRepository, UserRepository userRespository, 
-            GroupRepository groupRepository, PermissionRepository permissionRepository, 
-            DirectoryAccessRepository directoryAccessRepository) {
+            GroupRepository groupRepository, PermissionRepository permissionRepository) {
         this.directoryRepository = directoryRepository;
         this.userRespository = userRespository;
         this.groupRepository = groupRepository;
         this.permissionRepository = permissionRepository;
-        this.directoryAccessRepository = directoryAccessRepository;
     }
     
     /**
@@ -83,8 +78,63 @@ public class AuthService {
         if (Objects.equals(userLogin, ROOT_LOGIN)) {
             return true;
         }
-        //TODO: add logic here.
-        return false;
+        UserEntity user = userRespository.findByLogin(userLogin);
+        if (user == null) {
+            throw new CoreException("USER_NOT_FOUND", "Can't find user " + userLogin);
+        }
+        Permission permissionEntry = permissionRepository.findByKey(userLogin);
+        if (permissionEntry == null) {
+            throw new CoreException("PEMISSION_NOT_FOUND", "Can't find permission " + permission);
+        }
+        Optional<Directory> accessDirectoryOpt = getDirectoryWithAccess(dirFullName);
+        Boolean result;
+        if (accessDirectoryOpt.isPresent()) {
+            LOGGER.info("Checking against directory {}", accessDirectoryOpt.get().getFullName());
+            result = checkAccessAgainstDirectoryAccess(accessDirectoryOpt.get(), permissionEntry, user);
+        } else {
+            LOGGER.info("Checking on default value of permission.");
+            result = permissionEntry.getDefaultValue();
+        }
+        return result;
+    }
+    
+    private Optional<Directory> getDirectoryWithAccess(String dirFullName) {
+        return directoryRepository.findDirByPathsReverse(preparePathChunks(dirFullName, ""))
+                .stream().filter(dir -> dir.getAccessEntries() != null).findFirst();
+    }
+    
+    private Boolean checkAccessAgainstDirectoryAccess(Directory directory, Permission permission, UserEntity user) {
+        DirectoryAccessModel allRecord = null;
+        Boolean isForbidden = false;
+        Set<String> groups = user.getGroups().stream().map(gr -> gr.getName()).collect(Collectors.toSet());
+        for (DirectoryAccessModel accessEntry: directory.getAccessEntries()) {
+            switch (accessEntry.getType()) {
+                case USER:
+                    if (Objects.equals(accessEntry.getName(), user.getLogin())) {
+                        if (accessEntry.getPermissions().getOrDefault(permission.getKey(), false)) {
+                            LOGGER.info("Granted for user {}", accessEntry.getName());
+                            return true;
+                        } else {
+                            isForbidden = true;
+                        }
+                    }
+                    break;
+                case GROUP:
+                    if (groups.contains(accessEntry.getName())) {
+                        if (accessEntry.getPermissions().getOrDefault(permission.getKey(), false)) {
+                            LOGGER.info("Granted for group {}", accessEntry.getName());
+                            return true;
+                        } else {
+                            isForbidden = true;
+                        }
+                    }
+                    break;
+                case ALL:
+                    allRecord = accessEntry;
+                    break;
+            }
+        }
+        return isForbidden ? false : (allRecord == null ? allRecord.getPermissions().getOrDefault(permission.getKey(), false) : permission.getDefaultValue());
     }
     
     /**
@@ -115,15 +165,8 @@ public class AuthService {
                 throw new CoreException("DIR_NOT_FOUND", "Can't find directory " + request.getDirectoryPath());
             }
             validateAccessEntries(request.getAccess());
-            DirectoryAccess access = directoryAccessRepository.findByDirectoryPath(finded.getFullName());
-            if (access == null) {
-                access = new DirectoryAccess();
-                access.setDirectory(finded);
-                finded.setAccess(access);
-            }
-            access.getAccessEntries().clear();
-            access.getAccessEntries().addAll(request.getAccess());
-            directoryAccessRepository.save(access);
+            finded.setAccessEntries(request.getAccess());
+            directoryRepository.save(finded);
         } else {
             throw new CoreException("NO_PERMISSION", "User doesn't have sufficient permission");
         }
@@ -173,5 +216,21 @@ public class AuthService {
                         String.format("Can't assign %s permission since it doesn't exist.", accessPermission));
             }
         }
+    }
+    
+    protected String[] preparePathChunks(String dirPath, String currentPath) {
+        String[] rawChunks = dirPath.substring(currentPath.length()).trim().split("\\.");
+        String[] chunks = new String[rawChunks.length];
+        for (int i=0; i<rawChunks.length; i++) {
+            if (currentPath.isEmpty()) {
+                currentPath = rawChunks[i];
+            } else {
+                if (!rawChunks[i].isBlank()) {
+                    currentPath = currentPath + "." + rawChunks[i];
+                }
+            }
+            chunks[i] = currentPath;
+        }
+        return chunks;
     }
 }

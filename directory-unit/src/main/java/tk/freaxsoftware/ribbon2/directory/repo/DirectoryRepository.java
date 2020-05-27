@@ -43,6 +43,15 @@ public class DirectoryRepository {
     }
     
     /**
+     * Find directories by array of paths. Reverse order.
+     * @param dirPaths array with path names;
+     * @return set of directories sorted from bottom to root;
+     */
+    public Set<Directory> findDirByPathsReverse(String[] dirPaths) {
+        return DB.getDefault().find(Directory.class).setDisableLazyLoading(true).order().desc("id").where().in("fullName", dirPaths).findSet();
+    }
+    
+    /**
      * Find single directory by it's full path.
      * @param fullPath full path to directory;
      * @return single directory or null;

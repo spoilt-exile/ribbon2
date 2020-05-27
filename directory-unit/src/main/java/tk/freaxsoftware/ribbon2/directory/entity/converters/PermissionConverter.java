@@ -33,6 +33,7 @@ public class PermissionConverter implements TwoWayConverter<Permission, Director
         Permission permission = new Permission();
         permission.setKey(destination.getKey());
         permission.setDescription(destination.getDescription());
+        permission.setDefaultValue(destination.getDefaultValue());
         return permission;
     }
 
