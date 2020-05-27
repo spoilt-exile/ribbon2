@@ -35,6 +35,11 @@ public class DirectoryPermissionModel {
      * Detail description of the permission.
      */
     private String description;
+    
+    /**
+     * Default value for permission.
+     */
+    private Boolean defaultValue;
 
     public String getKey() {
         return key;
@@ -51,9 +56,17 @@ public class DirectoryPermissionModel {
     public void setDescription(String description) {
         this.description = description;
     }
+    
+    public Boolean getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(Boolean defaultValue) {
+        this.defaultValue = defaultValue;
+    }
 
     @Override
     public String toString() {
-        return "{" + "key=" + key + ", description=" + description + '}';
+        return "{" + "key=" + key + ", description=" + description + ", defaultValue=" + defaultValue + '}';
     }
 }
