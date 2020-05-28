@@ -24,6 +24,8 @@ package tk.freaxsoftware.ribbon2.core.exception;
  */
 public class CoreException extends RuntimeException {
     
+    public final static String HEADER_ERROR_CODE = "Ribbon2.Header.ErrorCode";
+    
     private final RibbonErrorCodes code;
 
     public CoreException(RibbonErrorCodes code, String message) {

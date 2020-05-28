@@ -18,40 +18,21 @@
  */
 package tk.freaxsoftware.ribbon2.core.exception;
 
+import tk.freaxsoftware.extras.bus.ResponseHolder;
+import tk.freaxsoftware.extras.bus.exceptions.MessageExceptionHandler;
+
 /**
- * Unified enum for all system error codes.
+ * Ribbon2 message exception handler for message bus.
  * @author Stanislav Nepochatov
  */
-public enum RibbonErrorCodes {
-    
-    UNREGISTERED(500),
-    
-    CALL_ERROR(504),
-    
-    ACCESS_DENIED(401),
-    
-    USER_NOT_FOUND(404),
-    
-    GROUP_NOT_FOUND(404),
-    
-    DIRECTORY_NOT_FOUND(404),
-    
-    PERMISSION_NOT_FOUND(404),
-    PERMISSION_VALIDATION_FAILED(400),
-    
-    MESSAGE_NOT_FOUND(404),
-    MESSAGE_DIRECORIES_REQUIRED(400);
-    
-    private int httpCode;
-    
-    private RibbonErrorCodes() {}
-    
-    private RibbonErrorCodes(int httpCode) {
-        this.httpCode = httpCode;
-    }
-    
-    public int getHttpCode() {
-        return this.httpCode;
+public class RibbonMessageExceptionHandler implements MessageExceptionHandler {
+
+    @Override
+    public void handle(ResponseHolder response, Exception ex) {
+        if (ex instanceof CoreException) {
+            response.getHeaders().put(CoreException.HEADER_ERROR_CODE, 
+                    ((CoreException) ex).getCode().name());
+        }
     }
     
 }

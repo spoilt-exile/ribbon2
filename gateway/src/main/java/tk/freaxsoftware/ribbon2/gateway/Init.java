@@ -39,7 +39,10 @@ import org.slf4j.LoggerFactory;
 import spark.Spark;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageHolder;
+import tk.freaxsoftware.extras.bus.exceptions.ExceptionServices;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
+import tk.freaxsoftware.ribbon2.core.exception.RibbonMessageExceptionCallback;
+import tk.freaxsoftware.ribbon2.core.exception.RibbonMessageExceptionHandler;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
 import tk.freaxsoftware.ribbon2.gateway.routes.AuthRoutes;
 
@@ -72,6 +75,7 @@ public class Init {
         
         LOGGER.info("Init MessagBus...");
         MessageBus.init();
+        ExceptionServices.registerCallback(new RibbonMessageExceptionCallback());
         
         if (!appendixMessages.isEmpty()) {
             GatewayMain.executor.submit(() -> {

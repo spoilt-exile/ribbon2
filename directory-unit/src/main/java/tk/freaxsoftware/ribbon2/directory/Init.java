@@ -39,9 +39,11 @@ import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.MessageOptions;
+import tk.freaxsoftware.extras.bus.exceptions.ExceptionServices;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryPermissionHolder;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionModel;
+import tk.freaxsoftware.ribbon2.core.exception.RibbonMessageExceptionHandler;
 import tk.freaxsoftware.ribbon2.directory.config.DirectoryUnitConfig;
 
 /**
@@ -72,6 +74,7 @@ public class Init {
         
         LOGGER.info("Init MessagBus...");
         MessageBus.init();
+        ExceptionServices.registerHandler(new RibbonMessageExceptionHandler());
         
         appendixMessages.add(new MessageHolder(DirectoryPermissionModel.CALL_INIT_PERMISSIONS, 
                 MessageOptions.Builder.newInstance().deliveryCall().async().build(),
