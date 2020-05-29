@@ -19,11 +19,13 @@
 package tk.freaxsoftware.ribbon2.gateway.routes;
 
 import io.ebean.DB;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static spark.Spark.delete;
 import static spark.Spark.post;
 import static spark.Spark.put;
+import static spark.Spark.get;
 import spark.utils.StringUtils;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
@@ -98,6 +100,22 @@ public class UserRoutes {
             }
             return "";
         });
+        
+        get("/api/user", (req, res) -> {
+            LOGGER.info("Request to get all users");
+            return DB.getDefault().find(UserEntity.class).findList().stream()
+                    .map(user -> new UserConverter().convert(user)).collect(Collectors.toSet());
+        }, GatewayMain.gson::toJson);
+        
+        get("/api/user/:id", (req, res) -> {
+            UserEntity entity = DB.getDefault().find(UserEntity.class).where().idEq(Long.parseLong(req.params("id"))).findOne();
+            LOGGER.info("Request to get User: {}", req.params("id"));
+            if (entity == null) {
+                throw new CoreException(RibbonErrorCodes.USER_NOT_FOUND, 
+                        String.format("Unable to find User with id %s", req.params("id")));
+            }
+            return new UserConverter().convert(entity);
+        }, GatewayMain.gson::toJson);
     }
     
 }
