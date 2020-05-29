@@ -75,6 +75,7 @@ public class GatewayMain {
         Spark.exception(CoreException.class, (ex, req, res) -> {
             LOGGER.error("Error occurred:", ex);
             res.status(ex.getCode().getHttpCode());
+            res.type("application/json");
             res.body(gson.toJson(new CoreError(ex)));
         });
     }
