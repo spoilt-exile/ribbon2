@@ -114,6 +114,7 @@ public class DbMessage extends Model implements Serializable {
     /**
      * Response headers;
      */
+    @DbJsonB
     private Map<String, String> responseHeaders;
 
     public Long getId() {
