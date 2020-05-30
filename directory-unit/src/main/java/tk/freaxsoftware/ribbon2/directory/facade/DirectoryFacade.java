@@ -18,13 +18,18 @@
  */
 package tk.freaxsoftware.ribbon2.directory.facade;
 
+import io.ebean.PagedList;
 import java.util.Set;
+import java.util.stream.Collectors;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.ResponseHolder;
 import tk.freaxsoftware.extras.bus.annotation.Receive;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
+import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
+import tk.freaxsoftware.ribbon2.core.utils.DBUtils;
 import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
 import tk.freaxsoftware.ribbon2.directory.entity.Directory;
 import tk.freaxsoftware.ribbon2.directory.entity.converters.DirectoryConverter;
@@ -78,5 +83,24 @@ public class DirectoryFacade {
             MessageBus.fire(DirectoryModel.NOTIFICATION_DIRECTORY_DELETED, converter.convertBack(deleted), 
                     MessageOptions.Builder.newInstance().deliveryNotification(5).build());
         }
+    }
+    
+    @Receive(DirectoryModel.CALL_GET_DIRECTORY_ALL)
+    public void getDirectories(MessageHolder<PaginationRequest> paginationMessage) {
+        PaginationRequest pageRequest = paginationMessage.getContent();
+        PagedList<Directory> directoryPage = directoryService.findDirectoryPage(pageRequest);
+        DirectoryPage responsePage = new DirectoryPage();
+        responsePage.setContent(directoryPage.getList().stream()
+                .map(dir -> converter.convertBack(dir)).collect(Collectors.toList()));
+        responsePage.setTotalCount(directoryPage.getTotalCount());
+        paginationMessage.setResponse(new ResponseHolder());
+        paginationMessage.getResponse().setContent(responsePage);
+    }
+    
+    @Receive(DirectoryModel.CALL_GET_DIRECTORY_BY_PATH)
+    public void getDirectory(MessageHolder<String> findMessage) {
+        findMessage.setResponse(new ResponseHolder());
+        findMessage.getResponse().setContent(converter
+                .convertBack(directoryService.findByPath(findMessage.getContent())));
     }
 }

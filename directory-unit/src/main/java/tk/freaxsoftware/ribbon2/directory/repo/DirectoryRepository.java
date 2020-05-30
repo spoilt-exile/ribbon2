@@ -19,10 +19,13 @@
 package tk.freaxsoftware.ribbon2.directory.repo;
 
 import io.ebean.DB;
+import io.ebean.PagedList;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
+import tk.freaxsoftware.ribbon2.core.utils.DBUtils;
 import tk.freaxsoftware.ribbon2.directory.entity.Directory;
 
 /**
@@ -39,7 +42,7 @@ public class DirectoryRepository {
      * @return set of directories;
      */
     public Set<Directory> findDirByPaths(String[] dirPaths) {
-        return DB.getDefault().find(Directory.class).setDisableLazyLoading(true).order().asc("id").where().in("fullName", dirPaths).findSet();
+        return DB.getDefault().find(Directory.class).order().asc("id").where().in("fullName", dirPaths).findSet();
     }
     
     /**
@@ -48,7 +51,7 @@ public class DirectoryRepository {
      * @return set of directories sorted from bottom to root;
      */
     public Set<Directory> findDirByPathsReverse(String[] dirPaths) {
-        return DB.getDefault().find(Directory.class).setDisableLazyLoading(true).order().desc("id").where().in("fullName", dirPaths).findSet();
+        return DB.getDefault().find(Directory.class).order().desc("id").where().in("fullName", dirPaths).findSet();
     }
     
     /**
@@ -57,7 +60,7 @@ public class DirectoryRepository {
      * @return single directory or null;
      */
     public Directory findDirectoryByPath(String fullPath) {
-        return DB.getDefault().find(Directory.class).setDisableLazyLoading(true).where().eq("fullName", fullPath).findOne();
+        return DB.getDefault().find(Directory.class).where().eq("fullName", fullPath).findOne();
     }
     
     /**
@@ -87,6 +90,15 @@ public class DirectoryRepository {
         LOGGER.warn("Deleting following directories: [{}]", 
                 directories.stream().map(dir -> dir.getFullName()).collect(Collectors.toSet()));
         DB.getDefault().deleteAll(directories);
+    }
+    
+    /**
+     * Finds page of directories.
+     * @param request pagination request;
+     * @return paged list;
+     */
+    public PagedList<Directory> findPage(PaginationRequest request) {
+        return DBUtils.findPaginatedEntity(request, Directory.class);
     }
     
 }

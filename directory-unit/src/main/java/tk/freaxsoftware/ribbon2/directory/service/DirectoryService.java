@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.directory.service;
 
+import io.ebean.PagedList;
 import java.util.Objects;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.ACCESS_DENIED;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.DIRECTORY_NOT_FOUND;
@@ -133,5 +135,29 @@ public class DirectoryService extends AuthService {
             }
         }
         return path;
+    }
+    
+    /**
+     * Find page of directories.
+     * @param request pagination request;
+     * @return paged list;
+     */
+    public PagedList<Directory> findDirectoryPage(PaginationRequest request) {
+        LOGGER.info("Find directories paged: {}", request);
+        return directoryRepository.findPage(request);
+    }
+    
+    /**
+     * Find directory by path.
+     * @param path directory path;
+     * @return directory or throw exception;
+     */
+    public Directory findByPath(String path) {
+        LOGGER.info("Find directories by path: {}", path);
+        Directory found =  directoryRepository.findDirectoryByPath(path);
+        if (found == null) {
+            throw new CoreException(DIRECTORY_NOT_FOUND, "Can't find directory " + path);
+        }
+        return found;
     }
 }
