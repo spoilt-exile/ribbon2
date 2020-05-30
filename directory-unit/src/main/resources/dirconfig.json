@@ -2,7 +2,14 @@
     "directory": {
         "createDirs": [
             "System.Test",
-            "System.Error"
+            "System.Error",
+            "Inbox.Agencies",
+            "Inbox.Reporters",
+            "Inbox.Drop",
+            "Edit.Translation.En2Ua",
+            "Edit.Translation.Ua2En",
+            "Edit.Release.En",
+            "Edit.Release.Ua"
         ],
         "permissions": [
             {

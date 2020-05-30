@@ -47,17 +47,31 @@ public class UserGroupCustomChange implements CustomSqlChange {
         rootUser.setId(1l);
         rootUser.setLogin("root");
         rootUser.setDescription("Root admin");
-        rootUser.setEmail("localhost@localhost");
+        rootUser.setEmail("root@localhost");
         rootUser.setEnabled(true);
         rootUser.setGroups(new HashSet<>());
-        rootUser.getGroups().add("adm");
+        rootUser.getGroups().add("Admins");
+        
+        UserModel testUser = new UserModel();
+        testUser.setId(2l);
+        testUser.setLogin("user");
+        testUser.setDescription("Test user");
+        testUser.setEmail("user@localhost");
+        testUser.setEnabled(true);
+        testUser.setGroups(new HashSet<>());
+        testUser.getGroups().add("Users");
         
         GroupModel admGroup = new GroupModel();
         admGroup.setId(1l);
-        admGroup.setName("adm");
+        admGroup.setName("Admins");
         admGroup.setDescription("Administrator group");
         
-        SqlStatement[] statements = new SqlStatement[3];
+        GroupModel usersGroup = new GroupModel();
+        usersGroup.setId(2l);
+        usersGroup.setName("Users");
+        usersGroup.setDescription("Users group");
+        
+        SqlStatement[] statements = new SqlStatement[6];
         statements[0] = new InsertStatement(null, null, "user_entity")
                 .addColumnValue("login", rootUser.getLogin())
                 .addColumnValue("description", rootUser.getDescription())
@@ -73,10 +87,27 @@ public class UserGroupCustomChange implements CustomSqlChange {
                 .addColumnValue("user_id", 1l)
                 .addColumnValue("group_id", 1l);
         
+        statements[3] = new InsertStatement(null, null, "user_entity")
+                .addColumnValue("login", testUser.getLogin())
+                .addColumnValue("description", testUser.getDescription())
+                .addColumnValue("email", testUser.getEmail())
+                .addColumnValue("enabled", testUser.getEnabled())
+                .addColumnValue("password", SHAHash.hashPassword("user"));
+        
+        statements[4] = new InsertStatement(null, null, "group_entity")
+                .addColumnValue("name", usersGroup.getName())
+                .addColumnValue("description", usersGroup.getDescription());
+        
+        statements[5] = new InsertStatement(null, null, "user_entity_group_entity")
+                .addColumnValue("user_id", 2l)
+                .addColumnValue("group_id", 2l);
+        
         MessageOptions options = MessageOptions.Builder.newInstance().deliveryNotification(5).build();
         
         Init.appendixMessages.add(new MessageHolder(UserModel.NOTIFICATION_USER_CREATED, options, rootUser));
+        Init.appendixMessages.add(new MessageHolder(UserModel.NOTIFICATION_USER_CREATED, options, testUser));
         Init.appendixMessages.add(new MessageHolder(GroupModel.NOTIFICATION_GROUP_CREATED, options, admGroup));
+        Init.appendixMessages.add(new MessageHolder(GroupModel.NOTIFICATION_GROUP_CREATED, options, usersGroup));
         
         return statements;
     }

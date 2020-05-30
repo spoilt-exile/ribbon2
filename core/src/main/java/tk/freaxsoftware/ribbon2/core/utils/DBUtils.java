@@ -38,7 +38,24 @@ public class DBUtils {
      * @return paged list;
      */
     public static <T extends Model> PagedList<T> findPaginatedEntity(PaginationRequest pageRequest, Class<T> entityClass) {
-        Query<T> query = DB.getDefault().find(entityClass).setFirstRow(pageRequest.getPage() * pageRequest.getSize())
+        Query<T> query = DB.getDefault().find(entityClass);
+        
+        return executeQuery(pageRequest, query);
+    }
+    
+    /**
+     * Finds page of any entity by page request with prebuild query.
+     * @param <T> generic type of entity;
+     * @param pageRequest page request;
+     * @param query pre-build query for db;
+     * @return paged list;
+     */
+    public static <T extends Model> PagedList<T> findPaginatedEntityWithQuery(PaginationRequest pageRequest, Query<T> query) {
+        return executeQuery(pageRequest, query);
+    }
+    
+    private static <T extends Model> PagedList<T> executeQuery(PaginationRequest pageRequest, Query<T> query) {
+        query = query.setFirstRow(pageRequest.getPage() * pageRequest.getSize())
                 .setMaxRows(pageRequest.getSize());
         
         if (pageRequest.getDirection() == PaginationRequest.Order.ASC) {

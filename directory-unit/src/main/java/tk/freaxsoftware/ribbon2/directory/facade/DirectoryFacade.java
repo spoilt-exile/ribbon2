@@ -29,7 +29,6 @@ import tk.freaxsoftware.extras.bus.annotation.Receive;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
 import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
-import tk.freaxsoftware.ribbon2.core.utils.DBUtils;
 import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
 import tk.freaxsoftware.ribbon2.directory.entity.Directory;
 import tk.freaxsoftware.ribbon2.directory.entity.converters.DirectoryConverter;
