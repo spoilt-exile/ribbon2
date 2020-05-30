@@ -29,6 +29,8 @@ public class DirectoryModel {
     public final static String CALL_CREATE_DIRECTORY = "Ribbon.Global.CreateDirectory";
     public final static String CALL_UPDATE_DIRECTORY = "Ribbon.Global.UpdateDirectory";
     public final static String CALL_DELETE_DIRECTORY = "Ribbon.Global.DeleteDirectory";
+    public final static String CALL_GET_DIRECTORY_ALL = "Ribbon.Global.GetDirectoryAll";
+    public final static String CALL_GET_DIRECTORY_BY_PATH = "Ribbon.Global.GetDirectoryByPath";
     
     public final static String NOTIFICATION_DIRECTORY_CREATED = "Ribbon.Global.Notification.DirectoryCreated";
     public final static String NOTIFICATION_DIRECTORY_UPDATED = "Ribbon.Global.Notification.DirectoryUpdated";
