@@ -19,6 +19,10 @@
 package tk.freaxsoftware.ribbon2.message.repo;
 
 import io.ebean.DB;
+import io.ebean.PagedList;
+import io.ebean.Query;
+import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
+import tk.freaxsoftware.ribbon2.core.utils.DBUtils;
 import tk.freaxsoftware.ribbon2.message.entity.Message;
 
 /**
@@ -28,7 +32,7 @@ import tk.freaxsoftware.ribbon2.message.entity.Message;
 public class MessageRepository {
     
     public Message findByUid(String uid) {
-        return DB.getDefault().find(Message.class).setDisableLazyLoading(true)
+        return DB.getDefault().find(Message.class)
                 .where().eq("uid", uid).findOne();
     }
     
@@ -37,4 +41,15 @@ public class MessageRepository {
         return message;
     }
     
+    /**
+     * Finds page of messages.
+     * @param directory message directory;
+     * @param request pagination request;
+     * @return paged list;
+     */
+    public PagedList<Message> findPage(String directory, PaginationRequest request) {
+        Query<Message> query = DB.getDefault().find(Message.class).where().arrayContains("directoryNames", directory).query();
+        
+        return DBUtils.findPaginatedEntityWithQuery(request, query);
+    }
 }

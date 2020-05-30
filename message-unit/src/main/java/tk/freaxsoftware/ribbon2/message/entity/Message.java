@@ -40,6 +40,7 @@ public class Message extends Model {
     public final static String PERMISSION_CAN_CREATE_MESSAGE = "canCreateMessage";
     public final static String PERMISSION_CAN_UPDATE_MESSAGE = "canUpdateMessage";
     public final static String PERMISSION_CAN_DELETE_MESSAGE = "canDeleteMessage";
+    public final static String PERMISSION_CAN_READ_MESSAGE = "canReadMessage";
     
     @Id
     private Long id;

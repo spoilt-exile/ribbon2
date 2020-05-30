@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.message.service;
 
+import io.ebean.PagedList;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -33,6 +34,7 @@ import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryCheckAccessRequest;
+import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.ACCESS_DENIED;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.CALL_ERROR;
@@ -191,5 +193,34 @@ public class MessageService {
         return directories;
     }
 
+    /**
+     * Finds page of messages by directory.
+     * @param user current user login;
+     * @param directory name of the directory;
+     * @param request pagination request;
+     * @return paged list of messages;
+     */
+    public PagedList<Message> findPage(String user, String directory, PaginationRequest request) {
+        LOGGER.info("Find messages paged: directory {}, user {}, request {}", directory, user, request);
+        checkDirectoryAccess(user, Set.of(directory), Message.PERMISSION_CAN_READ_MESSAGE);
+        return messageRepository.findPage(directory, request);
+    }
     
+    /**
+     * Finds message by uid and directory.
+     * @param user current user login;
+     * @param directory name of the directory;
+     * @param uid message identeficator;
+     * @return finded message;
+     */
+    public Message findMessage(String user, String directory, String uid) {
+        LOGGER.info("Find message: directory {}, user {}, uid {}", directory, user, uid);
+        checkDirectoryAccess(user, Set.of(directory), Message.PERMISSION_CAN_READ_MESSAGE);
+        Message finded = messageRepository.findByUid(uid);
+        if (finded == null) {
+            throw new CoreException(MESSAGE_NOT_FOUND, 
+                    String.format("Message by UID %s not found!", uid));
+        }
+        return finded;
+    }
 }
