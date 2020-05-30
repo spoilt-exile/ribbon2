@@ -58,6 +58,7 @@ public class UserRoutes {
             UserModel savedUser = new UserConverter().convert(newUser);
             MessageBus.fire(UserModel.NOTIFICATION_USER_CREATED, savedUser, 
                     MessageOptions.Builder.newInstance().deliveryNotification(5).build());
+            res.type("application/json");
             return savedUser;
         }, GatewayMain.gson::toJson);
         
@@ -80,6 +81,7 @@ public class UserRoutes {
                 UserModel savedUser = new UserConverter().convert(updateUser);
                 MessageBus.fire(UserModel.NOTIFICATION_USER_UPDATED, savedUser, 
                         MessageOptions.Builder.newInstance().deliveryNotification(5).build());
+                res.type("application/json");
                 return savedUser;
             } else {
                 throw new CoreException(RibbonErrorCodes.USER_NOT_FOUND, 
@@ -103,6 +105,7 @@ public class UserRoutes {
         
         get("/api/user", (req, res) -> {
             LOGGER.info("Request to get all users");
+            res.type("application/json");
             return DB.getDefault().find(UserEntity.class).findList().stream()
                     .map(user -> new UserConverter().convert(user)).collect(Collectors.toSet());
         }, GatewayMain.gson::toJson);
@@ -114,6 +117,7 @@ public class UserRoutes {
                 throw new CoreException(RibbonErrorCodes.USER_NOT_FOUND, 
                         String.format("Unable to find User with id %s", req.params("id")));
             }
+            res.type("application/json");
             return new UserConverter().convert(entity);
         }, GatewayMain.gson::toJson);
     }

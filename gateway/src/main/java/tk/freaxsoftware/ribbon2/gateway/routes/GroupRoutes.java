@@ -33,9 +33,7 @@ import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
-import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.converters.GroupConverter;
-import tk.freaxsoftware.ribbon2.gateway.entity.converters.UserConverter;
 
 /**
  * Routes for CRUD operations with user groups.
@@ -55,6 +53,7 @@ public class GroupRoutes {
             GroupModel savedGroup = new GroupConverter().convert(newGroup);
             MessageBus.fire(GroupModel.NOTIFICATION_GROUP_CREATED, savedGroup, 
                     MessageOptions.Builder.newInstance().deliveryNotification(5).build());
+            res.type("application/json");
             return savedGroup;
         }, GatewayMain.gson::toJson);
         
@@ -66,6 +65,7 @@ public class GroupRoutes {
             GroupModel savedGroup = new GroupConverter().convert(updateGroup);
             MessageBus.fire(GroupModel.NOTIFICATION_GROUP_UPDATED, savedGroup, 
                     MessageOptions.Builder.newInstance().deliveryNotification(5).build());
+            res.type("application/json");
             return savedGroup;
         }, GatewayMain.gson::toJson);
         
@@ -85,6 +85,7 @@ public class GroupRoutes {
         
         get("/api/group", (req, res) -> {
             LOGGER.info("Request to get all groups");
+            res.type("application/json");
             return DB.getDefault().find(GroupEntity.class).findList().stream()
                     .map(group -> new GroupConverter().convert(group)).collect(Collectors.toSet());
         }, GatewayMain.gson::toJson);
@@ -96,6 +97,7 @@ public class GroupRoutes {
                 throw new CoreException(RibbonErrorCodes.USER_NOT_FOUND, 
                         String.format("Unable to find Group with id %s", req.params("id")));
             }
+            res.type("application/json");
             return new GroupConverter().convert(entity);
         }, GatewayMain.gson::toJson);
     }

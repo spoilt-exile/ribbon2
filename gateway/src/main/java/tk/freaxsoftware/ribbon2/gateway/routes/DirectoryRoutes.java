@@ -25,12 +25,16 @@ import org.slf4j.LoggerFactory;
 import static spark.Spark.delete;
 import static spark.Spark.post;
 import static spark.Spark.put;
+import static spark.Spark.get;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
+import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryEditAccessRequest;
+import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
+import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
 
@@ -52,6 +56,7 @@ public class DirectoryRoutes {
                     .deliveryCall().build(), DirectoryModel.class);
             model.setId(saved.getId());
             model.setName(saved.getName());
+            res.type("application/json");
             return model;
         }, GatewayMain.gson::toJson);
         
@@ -65,6 +70,7 @@ public class DirectoryRoutes {
             model.setId(saved.getId());
             model.setName(saved.getName());
             model.setDescription(saved.getDescription());
+            res.type("application/json");
             return model;
         }, GatewayMain.gson::toJson);
         
@@ -92,6 +98,29 @@ public class DirectoryRoutes {
                     .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
                     .deliveryCall().build(), Boolean.class);
             return saved;
+        }, GatewayMain.gson::toJson);
+        
+        get("/api/directory", (req, res) -> {
+            PaginationRequest request = PaginationRequest.ofRequest(req.queryMap());
+            LOGGER.info("Request to get all directories {}", request);
+            DirectoryPage page = MessageBus.fireCall(DirectoryModel.CALL_GET_DIRECTORY_ALL, request, MessageOptions.Builder.newInstance()
+                    .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
+                    .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                    .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                    .deliveryCall().build(), DirectoryPage.class);
+            res.type("application/json");
+            return page;
+        }, GatewayMain.gson::toJson);
+        
+        get("/api/directory/:path", (req, res) -> {
+            LOGGER.info("Request to get directory {}", req.params("path"));
+            DirectoryModel directory = MessageBus.fireCall(DirectoryModel.CALL_GET_DIRECTORY_BY_PATH, req.params("path"), MessageOptions.Builder.newInstance()
+                    .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
+                    .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                    .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                    .deliveryCall().build(), DirectoryModel.class);
+            res.type("application/json");
+            return directory;
         }, GatewayMain.gson::toJson);
     }
     

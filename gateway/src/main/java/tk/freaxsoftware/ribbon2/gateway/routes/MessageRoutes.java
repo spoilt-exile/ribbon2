@@ -46,6 +46,7 @@ public class MessageRoutes {
                     .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
                     .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
                     .deliveryCall().build(), MessageModel.class);
+            res.type("application/json");
             return saved;
         }, GatewayMain.gson::toJson);
         
@@ -56,6 +57,7 @@ public class MessageRoutes {
                     .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
                     .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
                     .deliveryCall().build(), MessageModel.class);
+            res.type("application/json");
             return saved;
         }, GatewayMain.gson::toJson);
         
