@@ -21,12 +21,16 @@ package tk.freaxsoftware.ribbon2.gateway.routes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static spark.Spark.delete;
+import static spark.Spark.get;
 import static spark.Spark.post;
 import static spark.Spark.put;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
+import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
+import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
+import tk.freaxsoftware.ribbon2.core.data.response.MessagePage;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
 
@@ -74,5 +78,31 @@ public class MessageRoutes {
             }
             return "";
         });
+        
+        get("/api/message/:dir", (req, res) -> {
+            PaginationRequest request = PaginationRequest.ofRequest(req.queryMap());
+            LOGGER.info("Request to get all messages {}", request);
+            MessagePage page = MessageBus.fireCall(MessageModel.CALL_GET_MESSAGE_ALL, request, MessageOptions.Builder.newInstance()
+                    .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
+                    .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                    .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                    .header(MessageModel.HEADER_MESSAGE_DIR, req.params("dir"))
+                    .deliveryCall().build(), MessagePage.class);
+            res.type("application/json");
+            return page;
+        }, GatewayMain.gson::toJson);
+        
+        get("/api/message/:uid/dir/:dir", (req, res) -> {
+            LOGGER.info("Request to get message {} by dir {}", req.params("uid"));
+            MessageModel message = MessageBus.fireCall(MessageModel.CALL_GET_MESSAGE_BY_UID, null, MessageOptions.Builder.newInstance()
+                    .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
+                    .header(MessageModel.HEADER_MESSAGE_UID, req.params("uid"))
+                    .header(MessageModel.HEADER_MESSAGE_DIR, req.params("dir"))
+                    .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                    .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                    .deliveryCall().build(), MessageModel.class);
+            res.type("application/json");
+            return message;
+        }, GatewayMain.gson::toJson);
     }
 }
