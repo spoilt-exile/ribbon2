@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import spark.utils.IOUtils;
 import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
+import tk.freaxsoftware.ribbon2.core.config.PropertyConfigProcessor;
 import tk.freaxsoftware.ribbon2.directory.config.DirectoryUnitConfig;
 import tk.freaxsoftware.ribbon2.directory.facade.DirectoryAccessFacade;
 import tk.freaxsoftware.ribbon2.directory.facade.DirectoryFacade;
@@ -69,6 +70,7 @@ public class DirectoryUnit {
     public static void main(String[] args) throws IOException {
         LOGGER.info("\n{}", IOUtils.toString(DirectoryUnit.class.getClassLoader().getResourceAsStream("header")));
         config = gson.fromJson(IOUtils.toString(DirectoryUnit.class.getClassLoader().getResourceAsStream("dirconfig.json")), DirectoryUnitConfig.class);
+        PropertyConfigProcessor.process(config.getDb());
         LOGGER.info("Directory started, config: {}", config);
         
         Init.init(config);

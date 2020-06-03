@@ -43,8 +43,13 @@ import tk.freaxsoftware.extras.bus.exceptions.ExceptionServices;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryPermissionHolder;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionModel;
+import tk.freaxsoftware.ribbon2.core.data.messagestorage.DbMessage;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonMessageExceptionHandler;
 import tk.freaxsoftware.ribbon2.directory.config.DirectoryUnitConfig;
+import tk.freaxsoftware.ribbon2.directory.entity.Directory;
+import tk.freaxsoftware.ribbon2.directory.entity.GroupEntity;
+import tk.freaxsoftware.ribbon2.directory.entity.Permission;
+import tk.freaxsoftware.ribbon2.directory.entity.UserEntity;
 
 /**
  * Main init of the directory unit.
@@ -117,6 +122,11 @@ public class Init {
         tuneConfig.setQueryTuning(false);
         tuneConfig.setMode(AutoTuneMode.DEFAULT_OFF);
         config.setAutoTuneConfig(new AutoTuneConfig());
+        config.addClass(DbMessage.class);
+        config.addClass(Directory.class);
+        config.addClass(GroupEntity.class);
+        config.addClass(UserEntity.class);
+        config.addClass(Permission.class);
         Database database = DatabaseFactory.create(config);
     }
 }
