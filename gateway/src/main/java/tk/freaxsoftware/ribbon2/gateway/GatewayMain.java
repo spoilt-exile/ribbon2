@@ -63,12 +63,10 @@ public class GatewayMain {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
+    public static void main(String[] args) throws IOException {
         LOGGER.info("\n{}", IOUtils.toString(GatewayMain.class.getClassLoader().getResourceAsStream("header")));
         config = gson.fromJson(IOUtils.toString(GatewayMain.class.getClassLoader().getResourceAsStream("appconfig.json")), ApplicationConfig.class);
         PropertyConfigProcessor.process(config.getDb());
-        LOGGER.warn("Loading JDBC driver {}", config.getDb().getDriver());
-        Class.forName(config.getDb().getDriver());
         LOGGER.info("Gateway started, config: {}", config);
         Init.init(config);
         UserRoutes.init();
