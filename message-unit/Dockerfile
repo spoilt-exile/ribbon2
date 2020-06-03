@@ -1,5 +1,5 @@
-FROM java
+FROM openjdk:11.0.7-jre
 MAINTAINER Stanislav Nepochatov
-COPY target/test-static.jar /home/test-static.jar
+COPY target/messenger-static.jar /home/messenger-static.jar
 EXPOSE 9100
-CMD ["java","-jar","/home/test-static.jar"]
+CMD sleep 10 && java -jar /home/messenger-static.jar

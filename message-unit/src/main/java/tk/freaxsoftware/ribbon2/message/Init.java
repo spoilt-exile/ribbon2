@@ -43,8 +43,11 @@ import tk.freaxsoftware.extras.bus.exceptions.ExceptionServices;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryPermissionHolder;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionModel;
+import tk.freaxsoftware.ribbon2.core.data.messagestorage.DbMessage;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonMessageExceptionHandler;
 import tk.freaxsoftware.ribbon2.message.config.MessengerUnitConfig;
+import tk.freaxsoftware.ribbon2.message.entity.Directory;
+import tk.freaxsoftware.ribbon2.message.entity.Message;
 
 /**
  * Main init of the message unit.
@@ -117,6 +120,9 @@ public class Init {
         tuneConfig.setQueryTuning(false);
         tuneConfig.setMode(AutoTuneMode.DEFAULT_OFF);
         config.setAutoTuneConfig(new AutoTuneConfig());
+        config.addClass(DbMessage.class);
+        config.addClass(Message.class);
+        config.addClass(Directory.class);
         Database database = DatabaseFactory.create(config);
     }
 }

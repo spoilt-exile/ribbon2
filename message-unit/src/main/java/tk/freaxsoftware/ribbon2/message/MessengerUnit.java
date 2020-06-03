@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import spark.utils.IOUtils;
 import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
+import tk.freaxsoftware.ribbon2.core.config.PropertyConfigProcessor;
 import tk.freaxsoftware.ribbon2.message.config.MessengerUnitConfig;
 import tk.freaxsoftware.ribbon2.message.entity.converters.DirectoryConverter;
 import tk.freaxsoftware.ribbon2.message.facade.DirectoryFacade;
@@ -64,8 +65,8 @@ public class MessengerUnit {
      */
     public static void main(String[] args) throws IOException {
         LOGGER.info("\n{}", IOUtils.toString(MessengerUnit.class.getClassLoader().getResourceAsStream("header")));
-        
         config = gson.fromJson(IOUtils.toString(MessengerUnit.class.getClassLoader().getResourceAsStream("messageconfig.json")), MessengerUnitConfig.class);
+        PropertyConfigProcessor.process(config.getDb());
         LOGGER.info("Messenger started, config: {}", config);
         
         Init.init(config);
