@@ -41,9 +41,11 @@ import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.exceptions.ExceptionServices;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
+import tk.freaxsoftware.ribbon2.core.data.messagestorage.DbMessage;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonMessageExceptionCallback;
-import tk.freaxsoftware.ribbon2.core.exception.RibbonMessageExceptionHandler;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
+import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
+import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
 import tk.freaxsoftware.ribbon2.gateway.routes.AuthRoutes;
 
 /**
@@ -120,6 +122,9 @@ public class Init {
         tuneConfig.setQueryTuning(false);
         tuneConfig.setMode(AutoTuneMode.DEFAULT_OFF);
         config.setAutoTuneConfig(new AutoTuneConfig());
+        config.addClass(DbMessage.class);
+        config.addClass(UserEntity.class);
+        config.addClass(GroupEntity.class);
         Database database = DatabaseFactory.create(config);
     }
 }

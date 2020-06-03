@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import spark.Spark;
 import spark.utils.IOUtils;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
+import tk.freaxsoftware.ribbon2.core.config.PropertyConfigProcessor;
 import tk.freaxsoftware.ribbon2.core.exception.CoreError;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
@@ -62,9 +63,12 @@ public class GatewayMain {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
         LOGGER.info("\n{}", IOUtils.toString(GatewayMain.class.getClassLoader().getResourceAsStream("header")));
         config = gson.fromJson(IOUtils.toString(GatewayMain.class.getClassLoader().getResourceAsStream("appconfig.json")), ApplicationConfig.class);
+        PropertyConfigProcessor.process(config.getDb());
+        LOGGER.warn("Loading JDBC driver {}", config.getDb().getDriver());
+        Class.forName(config.getDb().getDriver());
         LOGGER.info("Gateway started, config: {}", config);
         Init.init(config);
         UserRoutes.init();
