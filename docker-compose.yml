@@ -1,0 +1,46 @@
+version: '3'
+services:
+
+    ribbon2-gateway:
+        image: freax/ribbon2-gateway:1.0
+        environment:
+            - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-gateway
+        depends_on:
+            - ribbon2-postgresql
+        ports:
+            - 9000:9000
+            
+    ribbon2-directory:
+        image: freax/ribbon2-directory:1.0
+        environment:
+            - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-directory
+            - BRIDGE_CLIENT_ADDRESS=ribbon2-gateway
+        depends_on:
+            - ribbon2-postgresql
+            - ribbon2-gateway
+            
+    ribbon2-messenger:
+        image: freax/ribbon2-messenger:1.0
+        environment:
+            - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-messenger
+            - BRIDGE_CLIENT_ADDRESS=ribbon2-gateway
+        depends_on:
+            - ribbon2-postgresql
+            - ribbon2-gateway
+
+    ribbon2-postgresql:
+        image: postgres:11
+        environment:
+            - POSTGRES_USER=ribbon2
+            - POSTGRES_PASSWORD=ribbon2
+            - POSTGRES_MULTIPLE_DATABASES="ribbon2-gateway","ribbon2-directory","ribbon2-messenger"
+        volumes:
+            - ./pg-multiple-db:/docker-entrypoint-initdb.d
+            
+    ribbon2-phppgadmin:
+         image: dockage/phppgadmin
+         environment:
+            - PHP_PG_ADMIN_SERVER_DESC=Ribbon2 DB
+            - PHP_PG_ADMIN_SERVER_HOST=ribbon2-postgresql
+         ports:
+            - 9001:80
