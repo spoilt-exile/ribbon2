@@ -103,7 +103,7 @@ public class MessageService {
             existingMessage.setDirectories(linkDirectories(message.getDirectoryNames()));
             existingMessage.setDirectoryNames(message.getDirectoryNames());
             existingMessage.setUpdated(ZonedDateTime.now());
-            existingMessage.setCreatedBy(user);
+            existingMessage.setUpdatedBy(user);
             checkDirectoryAccess(user, message.getDirectoryNames(), Message.PERMISSION_CAN_UPDATE_MESSAGE);
             return messageRepository.save(existingMessage);
         }
