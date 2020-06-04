@@ -30,11 +30,13 @@ import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.config.PropertyConfigProcessor;
 import tk.freaxsoftware.ribbon2.core.exception.CoreError;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
+import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
 import tk.freaxsoftware.ribbon2.gateway.routes.DirectoryRoutes;
 import tk.freaxsoftware.ribbon2.gateway.routes.GroupRoutes;
 import tk.freaxsoftware.ribbon2.gateway.routes.MessageRoutes;
 import tk.freaxsoftware.ribbon2.gateway.routes.UserRoutes;
+import tk.freaxsoftware.extras.bus.exceptions.NoSubscriptionMessageException;
 
 /**
  * Main class for API gateway.
@@ -79,6 +81,15 @@ public class GatewayMain {
             res.status(ex.getCode().getHttpCode());
             res.type("application/json");
             res.body(gson.toJson(new CoreError(ex)));
+        });
+        
+        Spark.exception(NoSubscriptionMessageException.class, (rex, req, res) -> {
+            LOGGER.error("Call error occurred:", rex);
+            CoreError error = new CoreError();
+            error.setCode(RibbonErrorCodes.CALL_ERROR);
+            error.setMessage(rex.getMessage());
+            res.status(RibbonErrorCodes.CALL_ERROR.getHttpCode());
+            res.body(gson.toJson(error));
         });
     }
 }
