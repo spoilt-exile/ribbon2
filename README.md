@@ -1,15 +1,26 @@
-Ribbon2 is a new generation news messaging system based on old Ribbon System. 
-It delivers similar concepts with completely new tech stack and features.
+Ribbon2 is concept of news message system for journalism and news agencies. It based on older Ribbon system but with complete new tech stack. System now built around micro-service architecture.
 
-### Key features compared to old Ribbon:
-1. Message content type doesn't limited to plain text;
-1. Message attachments like photos, docs and else;
-1. Distributed microservice architecture;
-1. Support of SQL databases;
-1. Independent infrastructure for import or export messages;
-1. Still not so demanding for hardware or memory;
+Current version: **1.0**
+
+### List of units
+ - `gateway` - REST api facade for units and also holder or user/group data;
+ - `directory-unit` - unit for holding tree of directories and permission data;
+ - `message-unit` - unit for holding messages;
+
+### Key features
+ - Docker support;
+ - High scability;
+ - Secure auth;
+ - Ability to create tree of directories for messages with transparent access control;
+ - Ability to post/edit/delete message in several directories;
+ - Open API;
+
+### Planned features
+ - Rich message options and properties support;
+ - Import/export to the system;
+ - Async API for critical API;
 
 ### Tech stack
-System based on Spark Java (REST API provider), MessageBus 4.0 and JOOQ.
+System based on Spark Java (REST API provider), MessageBus 5.2 and Ebean.
 
 Source code of Ribbon2 system distributed under terms of the GNU LGPLv3 license.
