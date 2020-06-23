@@ -62,6 +62,8 @@ public class MessageModel {
     private String content;
     
     private Set<String> tags;
+    
+    private Set<MessageProperty> properties;
 
     public Long getId() {
         return id;
@@ -149,5 +151,13 @@ public class MessageModel {
 
     public void setTags(Set<String> tags) {
         this.tags = tags;
+    }
+
+    public Set<MessageProperty> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Set<MessageProperty> properties) {
+        this.properties = properties;
     }
 }
