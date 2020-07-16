@@ -21,6 +21,7 @@ package tk.freaxsoftware.ribbon2.message.config;
 import java.util.Set;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionModel;
+import tk.freaxsoftware.ribbon2.core.data.request.MessagePropertyRegistrationRequest;
 
 /**
  * Config for message unit.
@@ -54,6 +55,8 @@ public class MessengerUnitConfig {
     
     public static class MessengerConfig {
         
+        private Set<MessagePropertyRegistrationRequest.Entry> propertyTypes;
+        
         private Set<DirectoryPermissionModel> permissions;
         
         private Boolean enablePermissionCaching;
@@ -84,9 +87,20 @@ public class MessengerUnitConfig {
             this.permissionCacheExpiry = permissionCacheExpiry;
         }
 
+        public Set<MessagePropertyRegistrationRequest.Entry> getPropertyTypes() {
+            return propertyTypes;
+        }
+
+        public void setPropertyTypes(Set<MessagePropertyRegistrationRequest.Entry> propertyTypes) {
+            this.propertyTypes = propertyTypes;
+        }
+
         @Override
         public String toString() {
-            return "{" + "permissions=" + permissions + ", enablePermissionCaching=" + enablePermissionCaching + ", permissionCacheExpiry=" + permissionCacheExpiry + '}';
+            return "{" + "permissions=" + permissions 
+                    + ", propertyTypes=" + propertyTypes
+                    + ", enablePermissionCaching=" + enablePermissionCaching 
+                    + ", permissionCacheExpiry=" + permissionCacheExpiry + '}';
         }
     }
 }

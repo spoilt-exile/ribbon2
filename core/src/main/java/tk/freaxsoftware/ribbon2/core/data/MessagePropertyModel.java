@@ -24,7 +24,7 @@ import java.time.ZonedDateTime;
  * Message property contains additional metadata for message.
  * @author Stanislav Nepochatov
  */
-public class MessageProperty {
+public class MessagePropertyModel {
     
     public final static String CALL_ADD_PROPERTY = "Ribbon.Global.AddMessageProperty";
     

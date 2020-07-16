@@ -23,6 +23,24 @@
                 "description": "Allows user to delete message",
                 "defaultValue": false
             }
+        ],
+        "propertyTypes": [
+            {
+                "type": "URGENT",
+                "description": "Urgent message mark."
+            },
+            {
+                "type": "MARK",
+                "description": "User note or comment."
+            },
+            {
+                "type": "COPYRIGHT",
+                "description": "Copyright on message content."
+            },
+            {
+                "type": "RELOCATED",
+                "description": "Relocated from directory."
+            }
         ]
     },
     "db": {

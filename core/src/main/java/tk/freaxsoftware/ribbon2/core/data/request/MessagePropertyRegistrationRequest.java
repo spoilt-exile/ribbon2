@@ -72,5 +72,10 @@ public class MessagePropertyRegistrationRequest {
         public void setDescription(String description) {
             this.description = description;
         }
+
+        @Override
+        public String toString() {
+            return "{" + "type=" + type + ", description=" + description + '}';
+        }
     }
 }

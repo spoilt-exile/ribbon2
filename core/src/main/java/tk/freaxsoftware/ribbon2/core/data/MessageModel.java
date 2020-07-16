@@ -63,7 +63,7 @@ public class MessageModel {
     
     private Set<String> tags;
     
-    private Set<MessageProperty> properties;
+    private Set<MessagePropertyModel> properties;
 
     public Long getId() {
         return id;
@@ -153,11 +153,11 @@ public class MessageModel {
         this.tags = tags;
     }
 
-    public Set<MessageProperty> getProperties() {
+    public Set<MessagePropertyModel> getProperties() {
         return properties;
     }
 
-    public void setProperties(Set<MessageProperty> properties) {
+    public void setProperties(Set<MessagePropertyModel> properties) {
         this.properties = properties;
     }
 }

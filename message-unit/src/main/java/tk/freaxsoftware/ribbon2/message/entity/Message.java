@@ -20,6 +20,7 @@ package tk.freaxsoftware.ribbon2.message.entity;
 
 import io.ebean.Model;
 import io.ebean.annotation.DbArray;
+import io.ebean.annotation.DbJsonB;
 import java.time.ZonedDateTime;
 import java.util.Set;
 import javax.persistence.Entity;
@@ -29,6 +30,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
+import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 
 /**
  * Message entity.
@@ -74,6 +76,9 @@ public class Message extends Model {
     
     @DbArray
     private Set<String> tags;
+    
+    @DbJsonB
+    private Set<MessagePropertyModel> properties;
 
     public Long getId() {
         return id;
@@ -169,6 +174,14 @@ public class Message extends Model {
 
     public void setTags(Set<String> tags) {
         this.tags = tags;
+    }
+
+    public Set<MessagePropertyModel> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Set<MessagePropertyModel> properties) {
+        this.properties = properties;
     }
     
 }
