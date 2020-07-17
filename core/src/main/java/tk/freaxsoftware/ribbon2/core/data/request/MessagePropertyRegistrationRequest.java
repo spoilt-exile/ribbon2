@@ -32,6 +32,13 @@ public class MessagePropertyRegistrationRequest {
     
     private List<Entry> propertyTypes;
 
+    public MessagePropertyRegistrationRequest() {}
+
+    public MessagePropertyRegistrationRequest(String tag, List<Entry> propertyTypes) {
+        this.tag = tag;
+        this.propertyTypes = propertyTypes;
+    }
+
     public String getTag() {
         return tag;
     }

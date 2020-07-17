@@ -32,9 +32,12 @@ import tk.freaxsoftware.ribbon2.message.config.MessengerUnitConfig;
 import tk.freaxsoftware.ribbon2.message.entity.converters.DirectoryConverter;
 import tk.freaxsoftware.ribbon2.message.facade.DirectoryFacade;
 import tk.freaxsoftware.ribbon2.message.facade.MessageFacade;
+import tk.freaxsoftware.ribbon2.message.facade.PropertyTypeFacade;
 import tk.freaxsoftware.ribbon2.message.repo.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.message.repo.MessageRepository;
+import tk.freaxsoftware.ribbon2.message.repo.PropertyTypeRepository;
 import tk.freaxsoftware.ribbon2.message.service.MessageService;
+import tk.freaxsoftware.ribbon2.message.service.PropertyTypeService;
 
 /**
  * Unit main class.
@@ -71,6 +74,7 @@ public class MessengerUnit {
         
         Init.init(config);
         
+        AnnotationUtil.subscribeReceiverInstance(new PropertyTypeFacade(new PropertyTypeService(new PropertyTypeRepository())));
         AnnotationUtil.subscribeReceiverInstance(new DirectoryFacade(new DirectoryRepository(), new DirectoryConverter()));
         AnnotationUtil.subscribeReceiverInstance(new MessageFacade(new MessageService(new DirectoryRepository(), new MessageRepository())));
     }

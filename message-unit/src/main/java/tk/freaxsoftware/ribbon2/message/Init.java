@@ -44,10 +44,12 @@ import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryPermissionHolder;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionModel;
 import tk.freaxsoftware.ribbon2.core.data.messagestorage.DbMessage;
+import tk.freaxsoftware.ribbon2.core.data.request.MessagePropertyRegistrationRequest;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonMessageExceptionHandler;
 import tk.freaxsoftware.ribbon2.message.config.MessengerUnitConfig;
 import tk.freaxsoftware.ribbon2.message.entity.Directory;
 import tk.freaxsoftware.ribbon2.message.entity.Message;
+import tk.freaxsoftware.ribbon2.message.entity.PropertyType;
 
 /**
  * Main init of the message unit.
@@ -82,6 +84,10 @@ public class Init {
         appendixMessages.add(new MessageHolder(DirectoryPermissionModel.CALL_INIT_PERMISSIONS, 
                 MessageOptions.Builder.newInstance().deliveryCall().async().build(),
                 new DirectoryPermissionHolder(config.getMessenger().getPermissions(), TAG)));
+        
+        appendixMessages.add(new MessageHolder(MessagePropertyRegistrationRequest.CALL_REGISTER_PROPERTY, 
+                MessageOptions.Builder.newInstance().deliveryCall().async().build(),
+                new MessagePropertyRegistrationRequest(TAG, config.getMessenger().getPropertyTypes())));
         
         if (!appendixMessages.isEmpty()) {
             MessengerUnit.executor.submit(() -> {
@@ -123,6 +129,7 @@ public class Init {
         config.addClass(DbMessage.class);
         config.addClass(Message.class);
         config.addClass(Directory.class);
+        config.addClass(PropertyType.class);
         Database database = DatabaseFactory.create(config);
     }
 }

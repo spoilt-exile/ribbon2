@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.message.config;
 
+import java.util.List;
 import java.util.Set;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionModel;
@@ -55,7 +56,7 @@ public class MessengerUnitConfig {
     
     public static class MessengerConfig {
         
-        private Set<MessagePropertyRegistrationRequest.Entry> propertyTypes;
+        private List<MessagePropertyRegistrationRequest.Entry> propertyTypes;
         
         private Set<DirectoryPermissionModel> permissions;
         
@@ -87,11 +88,11 @@ public class MessengerUnitConfig {
             this.permissionCacheExpiry = permissionCacheExpiry;
         }
 
-        public Set<MessagePropertyRegistrationRequest.Entry> getPropertyTypes() {
+        public List<MessagePropertyRegistrationRequest.Entry> getPropertyTypes() {
             return propertyTypes;
         }
 
-        public void setPropertyTypes(Set<MessagePropertyRegistrationRequest.Entry> propertyTypes) {
+        public void setPropertyTypes(List<MessagePropertyRegistrationRequest.Entry> propertyTypes) {
             this.propertyTypes = propertyTypes;
         }
 
