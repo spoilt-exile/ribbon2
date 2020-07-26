@@ -178,7 +178,10 @@ public class Message extends Model {
     }
 
     public Set<MessagePropertyModel> getProperties() {
-        return properties == null ? new HashSet<>() : properties;
+        if (properties == null) {
+            properties = new HashSet<>();
+        }
+        return properties;
     }
 
     public void setProperties(Set<MessagePropertyModel> properties) {

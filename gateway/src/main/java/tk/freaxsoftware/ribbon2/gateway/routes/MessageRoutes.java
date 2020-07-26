@@ -28,6 +28,7 @@ import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
+import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
 import tk.freaxsoftware.ribbon2.core.data.response.MessagePage;
@@ -103,6 +104,18 @@ public class MessageRoutes {
                     .deliveryCall().build(), MessageModel.class);
             res.type("application/json");
             return message;
+        }, GatewayMain.gson::toJson);
+        
+        post("/api/message/property/:uid", (req, res) -> {
+            MessagePropertyModel model = GatewayMain.gson.fromJson(req.body(), MessagePropertyModel.class);
+            LOGGER.info("Request to add message property {} with content {}", model.getType(), model.getContent());
+            MessagePropertyModel saved = MessageBus.fireCall(MessagePropertyModel.CALL_ADD_PROPERTY, model, MessageOptions.Builder.newInstance()
+                    .header(MessageModel.HEADER_MESSAGE_UID, req.params("uid"))
+                    .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                    .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                    .deliveryCall().build(), MessagePropertyModel.class);
+            res.type("application/json");
+            return saved;
         }, GatewayMain.gson::toJson);
     }
 }

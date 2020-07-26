@@ -18,6 +18,9 @@
  */
 package tk.freaxsoftware.ribbon2.message;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.ebean.Database;
 import io.ebean.DatabaseFactory;
 import io.ebean.config.AutoTuneConfig;
@@ -130,6 +133,12 @@ public class Init {
         config.addClass(Message.class);
         config.addClass(Directory.class);
         config.addClass(PropertyType.class);
+        
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        config.setObjectMapper(mapper);
+        
         Database database = DatabaseFactory.create(config);
     }
 }
