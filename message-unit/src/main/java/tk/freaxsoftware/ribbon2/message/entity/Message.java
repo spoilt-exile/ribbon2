@@ -79,7 +79,7 @@ public class Message extends Model {
     private Set<String> tags;
     
     @DbJsonB
-    private Set<MessagePropertyModel> properties = new HashSet<>();
+    private Set<MessagePropertyModel> properties;
 
     public Long getId() {
         return id;
@@ -178,7 +178,7 @@ public class Message extends Model {
     }
 
     public Set<MessagePropertyModel> getProperties() {
-        return properties;
+        return properties == null ? new HashSet<>() : properties;
     }
 
     public void setProperties(Set<MessagePropertyModel> properties) {

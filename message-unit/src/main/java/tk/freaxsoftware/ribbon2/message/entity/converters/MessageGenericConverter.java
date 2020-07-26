@@ -41,6 +41,7 @@ public class MessageGenericConverter implements Converter<Message, MessageModel>
         model.setHeader(source.getHeader());
         model.setTags(source.getTags());
         model.setDirectories(source.getDirectoryNames());
+        model.setProperties(source.getProperties());
         return model;
     }
 }

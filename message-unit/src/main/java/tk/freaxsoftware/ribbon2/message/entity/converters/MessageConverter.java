@@ -42,6 +42,7 @@ public class MessageConverter implements TwoWayConverter<MessageModel, Message> 
         model.setContent(destination.getContent());
         model.setTags(destination.getTags());
         model.setDirectories(destination.getDirectoryNames());
+        model.setProperties(destination.getProperties());
         return model;
     }
 
@@ -59,6 +60,7 @@ public class MessageConverter implements TwoWayConverter<MessageModel, Message> 
         message.setContent(source.getContent());
         message.setTags(source.getTags());
         message.setDirectoryNames(source.getDirectories());
+        message.setProperties(source.getProperties());
         return message;
     }
 }
