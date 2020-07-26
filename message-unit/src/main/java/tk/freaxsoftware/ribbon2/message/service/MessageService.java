@@ -185,7 +185,7 @@ public class MessageService {
      * @param uid message uid;
      * @param property message property to add;
      */
-    public void addMessageProperty(String user, String uid, MessagePropertyModel property) {
+    public MessagePropertyModel addMessageProperty(String user, String uid, MessagePropertyModel property) {
         LOGGER.info("Add property to message: property {}, user {}, uid {}", property.getType(), user, uid);
         checkPropertyType(property.getType());
         Message finded = messageRepository.findByUid(uid);
@@ -198,6 +198,7 @@ public class MessageService {
         property.setUid(UUID.randomUUID().toString());
         finded.getProperties().add(property);
         messageRepository.save(finded);
+        return property;
     }
     
     private void checkPropertyType(String type) {

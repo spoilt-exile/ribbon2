@@ -111,7 +111,9 @@ public class MessageFacade {
     public void addMessageProperty(MessageHolder<MessagePropertyModel> propertyMessage) {
         String userLogin = MessageUtils.getAuthFromHeader(propertyMessage);
         String uid = propertyMessage.getHeaders().get(MessageModel.HEADER_MESSAGE_UID);
-        messageService.addMessageProperty(uid, uid, propertyMessage.getContent());
+        MessagePropertyModel property = messageService.addMessageProperty(userLogin, uid, propertyMessage.getContent());
+        propertyMessage.setResponse(new ResponseHolder());
+        propertyMessage.getResponse().setContent(property);
     }
     
 }
