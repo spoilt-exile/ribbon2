@@ -45,19 +45,19 @@ import tk.freaxsoftware.ribbon2.message.service.PropertyTypeService;
  * @author Stanislav Nepochatov
  */
 public class MessengerUnit {
-    
+
     private final static Logger LOGGER = LoggerFactory.getLogger(MessengerUnit.class);
-    
+
     /**
      * Gson instance.
      */
     public static final Gson gson = GsonUtils.getGson();
-    
+
     /**
      * Current application config;
      */
     public static MessengerUnitConfig config;
-    
+
     /**
      * Available thread pool for various needs;
      */
@@ -71,12 +71,12 @@ public class MessengerUnit {
         config = gson.fromJson(IOUtils.toString(MessengerUnit.class.getClassLoader().getResourceAsStream("messageconfig.json")), MessengerUnitConfig.class);
         PropertyConfigProcessor.process(config.getDb());
         LOGGER.info("Messenger started, config: {}", config);
-        
+
         Init.init(config);
-        
+
         AnnotationUtil.subscribeReceiverInstance(new PropertyTypeFacade(new PropertyTypeService(new PropertyTypeRepository())));
         AnnotationUtil.subscribeReceiverInstance(new DirectoryFacade(new DirectoryRepository(), new DirectoryConverter()));
-        AnnotationUtil.subscribeReceiverInstance(new MessageFacade(new MessageService(new DirectoryRepository(), new MessageRepository())));
+        AnnotationUtil.subscribeReceiverInstance(new MessageFacade(new MessageService(new DirectoryRepository(), new MessageRepository(), new PropertyTypeRepository())));
     }
 
 }
