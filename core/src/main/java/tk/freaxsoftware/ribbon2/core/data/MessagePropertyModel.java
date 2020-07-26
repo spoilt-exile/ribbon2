@@ -19,6 +19,7 @@
 package tk.freaxsoftware.ribbon2.core.data;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 /**
  * Message property contains additional metadata for message.
@@ -28,6 +29,8 @@ public class MessagePropertyModel {
     
     public final static String CALL_ADD_PROPERTY = "Ribbon.Global.AddMessageProperty";
     
+    private String uid;
+    
     private String type;
     
     private String createdBy;
@@ -35,6 +38,14 @@ public class MessagePropertyModel {
     private ZonedDateTime created;
     
     private String content;
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
 
     public String getType() {
         return type;
@@ -66,6 +77,34 @@ public class MessagePropertyModel {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 47 * hash + Objects.hashCode(this.uid);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final MessagePropertyModel other = (MessagePropertyModel) obj;
+        if (!Objects.equals(this.uid, other.uid)) {
+            return false;
+        }
+        if (!Objects.equals(this.type, other.type)) {
+            return false;
+        }
+        return true;
     }
     
 }

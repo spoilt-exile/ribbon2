@@ -22,6 +22,7 @@ import io.ebean.Model;
 import io.ebean.annotation.DbArray;
 import io.ebean.annotation.DbJsonB;
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -78,7 +79,7 @@ public class Message extends Model {
     private Set<String> tags;
     
     @DbJsonB
-    private Set<MessagePropertyModel> properties;
+    private Set<MessagePropertyModel> properties = new HashSet<>();
 
     public Long getId() {
         return id;

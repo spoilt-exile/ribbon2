@@ -26,6 +26,7 @@ import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.ResponseHolder;
 import tk.freaxsoftware.extras.bus.annotation.Receive;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
+import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
 import tk.freaxsoftware.ribbon2.core.data.response.MessagePage;
 import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
@@ -104,6 +105,13 @@ public class MessageFacade {
         Message message = messageService.findMessage(userLogin, dir, uid);
         findMessage.setResponse(new ResponseHolder());
         findMessage.getResponse().setContent(converter.convertBack(message));
+    }
+    
+    @Receive(MessagePropertyModel.CALL_ADD_PROPERTY)
+    public void addMessageProperty(MessageHolder<MessagePropertyModel> propertyMessage) {
+        String userLogin = MessageUtils.getAuthFromHeader(propertyMessage);
+        String uid = propertyMessage.getHeaders().get(MessageModel.HEADER_MESSAGE_UID);
+        messageService.addMessageProperty(uid, uid, propertyMessage.getContent());
     }
     
 }

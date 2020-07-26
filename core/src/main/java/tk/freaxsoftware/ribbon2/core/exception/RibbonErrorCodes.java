@@ -40,7 +40,9 @@ public enum RibbonErrorCodes {
     PERMISSION_VALIDATION_FAILED(400),
     
     MESSAGE_NOT_FOUND(404),
-    MESSAGE_DIRECORIES_REQUIRED(400);
+    MESSAGE_DIRECORIES_REQUIRED(400),
+    
+    PROPERTY_TYPE_NOT_FOUND(404);
     
     private int httpCode;
     

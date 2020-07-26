@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
+import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryCheckAccessRequest;
 import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
@@ -41,11 +42,14 @@ import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.CALL_ERRO
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.DIRECTORY_NOT_FOUND;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.MESSAGE_DIRECORIES_REQUIRED;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.MESSAGE_NOT_FOUND;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.PROPERTY_TYPE_NOT_FOUND;
 import tk.freaxsoftware.ribbon2.message.MessengerUnit;
 import tk.freaxsoftware.ribbon2.message.entity.Directory;
 import tk.freaxsoftware.ribbon2.message.entity.Message;
+import tk.freaxsoftware.ribbon2.message.entity.PropertyType;
 import tk.freaxsoftware.ribbon2.message.repo.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.message.repo.MessageRepository;
+import tk.freaxsoftware.ribbon2.message.repo.PropertyTypeRepository;
 
 /**
  * Message service.
@@ -57,11 +61,15 @@ public class MessageService {
     
     private final DirectoryRepository directoryRepository;
     private final MessageRepository messageRepository;
+    private final PropertyTypeRepository propertyTypeRepository;
     private final Map<String, Instant> permissionCache;
 
-    public MessageService(DirectoryRepository directoryRepository, MessageRepository messageRepository) {
+    public MessageService(DirectoryRepository directoryRepository, 
+            MessageRepository messageRepository, 
+            PropertyTypeRepository propertyTypeRepository) {
         this.directoryRepository = directoryRepository;
         this.messageRepository = messageRepository;
+        this.propertyTypeRepository = propertyTypeRepository;
         if (MessengerUnit.config.getMessenger().getEnablePermissionCaching()) {
             permissionCache = new ConcurrentHashMap<>();
         } else {
@@ -82,6 +90,12 @@ public class MessageService {
         message.setCreated(ZonedDateTime.now());
         message.setCreatedBy(user);
         message.setDirectories(linkDirectories(message.getDirectoryNames()));
+        message.getProperties().forEach(pr -> {
+            checkPropertyType(pr.getType());
+            pr.setCreated(ZonedDateTime.now());
+            pr.setCreatedBy(user);
+            pr.setUid(UUID.randomUUID().toString());
+        });
         checkDirectoryAccess(user, message.getDirectoryNames(), Message.PERMISSION_CAN_CREATE_MESSAGE);
         return messageRepository.save(message);
     }
@@ -104,6 +118,15 @@ public class MessageService {
             existingMessage.setDirectoryNames(message.getDirectoryNames());
             existingMessage.setUpdated(ZonedDateTime.now());
             existingMessage.setUpdatedBy(user);
+            message.getProperties().forEach(pr -> {
+                if (!existingMessage.getProperties().contains(pr)) {
+                    checkPropertyType(pr.getType());
+                    pr.setCreated(ZonedDateTime.now());
+                    pr.setCreatedBy(user);
+                    pr.setUid(UUID.randomUUID().toString());
+                    existingMessage.getProperties().add(pr);
+                }
+            });
             checkDirectoryAccess(user, message.getDirectoryNames(), Message.PERMISSION_CAN_UPDATE_MESSAGE);
             return messageRepository.save(existingMessage);
         }
@@ -123,6 +146,66 @@ public class MessageService {
         }
         throw new CoreException(MESSAGE_NOT_FOUND, 
                 String.format("Message by UID %s not found!", uid));
+    }
+    
+    /**
+     * Finds page of messages by directory.
+     * @param user current user login;
+     * @param directory name of the directory;
+     * @param request pagination request;
+     * @return paged list of messages;
+     */
+    public PagedList<Message> findPage(String user, String directory, PaginationRequest request) {
+        LOGGER.info("Find messages paged: directory {}, user {}, request {}", directory, user, request);
+        checkDirectoryAccess(user, Set.of(directory), Message.PERMISSION_CAN_READ_MESSAGE);
+        return messageRepository.findPage(directory, request);
+    }
+    
+    /**
+     * Finds message by uid and directory.
+     * @param user current user login;
+     * @param directory name of the directory;
+     * @param uid message identeficator;
+     * @return finded message;
+     */
+    public Message findMessage(String user, String directory, String uid) {
+        LOGGER.info("Find message: directory {}, user {}, uid {}", directory, user, uid);
+        checkDirectoryAccess(user, Set.of(directory), Message.PERMISSION_CAN_READ_MESSAGE);
+        Message finded = messageRepository.findByUid(uid);
+        if (finded == null) {
+            throw new CoreException(MESSAGE_NOT_FOUND, 
+                    String.format("Message by UID %s not found!", uid));
+        }
+        return finded;
+    }
+    
+    /**
+     * Adds property to the message.
+     * @param user current user login;
+     * @param uid message uid;
+     * @param property message property to add;
+     */
+    public void addMessageProperty(String user, String uid, MessagePropertyModel property) {
+        LOGGER.info("Add property to message: property {}, user {}, uid {}", property.getType(), user, uid);
+        checkPropertyType(property.getType());
+        Message finded = messageRepository.findByUid(uid);
+        if (finded == null) {
+            throw new CoreException(MESSAGE_NOT_FOUND, 
+                    String.format("Message by UID %s not found!", uid));
+        }
+        property.setCreated(ZonedDateTime.now());
+        property.setCreatedBy(user);
+        property.setUid(UUID.randomUUID().toString());
+        finded.getProperties().add(property);
+        messageRepository.save(finded);
+    }
+    
+    private void checkPropertyType(String type) {
+        PropertyType propType = propertyTypeRepository.findByType(type);
+        if (propType == null) {
+            throw new CoreException(PROPERTY_TYPE_NOT_FOUND, 
+                    String.format("Property type %s not registered!", type));
+        }
     }
     
     private void checkDirectoryAccess(String user, Set<String> directories, String permission) {
@@ -191,36 +274,5 @@ public class MessageService {
             }
         }
         return directories;
-    }
-
-    /**
-     * Finds page of messages by directory.
-     * @param user current user login;
-     * @param directory name of the directory;
-     * @param request pagination request;
-     * @return paged list of messages;
-     */
-    public PagedList<Message> findPage(String user, String directory, PaginationRequest request) {
-        LOGGER.info("Find messages paged: directory {}, user {}, request {}", directory, user, request);
-        checkDirectoryAccess(user, Set.of(directory), Message.PERMISSION_CAN_READ_MESSAGE);
-        return messageRepository.findPage(directory, request);
-    }
-    
-    /**
-     * Finds message by uid and directory.
-     * @param user current user login;
-     * @param directory name of the directory;
-     * @param uid message identeficator;
-     * @return finded message;
-     */
-    public Message findMessage(String user, String directory, String uid) {
-        LOGGER.info("Find message: directory {}, user {}, uid {}", directory, user, uid);
-        checkDirectoryAccess(user, Set.of(directory), Message.PERMISSION_CAN_READ_MESSAGE);
-        Message finded = messageRepository.findByUid(uid);
-        if (finded == null) {
-            throw new CoreException(MESSAGE_NOT_FOUND, 
-                    String.format("Message by UID %s not found!", uid));
-        }
-        return finded;
     }
 }

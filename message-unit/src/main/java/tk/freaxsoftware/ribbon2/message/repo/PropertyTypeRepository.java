@@ -36,7 +36,7 @@ public class PropertyTypeRepository {
         DB.getDefault().find(PropertyType.class).where().eq("tag", tag).delete();
     }
     
-    public PropertyType findByTag(String type) {
+    public PropertyType findByType(String type) {
         return DB.getDefault().find(PropertyType.class).where().eq("type", type).findOne();
     }
     
