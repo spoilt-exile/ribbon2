@@ -16,39 +16,27 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package tk.freaxsoftware.ribbon2.io.core;
+package tk.freaxsoftware.ribbon2.io.core.importer;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import tk.freaxsoftware.ribbon2.core.data.MessageModel;
+import tk.freaxsoftware.ribbon2.io.core.IOMessage;
 
 /**
- * Main interface for IO modules.
+ * Import message main contract.
  * @author Stanislav Nepochatov
  */
-@Target(value=ElementType.TYPE)
-@Retention(value= RetentionPolicy.RUNTIME)
-public @interface IOModule {
+public interface ImportMessage extends IOMessage {
     
     /**
-     * Id of the module.
+     * Reads message from import source.
+     * @return message model;
      */
-    String id();
+    MessageModel getMessage();
     
     /**
-     * Name of module.
+     * Marks message in the import source as read. 
+     * So it shouldn't appear on next run.
      */
-    String name();
-    
-    /**
-     * Name of the module protocol.
-     */
-    String protocol();
-    
-    /**
-     * Required keys to config this module.
-     */
-    String[] requiredConfigKeys();
+    void markAsRead();
     
 }

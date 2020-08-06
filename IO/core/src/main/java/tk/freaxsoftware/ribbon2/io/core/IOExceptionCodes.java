@@ -18,37 +18,30 @@
  */
 package tk.freaxsoftware.ribbon2.io.core;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
- * Main interface for IO modules.
+ * Exception codes for IO exception.
  * @author Stanislav Nepochatov
  */
-@Target(value=ElementType.TYPE)
-@Retention(value= RetentionPolicy.RUNTIME)
-public @interface IOModule {
+public enum IOExceptionCodes {
     
     /**
-     * Id of the module.
+     * Error happend during extracting content from the source.
      */
-    String id();
+    IMPORT_ERROR,
     
     /**
-     * Name of module.
+     * Error happend during checking for unread messages in the source.
      */
-    String name();
+    IMPORT_CHECK_ERROR,
     
     /**
-     * Name of the module protocol.
+     * Error happend on processing messages after import.
      */
-    String protocol();
+    PROCESSING_ERROR,
     
     /**
-     * Required keys to config this module.
+     * Error happend on marking messages as read.
      */
-    String[] requiredConfigKeys();
+    MARK_ERROR;
     
 }

@@ -19,23 +19,25 @@
 package tk.freaxsoftware.ribbon2.io.core;
 
 /**
- * Importer methods inteface.
+ * Exception designed for input/output error handling.
  * @author Stanislav Nepochatov
  */
-public interface Importer {
+public class InputOutputException extends RuntimeException {
     
-    /**
-     * Inits import module. Can be also used for reinit module, so 
-     * it should also reset it's state.
-     * @param scheme import scheme to apply;
-     */
-    void init(IOScheme scheme);
-    
-    /**
-     * Run import task. Opens source of messages and import them into 
-     * system. Should mark imported messages so they mustn't be duplicated during 
-     * next run.
-     */
-    void runImport();
+    private final IOExceptionCodes code;
+
+    public InputOutputException(IOExceptionCodes code, String message) {
+        super(message);
+        this.code = code;
+    }
+
+    public InputOutputException(IOExceptionCodes code, String message, Throwable cause) {
+        super(message, cause);
+        this.code = code;
+    }
+
+    public IOExceptionCodes getCode() {
+        return code;
+    }
     
 }

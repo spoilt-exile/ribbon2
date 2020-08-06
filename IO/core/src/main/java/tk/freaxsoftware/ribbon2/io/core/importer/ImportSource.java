@@ -16,28 +16,27 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package tk.freaxsoftware.ribbon2.io.core;
+package tk.freaxsoftware.ribbon2.io.core.importer;
 
-import tk.freaxsoftware.ribbon2.core.data.MessageModel;
+import java.util.List;
+import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 
 /**
- * Exporter methods inteface.
+ * Represents any import message source. Provides methods for the handling import queue.
  * @author Stanislav Nepochatov
  */
-public interface Exporter {
+public interface ImportSource {
     
     /**
-     * Inits export module. Can be also used for reinit module, so 
-     * it should also reset it's state.
-     * @param scheme import scheme to apply;
+     * Get current scheme.
+     * @return current import scheme;
      */
-    void init(IOScheme scheme);
+    IOScheme getScheme();
     
     /**
-     * Runs export task for specified message. After export should 
-     * add properties to it.
-     * @param message message to export;
+     * Get list of new unread messages from source.
+     * @return list of messages to process;
      */
-    void runExport(MessageModel message);
+    List<ImportMessage> getUnreadMessages();
     
 }

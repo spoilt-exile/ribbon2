@@ -16,39 +16,21 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package tk.freaxsoftware.ribbon2.io.core;
+package tk.freaxsoftware.ribbon2.io.core.importer;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 
 /**
- * Main interface for IO modules.
+ * Importer methods inteface.
  * @author Stanislav Nepochatov
  */
-@Target(value=ElementType.TYPE)
-@Retention(value= RetentionPolicy.RUNTIME)
-public @interface IOModule {
+public interface Importer {
     
     /**
-     * Id of the module.
+     * Creats source for specified import scheme.
+     * @param scheme import scheme;
+     * @return initialized import source for processing messages;
      */
-    String id();
-    
-    /**
-     * Name of module.
-     */
-    String name();
-    
-    /**
-     * Name of the module protocol.
-     */
-    String protocol();
-    
-    /**
-     * Required keys to config this module.
-     */
-    String[] requiredConfigKeys();
+    ImportSource createSource(IOScheme scheme);
     
 }

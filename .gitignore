@@ -3,3 +3,5 @@
 /message-unit/target/
 /authprovider/target/
 /IO/core/target/
+/IO/io-unit/target/
+/IO/importers/importer-plain/target/

@@ -6,16 +6,16 @@
         <artifactId>IO</artifactId>
         <version>1.0</version>
     </parent>
-    <groupId>tk.freaxsoftware.ribbon2.io</groupId>
-    <artifactId>core</artifactId>
+    <groupId>tk.freaxsoftware.ribbon2.io.unit</groupId>
+    <artifactId>io-unit</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
-    <name>Ribbon2 IO Core</name>
-    <description>Core for input/output system;</description>
+    <name>Ribbon2 IO Unit</name>
+    <description>Main unit to launch importers/exporters;</description>
     <developers>
         <developer>
             <id>spoilt</id>
@@ -36,6 +36,11 @@
             <groupId>tk.freaxsoftware.ribbon2</groupId>
             <artifactId>core</artifactId>
             <version>2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>tk.freaxsoftware.ribbon2.io</groupId>
+            <artifactId>core</artifactId>
+            <version>1.0</version>
         </dependency>
     </dependencies>
 </project>

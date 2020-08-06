@@ -18,37 +18,22 @@
  */
 package tk.freaxsoftware.ribbon2.io.core;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
- * Main interface for IO modules.
+ * General contract for input/output message.
  * @author Stanislav Nepochatov
  */
-@Target(value=ElementType.TYPE)
-@Retention(value= RetentionPolicy.RUNTIME)
-public @interface IOModule {
+public interface IOMessage {
     
     /**
-     * Id of the module.
+     * Gets unique id of the message.
+     * @return id of the message;
      */
-    String id();
+    String getId();
     
     /**
-     * Name of module.
+     * Gets header of the message (if possible).
+     * @return header of the message;
      */
-    String name();
-    
-    /**
-     * Name of the module protocol.
-     */
-    String protocol();
-    
-    /**
-     * Required keys to config this module.
-     */
-    String[] requiredConfigKeys();
+    String getHeader();
     
 }

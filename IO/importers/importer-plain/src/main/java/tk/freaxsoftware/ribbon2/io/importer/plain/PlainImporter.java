@@ -16,39 +16,24 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package tk.freaxsoftware.ribbon2.io.core;
+package tk.freaxsoftware.ribbon2.io.importer.plain;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import tk.freaxsoftware.ribbon2.io.core.IOModule;
+import tk.freaxsoftware.ribbon2.io.core.IOScheme;
+import tk.freaxsoftware.ribbon2.io.core.importer.ImportSource;
+import tk.freaxsoftware.ribbon2.io.core.importer.Importer;
 
 /**
- * Main interface for IO modules.
+ * Plain text importer.
  * @author Stanislav Nepochatov
  */
-@Target(value=ElementType.TYPE)
-@Retention(value= RetentionPolicy.RUNTIME)
-public @interface IOModule {
-    
-    /**
-     * Id of the module.
-     */
-    String id();
-    
-    /**
-     * Name of module.
-     */
-    String name();
-    
-    /**
-     * Name of the module protocol.
-     */
-    String protocol();
-    
-    /**
-     * Required keys to config this module.
-     */
-    String[] requiredConfigKeys();
+@IOModule(id = "import:plain", name = "Plain text importer", 
+        protocol = "plain", requiredConfigKeys = {"plainFolderPath", "plainFileMask"})
+public class PlainImporter implements Importer {
+
+    @Override
+    public ImportSource createSource(IOScheme scheme) {
+        return new PlainImportSource(scheme);
+    }
     
 }
