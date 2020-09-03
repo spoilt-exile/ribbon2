@@ -11,7 +11,7 @@
     <version>1.0</version>
     <modules>
         <module>core</module>
-        <module>io-unit</module>
+        <module>exchanger-unit</module>
         <module>importers</module>
     </modules>
     <name>Ribbon2 IO</name>

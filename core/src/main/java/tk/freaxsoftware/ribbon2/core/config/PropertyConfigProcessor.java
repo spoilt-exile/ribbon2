@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Processing db config by using system properties.
+ * @deprecated use EnvironmentOverrider instead;
+ * @see EnvironmentOverrider
  * @author Stanislav Nepochatov
  */
 public class PropertyConfigProcessor {
