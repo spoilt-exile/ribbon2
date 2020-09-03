@@ -1,0 +1,26 @@
+{
+    "exchanger": {
+        "importPermissions": [
+            {
+                "key": "canAssignImport",
+                "description": "Can add import scheme on directory",
+                "defaultValue": false
+            }
+        ],
+        "exportPermissions": [
+            {
+                "key": "canAssignExport",
+                "description": "Can add export scheme on directory",
+                "defaultValue": false
+            }
+        ],
+        "type": "IMPORT",
+        "classes": []
+    },
+    "db": {
+        "jdbcUrl": "jdbc:postgresql://localhost:5432/ribbon2-exchange",
+        "driver": "org.postgresql.ds.PGSimpleDataSource",
+        "username": "ribbon2",
+        "password": "ribbon2"
+    }
+}

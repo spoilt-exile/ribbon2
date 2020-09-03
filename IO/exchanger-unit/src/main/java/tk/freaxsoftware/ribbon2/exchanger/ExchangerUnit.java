@@ -1,0 +1,92 @@
+/*
+ * This file is part of Ribbon2 news message system.
+ * 
+ * Copyright (C) 2020 Freax Software
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3.0 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library.
+ */
+package tk.freaxsoftware.ribbon2.exchanger;
+
+import com.google.gson.Gson;
+import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import spark.utils.IOUtils;
+import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
+import tk.freaxsoftware.ribbon2.core.config.DbConfig;
+import tk.freaxsoftware.ribbon2.core.config.EnvironmentOverrider;
+import tk.freaxsoftware.ribbon2.exchanger.config.ExchangerUnitConfig;
+import tk.freaxsoftware.ribbon2.exchanger.config.ExchangerUnitConfig.ExchangerConfig;
+import tk.freaxsoftware.ribbon2.io.core.ModuleType;
+
+/**
+ * Main class of Exchanger Unit.
+ * @author Stanislav Nepochatov
+ */
+public class ExchangerUnit {
+    
+    private final static Logger LOGGER = LoggerFactory.getLogger(ExchangerUnit.class);
+    
+    /**
+     * Gson instance.
+     */
+    public static final Gson gson = GsonUtils.getGson();
+    
+    /**
+     * Current application config;
+     */
+    public static ExchangerUnitConfig config;
+    
+    /**
+     * Available thread pool for various needs;
+     */
+    public static ExecutorService executor = Executors.newFixedThreadPool(4);  
+    
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) throws IOException {
+        LOGGER.info("\n{}", IOUtils.toString(ExchangerUnit.class.getClassLoader().getResourceAsStream("header")));
+        config = gson.fromJson(IOUtils.toString(ExchangerUnitConfig.class.getClassLoader().getResourceAsStream("exchangerconfig.json")), ExchangerUnitConfig.class);
+        processConfig(config);
+        LOGGER.info("Exchanger started, config: {}", config);
+        
+        if (config.getExchanger().getType() == ModuleType.IMPORT && config.getExchanger().getClasses().length > 1) {
+            LOGGER.error("Only single import module can be enabled!");
+            System.exit(1);
+        }
+        
+        Init.init(config);
+    }
+    
+    private static void processConfig(ExchangerUnitConfig config) {
+        EnvironmentOverrider overrider = new EnvironmentOverrider();
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ExchangerConfig>("EXCHANGER_TYPE", 
+                ExchangerUnitConfig.ExchangerConfig.class, (conf, property) -> conf.setType(ModuleType.valueOf(property))));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ExchangerConfig>("EXCHANGER_CLASSES", 
+                ExchangerUnitConfig.ExchangerConfig.class, (conf, property) -> conf.setClasses(property.split(","))));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_JDBC_URL", 
+                DbConfig.class, (conf, property) -> conf.setJdbcUrl(property)));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_USERNAME", 
+                DbConfig.class, (conf, property) -> conf.setUsername(property)));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_PASSWORD", 
+                DbConfig.class, (conf, property) -> conf.setPassword(property)));
+        
+        overrider.processConfig(config.getExchanger());
+        overrider.processConfig(config.getDb());
+    }
+    
+}
