@@ -15,7 +15,9 @@
             }
         ],
         "type": "IMPORT",
-        "classes": []
+        "classes": [
+            "tk.freaxsoftware.ribbon2.io.importer.plain.PlainImporter"
+        ]
     },
     "db": {
         "jdbcUrl": "jdbc:postgresql://localhost:5432/ribbon2-exchange",

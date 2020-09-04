@@ -30,6 +30,9 @@ import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 import tk.freaxsoftware.ribbon2.core.config.EnvironmentOverrider;
 import tk.freaxsoftware.ribbon2.exchanger.config.ExchangerUnitConfig;
 import tk.freaxsoftware.ribbon2.exchanger.config.ExchangerUnitConfig.ExchangerConfig;
+import tk.freaxsoftware.ribbon2.exchanger.converters.SchemeConverter;
+import tk.freaxsoftware.ribbon2.exchanger.engine.ImportEngine;
+import tk.freaxsoftware.ribbon2.exchanger.repository.SchemeRepository;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
 
 /**
@@ -70,6 +73,10 @@ public class ExchangerUnit {
         }
         
         Init.init(config);
+        if (config.getExchanger().getType() == ModuleType.IMPORT) {
+            ImportEngine engine = new ImportEngine(config.getExchanger().getClasses(), new SchemeRepository(), new SchemeConverter());
+            engine.start();
+        }
     }
     
     private static void processConfig(ExchangerUnitConfig config) {

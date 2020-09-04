@@ -49,9 +49,9 @@
             
             CREATE TABLE io_scheme (
                 id bigint NOT NULL,
-                name character varying(255) NOT NULL,
+                name character varying(255) UNIQUE NOT NULL,
                 description character varying(1024) NOT NULL,
-                module_id character varying(255) NOT NULL,
+                module_id character varying(255) UNIQUE NOT NULL,
                 type character varying(255) NOT NULL,
                 protocol character varying(255) NOT NULL,
                 config jsonb NOT NULL,

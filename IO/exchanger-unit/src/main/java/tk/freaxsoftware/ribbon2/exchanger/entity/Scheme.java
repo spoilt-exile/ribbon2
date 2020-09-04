@@ -25,6 +25,8 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
@@ -46,6 +48,7 @@ public class Scheme extends Model implements Serializable {
     
     private String moduleId;
     
+    @Enumerated(EnumType.STRING)
     private ModuleType type;
     
     private String protocol;
