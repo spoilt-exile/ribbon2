@@ -32,6 +32,8 @@
                 message_id character varying(512) NOT NULL,
                 header character varying(1024) NOT NULL,
                 directory character varying(2048) NOT NULL,
+                io_scheme character varying(255) NOT NULL,
+                uid character varying(255) NOT NULL UNIQUE,
                 date timestamp with time zone NOT NULL
             );
             

@@ -32,6 +32,7 @@ import tk.freaxsoftware.ribbon2.exchanger.config.ExchangerUnitConfig;
 import tk.freaxsoftware.ribbon2.exchanger.config.ExchangerUnitConfig.ExchangerConfig;
 import tk.freaxsoftware.ribbon2.exchanger.converters.SchemeConverter;
 import tk.freaxsoftware.ribbon2.exchanger.engine.ImportEngine;
+import tk.freaxsoftware.ribbon2.exchanger.repository.RegisterRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.SchemeRepository;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
 
@@ -56,7 +57,7 @@ public class ExchangerUnit {
     /**
      * Available thread pool for various needs;
      */
-    public static ExecutorService executor = Executors.newFixedThreadPool(4);  
+    public static ExecutorService executor = Executors.newFixedThreadPool(4);
     
     /**
      * @param args the command line arguments
@@ -67,14 +68,9 @@ public class ExchangerUnit {
         processConfig(config);
         LOGGER.info("Exchanger started, config: {}", config);
         
-        if (config.getExchanger().getType() == ModuleType.IMPORT && config.getExchanger().getClasses().length > 1) {
-            LOGGER.error("Only single import module can be enabled!");
-            System.exit(1);
-        }
-        
         Init.init(config);
         if (config.getExchanger().getType() == ModuleType.IMPORT) {
-            ImportEngine engine = new ImportEngine(config.getExchanger().getClasses(), new SchemeRepository(), new SchemeConverter());
+            ImportEngine engine = new ImportEngine(config.getExchanger().getClasses(), new SchemeRepository(), new SchemeConverter(), new RegisterRepository());
             engine.start();
         }
     }

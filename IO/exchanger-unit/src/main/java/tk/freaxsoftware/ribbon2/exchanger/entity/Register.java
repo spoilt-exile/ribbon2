@@ -20,6 +20,7 @@ package tk.freaxsoftware.ribbon2.exchanger.entity;
 
 import io.ebean.Model;
 import java.time.ZonedDateTime;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
@@ -42,7 +43,25 @@ public class Register extends Model {
     
     private String directory;
     
+    @Column(name = "io_scheme")
+    private String scheme;
+    
+    private String uid;
+    
     private ZonedDateTime date;
+
+    public Register() {
+    }
+
+    public Register(String moduleId, String messageId, String header, String directory, String scheme, String uid) {
+        this.moduleId = moduleId;
+        this.messageId = messageId;
+        this.header = header;
+        this.directory = directory;
+        this.scheme = scheme;
+        this.uid = uid;
+        this.date = ZonedDateTime.now();
+    }
 
     public Long getId() {
         return id;
@@ -91,5 +110,20 @@ public class Register extends Model {
     public void setDate(ZonedDateTime date) {
         this.date = date;
     }
-    
+
+    public String getScheme() {
+        return scheme;
+    }
+
+    public void setScheme(String scheme) {
+        this.scheme = scheme;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
 }

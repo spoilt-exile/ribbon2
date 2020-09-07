@@ -34,6 +34,18 @@ public class ModuleRegistration {
     
     private String[] schemes;
 
+    public ModuleRegistration() {
+    }
+
+    public ModuleRegistration(String id, ModuleType type, String protocol, 
+            String[] requiredConfigKeys, String[] schemes) {
+        this.id = id;
+        this.type = type;
+        this.protocol = protocol;
+        this.requiredConfigKeys = requiredConfigKeys;
+        this.schemes = schemes;
+    }
+
     public String getId() {
         return id;
     }
@@ -74,4 +86,18 @@ public class ModuleRegistration {
         this.schemes = schemes;
     }
     
+    public String schemeSaveTopic() {
+        return String.format("%s.%s.%s", IOLocalIds.IO_SCHEME_SAVE_TOPIC, 
+                type.name().toLowerCase(), protocol);
+    }
+    
+    public String schemeGetTopic() {
+        return String.format("%s.%s.%s", IOLocalIds.IO_SCHEME_GET_TOPIC, 
+                type.name().toLowerCase(), protocol);
+    }
+    
+    public String schemeDeleteTopic() {
+        return String.format("%s.%s.%s", IOLocalIds.IO_SCHEME_DELETE_TOPIC, 
+                type.name().toLowerCase(), protocol);
+    }
 }

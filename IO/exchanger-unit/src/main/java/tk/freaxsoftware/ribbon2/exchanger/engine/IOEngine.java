@@ -23,9 +23,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tk.freaxsoftware.extras.bus.MessageBus;
+import tk.freaxsoftware.extras.bus.MessageOptions;
+import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
+import tk.freaxsoftware.ribbon2.io.core.ModuleRegistration;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
 import tk.freaxsoftware.ribbon2.io.core.exporter.Exporter;
 import tk.freaxsoftware.ribbon2.io.core.importer.Importer;
@@ -101,6 +107,15 @@ public abstract class IOEngine<T> {
         return modules.stream().filter(m -> Objects.equals(m.getModuleData().id(), moduleId)).findFirst();
     }
     
+    protected void sendRegistration(ModuleWrapper<T> wrapper, ModuleType type, Set<String> schemes) {
+        ModuleRegistration registration = new ModuleRegistration(wrapper.getModuleData().id(), 
+                type, wrapper.getModuleData().protocol(), wrapper.getModuleData().requiredConfigKeys(), 
+                schemes.toArray(new String[schemes.size()]));
+        MessageBus.fire(IOLocalIds.IO_REGISTER_TOPIC, registration, 
+                MessageOptions.Builder.newInstance().deliveryNotification()
+                        .async().pointToPoint().build());
+    }
+    
     /**
      * Wrapper for modules.
      * @param <T> type of module;
@@ -110,11 +125,15 @@ public abstract class IOEngine<T> {
         private IOModule moduleData;
         
         private T moduleInstance;
+        
+        private Set<String> schemes;
 
         public ModuleWrapper() {
+            schemes = new CopyOnWriteArraySet();
         }
 
         public ModuleWrapper(IOModule moduleData, T moduleInstance) {
+            this();
             this.moduleData = moduleData;
             this.moduleInstance = moduleInstance;
         }
@@ -133,6 +152,14 @@ public abstract class IOEngine<T> {
 
         public void setModuleInstance(T moduleInstance) {
             this.moduleInstance = moduleInstance;
+        }
+
+        public Set<String> getSchemes() {
+            return schemes;
+        }
+
+        public void setSchemes(Set<String> schemes) {
+            this.schemes = schemes;
         }
         
     }

@@ -39,6 +39,14 @@ public class MessagePropertyModel {
     
     private String content;
 
+    public MessagePropertyModel() {
+    }
+
+    public MessagePropertyModel(String type, String content) {
+        this.type = type;
+        this.content = content;
+    }
+
     public String getUid() {
         return uid;
     }
