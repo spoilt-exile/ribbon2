@@ -25,13 +25,17 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.utils.IOUtils;
+import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 import tk.freaxsoftware.ribbon2.core.config.EnvironmentOverrider;
 import tk.freaxsoftware.ribbon2.exchanger.config.ExchangerUnitConfig;
 import tk.freaxsoftware.ribbon2.exchanger.config.ExchangerUnitConfig.ExchangerConfig;
+import tk.freaxsoftware.ribbon2.exchanger.converters.DirectoryConverter;
 import tk.freaxsoftware.ribbon2.exchanger.converters.SchemeConverter;
 import tk.freaxsoftware.ribbon2.exchanger.engine.ImportEngine;
+import tk.freaxsoftware.ribbon2.exchanger.facade.DirectoryFacade;
+import tk.freaxsoftware.ribbon2.exchanger.repository.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.RegisterRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.SchemeRepository;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
@@ -70,17 +74,21 @@ public class ExchangerUnit {
         
         Init.init(config);
         if (config.getExchanger().getType() == ModuleType.IMPORT) {
-            ImportEngine engine = new ImportEngine(config.getExchanger().getClasses(), new SchemeRepository(), new SchemeConverter(), new RegisterRepository());
+            ImportEngine engine = new ImportEngine(new String[] {config.getExchanger().getModuleClass()}, 
+                    new SchemeRepository(), new SchemeConverter(), new RegisterRepository(), 
+                    new DirectoryRepository());
             engine.start();
-        }
+        } 
+        // TODO: add export here.
+        AnnotationUtil.subscribeReceiverInstance(new DirectoryFacade(new DirectoryRepository(), new DirectoryConverter()));
     }
     
     private static void processConfig(ExchangerUnitConfig config) {
         EnvironmentOverrider overrider = new EnvironmentOverrider();
         overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ExchangerConfig>("EXCHANGER_TYPE", 
                 ExchangerUnitConfig.ExchangerConfig.class, (conf, property) -> conf.setType(ModuleType.valueOf(property))));
-        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ExchangerConfig>("EXCHANGER_CLASSES", 
-                ExchangerUnitConfig.ExchangerConfig.class, (conf, property) -> conf.setClasses(property.split(","))));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ExchangerConfig>("EXCHANGER_CLASS", 
+                ExchangerUnitConfig.ExchangerConfig.class, (conf, property) -> conf.setModuleClass(property)));
         overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_JDBC_URL", 
                 DbConfig.class, (conf, property) -> conf.setJdbcUrl(property)));
         overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_USERNAME", 

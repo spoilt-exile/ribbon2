@@ -5,7 +5,7 @@
     },
     "bridgeServer": {
         "nested": false,
-        "httpPort": 9101,
+        "httpPort": 9102,
         "sparkThreadPoolMaxSize": 16
     },
     "bridgeClient": {
@@ -13,13 +13,13 @@
         "port": 9000,
         "heartbeatRate": 30,
         "crossConnectionsDemand": [
+            "Ribbon.Global.CreateMessage",
+            "Ribbon.Property.Register"
+        ],
+        "crossConnectionsOffer": [
             "Ribbon.Global.Notification.DirectoryCreated",
             "Ribbon.Global.Notification.DirectoryUpdated",
             "Ribbon.Global.Notification.DirectoryDeleted"
-        ],
-        "crossConnectionsOffer": [
-            "Ribbon.Global.CheckDirectoryAccess",
-            "Ribbon.Global.InitPermissions"
         ]
     },
     "storage": {

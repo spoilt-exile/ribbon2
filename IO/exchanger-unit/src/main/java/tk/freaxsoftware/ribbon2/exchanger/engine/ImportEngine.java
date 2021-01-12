@@ -35,6 +35,7 @@ import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.exchanger.converters.SchemeConverter;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Register;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Scheme;
+import tk.freaxsoftware.ribbon2.exchanger.repository.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.RegisterRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.SchemeRepository;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
@@ -61,14 +62,18 @@ public class ImportEngine extends IOEngine<Importer> {
     
     private final RegisterRepository registerRepository;
     
+    private final DirectoryRepository directoryRepository;
+    
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
 
     public ImportEngine(String[] classes, SchemeRepository schemeRepository, 
-            SchemeConverter schemeConverter, RegisterRepository registerRepository) {
+            SchemeConverter schemeConverter, RegisterRepository registerRepository,
+            DirectoryRepository directoryRepository) {
         super(ModuleType.IMPORT, classes);
         this.schemeRepository = schemeRepository;
         this.schemeConverter = schemeConverter;
         this.registerRepository = registerRepository;
+        this.directoryRepository = directoryRepository;
     }
 
     @Override
@@ -83,7 +88,7 @@ public class ImportEngine extends IOEngine<Importer> {
                 if (isConfigValid(scheme.getConfig(), wrapper.getModuleData().requiredConfigKeys())) {
                     LOGGER.info("Launching import for scheme {} by module {}", scheme.getName(), wrapper.getModuleData().id());
                     ImportSource source = wrapper.getModuleInstance().createSource(schemeConverter.convert(scheme));
-                    scheduler.scheduleAtFixedRate(new ImportTask(source, registerRepository), 0, 
+                    scheduler.scheduleAtFixedRate(new ImportTask(source, registerRepository, directoryRepository), 0, 
                             (long) scheme.getConfig().get(GENERAL_TIMEOUT_KEY), TimeUnit.SECONDS);
                     wrapper.getSchemes().add(scheme.getName());
                 } else {
@@ -108,15 +113,22 @@ public class ImportEngine extends IOEngine<Importer> {
         return true;
     }
     
+    /**
+     * Import task routine: reads messages from source, tries to send and then marks them as sended.
+     */
     private static class ImportTask implements Runnable {
         
         private final ImportSource importSource;
         
         private final RegisterRepository registerRepository;
+        
+        private final DirectoryRepository directoryRepository;
 
-        public ImportTask(ImportSource importSource, RegisterRepository registerRepository) {
+        public ImportTask(ImportSource importSource, RegisterRepository registerRepository, 
+                DirectoryRepository directoryRepository) {
             this.importSource = importSource;
             this.registerRepository = registerRepository;
+            this.directoryRepository = directoryRepository;
         }
 
         @Override
@@ -137,6 +149,9 @@ public class ImportEngine extends IOEngine<Importer> {
                         registerRepository.saveRegisterRecord(importSource.getScheme().getId(), message.getId(), 
                                 message.getHeader(), (String) importSource.getScheme().getConfig().get(GENERAL_DIRECTORY), 
                                 importSource.getScheme().getName(), uid);
+                        LOGGER.info("Message {} : {} imported by module {} via {} scheme.", 
+                                uid, message.getHeader(), importSource.getScheme().getId(), 
+                                importSource.getScheme().getName());
                     } catch (Exception ex) {
                         LOGGER.error("Error on processing message {} during import of scheme {} for module {}",
                                 message.getId(),
@@ -153,16 +168,20 @@ public class ImportEngine extends IOEngine<Importer> {
         
         private String processMessage(IOScheme scheme, ImportMessage message) throws Exception {
             MessageModel messageModel = message.getMessage();
-//            if (messageModel.getDirectories() == null || (messageModel.getDirectories() != null 
-//                    && messageModel.getDirectories().isEmpty())) {
-//                if (scheme.getConfig().containsKey(GENERAL_DIRECTORY)) {
-//                    messageModel.setDirectories(Set.of((String) scheme.getConfig().get(GENERAL_DIRECTORY)));
-//                } else {
-//                    throw new IllegalArgumentException("Can't process message: no directory configured nor module doesn't set them.");
-//                }
-//            }
+            if (messageModel.getDirectories() == null || (messageModel.getDirectories() != null 
+                    && messageModel.getDirectories().isEmpty())) {
+                if (scheme.getConfig().containsKey(GENERAL_DIRECTORY)) {
+                    messageModel.setDirectories(Set.of((String) scheme.getConfig().get(GENERAL_DIRECTORY)));
+                } else {
+                    throw new IllegalArgumentException("Can't process message: no directory configured nor module doesn't set them.");
+                }
+            }
+            
+            String dir = messageModel.getDirectories().iterator().next();
+            if (directoryRepository.findByFullName(dir) == null) {
+                throw new IllegalArgumentException(String.format("Can't process message: specified directory %s not available!", dir));
+            }
 
-            messageModel.setDirectories(Set.of((String) scheme.getConfig().get(GENERAL_DIRECTORY)));
             messageModel.setProperties(Set.of(new MessagePropertyModel(scheme.getId(), scheme.getName())));
             MessageModel sent = sendMessage(messageModel);
             return sent.getUid();

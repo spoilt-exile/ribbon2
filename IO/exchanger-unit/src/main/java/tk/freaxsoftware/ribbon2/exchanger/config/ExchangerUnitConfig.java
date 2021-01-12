@@ -58,7 +58,7 @@ public class ExchangerUnitConfig {
         
         private ModuleType type;
         
-        private String[] classes;
+        private String moduleClass;
         
         private Set<DirectoryPermissionModel> importPermissions;
         
@@ -72,12 +72,12 @@ public class ExchangerUnitConfig {
             this.type = type;
         }
 
-        public String[] getClasses() {
-            return classes;
+        public String getModuleClass() {
+            return moduleClass;
         }
 
-        public void setClasses(String[] classes) {
-            this.classes = classes;
+        public void setModuleClass(String moduleClass) {
+            this.moduleClass = moduleClass;
         }
 
         public Set<DirectoryPermissionModel> getImportPermissions() {
@@ -98,7 +98,7 @@ public class ExchangerUnitConfig {
 
         @Override
         public String toString() {
-            return "{" + "type=" + type + ", classes=" + classes + ", importPermissions=" + importPermissions + ", exportPermissions=" + exportPermissions + '}';
+            return "{" + "type=" + type + ", moduleClass=" + moduleClass + ", importPermissions=" + importPermissions + ", exportPermissions=" + exportPermissions + '}';
         }
     }
 }

@@ -20,6 +20,7 @@ package tk.freaxsoftware.ribbon2.exchanger.engine;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
+import tk.freaxsoftware.ribbon2.core.data.request.MessagePropertyRegistrationRequest;
 import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
 import tk.freaxsoftware.ribbon2.io.core.ModuleRegistration;
@@ -103,15 +105,32 @@ public abstract class IOEngine<T> {
         }
     }
     
+    /**
+     * Get module by string id (type:protocol);
+     * @param moduleId string form of module id;
+     * @return optional of the module;
+     */
     protected Optional<ModuleWrapper<T>> getModule(String moduleId) {
         return modules.stream().filter(m -> Objects.equals(m.getModuleData().id(), moduleId)).findFirst();
     }
     
+    /**
+     * Sends registration of the module to the gateway and register property on messenger.
+     * @param wrapper wrapper of module;
+     * @param type type of IO;
+     * @param schemes array with name of schemes;
+     */
     protected void sendRegistration(ModuleWrapper<T> wrapper, ModuleType type, Set<String> schemes) {
         ModuleRegistration registration = new ModuleRegistration(wrapper.getModuleData().id(), 
                 type, wrapper.getModuleData().protocol(), wrapper.getModuleData().requiredConfigKeys(), 
-                schemes.toArray(new String[schemes.size()]));
+                wrapper.getSchemes());
         MessageBus.fire(IOLocalIds.IO_REGISTER_TOPIC, registration, 
+                MessageOptions.Builder.newInstance().deliveryNotification()
+                        .async().pointToPoint().build());
+        MessagePropertyRegistrationRequest propertyRegistrationRequest = new MessagePropertyRegistrationRequest();
+        propertyRegistrationRequest.setTag("exchanger");
+        propertyRegistrationRequest.setPropertyTypes(Arrays.asList(new MessagePropertyRegistrationRequest.Entry(wrapper.getModuleData().id(), wrapper.getModuleData().name())));
+        MessageBus.fire(MessagePropertyRegistrationRequest.CALL_REGISTER_PROPERTY, propertyRegistrationRequest, 
                 MessageOptions.Builder.newInstance().deliveryNotification()
                         .async().pointToPoint().build());
     }

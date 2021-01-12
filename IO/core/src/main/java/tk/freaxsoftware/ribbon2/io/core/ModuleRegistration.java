@@ -18,6 +18,8 @@
  */
 package tk.freaxsoftware.ribbon2.io.core;
 
+import java.util.Set;
+
 /**
  * Module registration request.
  * @author Stanislav Nepochatov
@@ -32,13 +34,13 @@ public class ModuleRegistration {
     
     private String[] requiredConfigKeys;
     
-    private String[] schemes;
+    private Set<String> schemes;
 
     public ModuleRegistration() {
     }
 
     public ModuleRegistration(String id, ModuleType type, String protocol, 
-            String[] requiredConfigKeys, String[] schemes) {
+            String[] requiredConfigKeys, Set<String> schemes) {
         this.id = id;
         this.type = type;
         this.protocol = protocol;
@@ -78,11 +80,11 @@ public class ModuleRegistration {
         this.requiredConfigKeys = requiredConfigKeys;
     }
 
-    public String[] getSchemes() {
+    public Set<String> getSchemes() {
         return schemes;
     }
 
-    public void setSchemes(String[] schemes) {
+    public void setSchemes(Set<String> schemes) {
         this.schemes = schemes;
     }
     

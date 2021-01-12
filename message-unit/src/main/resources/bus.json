@@ -20,6 +20,7 @@
             "Ribbon.Global.Notification.MessageDeleted"
         ],
         "crossConnectionsOffer": [
+            "Ribbon.Property.Register",
             "Ribbon.Global.CreateMessage",
             "Ribbon.Global.UpdateMessage",
             "Ribbon.Global.DeleteMessage",
