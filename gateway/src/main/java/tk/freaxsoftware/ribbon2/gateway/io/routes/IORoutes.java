@@ -18,6 +18,8 @@
  */
 package tk.freaxsoftware.ribbon2.gateway.io.routes;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -34,10 +36,12 @@ import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
+import tk.freaxsoftware.ribbon2.gateway.io.data.IOModuleScheme;
 import tk.freaxsoftware.ribbon2.gateway.io.data.IOProtocol;
 import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
 import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
+import tk.freaxsoftware.ribbon2.io.core.ModuleRegistration;
 
 /**
  * IO API routes.
@@ -48,12 +52,24 @@ public class IORoutes {
     private final static Logger LOGGER = LoggerFactory.getLogger(IORoutes.class);
     
     public static void init(IOService ioService) {
-        get("/api/io/protocols", (req, res) -> {
+        get("/api/io/protocol", (req, res) -> {
             isAccessiableForIO();
             LOGGER.info("Request to get IO protocols.");
+            res.type("application/json");
             return ioService.getRegistrations().stream()
                     .map(reg -> IOProtocol.ofModuleRegistration(reg))
                     .collect(Collectors.toList());
+        }, GatewayMain.gson::toJson);
+        
+        get("/api/io/scheme", (req, res) -> {
+            isAccessiableForIO();
+            LOGGER.info("Request to get IO schemes.");
+            List<IOModuleScheme> moduleSchemes = new ArrayList<>();
+            ioService.getRegistrations().forEach(reg -> {
+                moduleSchemes.addAll(IOModuleScheme.ofModuleRegistration(reg));
+            });
+            res.type("application/json");
+            return moduleSchemes;
         }, GatewayMain.gson::toJson);
         
         get("/api/io/scheme/:type/:protocol/:name", (req, res) -> {
@@ -82,6 +98,10 @@ public class IORoutes {
                     .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
                     .deliveryCall().build(), IOScheme.class);
             res.type("application/json");
+            ModuleRegistration reg = ioService.getById(saved.getId());
+            if (reg != null) {
+                reg.getSchemes().add(saved.getName());
+            }
             return saved;
         }, GatewayMain.gson::toJson);
         
@@ -98,6 +118,10 @@ public class IORoutes {
                     .deliveryCall().build(), Boolean.class);
             if (deleted != null && deleted) {
                 res.status(200);
+                ModuleRegistration reg = ioService.getById(String.format("%s.%s", type, protocol));
+                if (reg != null) {
+                    reg.getSchemes().remove(name);
+                }
             } else {
                 res.status(404);
             }

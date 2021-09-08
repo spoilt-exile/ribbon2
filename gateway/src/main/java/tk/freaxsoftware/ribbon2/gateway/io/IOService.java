@@ -19,6 +19,7 @@
 package tk.freaxsoftware.ribbon2.gateway.io;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,5 +47,16 @@ public class IOService {
 
     public List<ModuleRegistration> getRegistrations() {
         return registrations;
+    }
+    
+    public ModuleRegistration getById(String id) {
+        ModuleRegistration registration = null;
+        for (ModuleRegistration module: registrations) {
+            if (Objects.equals(module.getId(), id)) {
+                registration = module;
+                break;
+            }
+        }
+        return registration;
     }
 }
