@@ -84,9 +84,11 @@ public class Init {
         Set<DirectoryPermissionModel> permissions = config.getExchanger().getType() == ModuleType.IMPORT ? 
                 config.getExchanger().getImportPermissions() : config.getExchanger().getExportPermissions();
         
+        /** TODO: uncomment on refactoring of IO;
         appendixMessages.add(new MessageHolder(DirectoryPermissionModel.CALL_INIT_PERMISSIONS, 
                 MessageOptions.Builder.newInstance().deliveryCall().async().build(),
                 new DirectoryPermissionHolder(permissions, TAG)));
+        **/
         
         if (!appendixMessages.isEmpty()) {
             ExchangerUnit.executor.submit(() -> {
