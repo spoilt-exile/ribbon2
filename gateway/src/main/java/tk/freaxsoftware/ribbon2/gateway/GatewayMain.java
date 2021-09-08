@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Spark;
 import spark.utils.IOUtils;
+import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.config.PropertyConfigProcessor;
 import tk.freaxsoftware.ribbon2.core.exception.CoreError;
@@ -37,6 +38,8 @@ import tk.freaxsoftware.ribbon2.gateway.routes.GroupRoutes;
 import tk.freaxsoftware.ribbon2.gateway.routes.MessageRoutes;
 import tk.freaxsoftware.ribbon2.gateway.routes.UserRoutes;
 import tk.freaxsoftware.extras.bus.exceptions.NoSubscriptionMessageException;
+import tk.freaxsoftware.ribbon2.gateway.io.IOService;
+import tk.freaxsoftware.ribbon2.gateway.io.routes.IORoutes;
 
 /**
  * Main class for API gateway.
@@ -75,6 +78,10 @@ public class GatewayMain {
         GroupRoutes.init();
         DirectoryRoutes.init();
         MessageRoutes.init();
+        
+        IOService ioService = new IOService();
+        AnnotationUtil.subscribeReceiverInstance(ioService);
+        IORoutes.init(ioService);
         
         Spark.exception(CoreException.class, (ex, req, res) -> {
             LOGGER.error("Error occurred:", ex);

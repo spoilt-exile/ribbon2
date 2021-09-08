@@ -25,7 +25,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.Table;
 
 /**
  * Group entity class.
@@ -33,6 +32,8 @@ import javax.persistence.Table;
  */
 @Entity
 public class GroupEntity extends Model implements Serializable {
+    
+    public static final String ADMIN_GROUP = "Admins";
     
     /**
      * Group id.

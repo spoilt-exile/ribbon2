@@ -85,6 +85,11 @@
             <artifactId>liquibase-cdi</artifactId>
             <version>3.8.9</version>
         </dependency>
+        <dependency>
+            <groupId>tk.freaxsoftware.ribbon2.io</groupId>
+            <artifactId>core</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
     <name>Ribbon2 Gateway</name>
     <description>API gateway for units.</description>

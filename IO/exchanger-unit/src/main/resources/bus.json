@@ -20,6 +20,9 @@
             "Ribbon.Global.Notification.DirectoryCreated",
             "Ribbon.Global.Notification.DirectoryUpdated",
             "Ribbon.Global.Notification.DirectoryDeleted"
+        ],
+        "additionalSubscriptions": [
+            "Ribbon.IO.Register"
         ]
     },
     "storage": {

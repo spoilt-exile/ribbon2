@@ -18,10 +18,13 @@
  */
 package tk.freaxsoftware.ribbon2.exchanger.engine;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -32,6 +35,8 @@ import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
+import tk.freaxsoftware.ribbon2.core.exception.CoreException;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME_NOT_FOUND;
 import tk.freaxsoftware.ribbon2.exchanger.converters.SchemeConverter;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Register;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Scheme;
@@ -65,6 +70,10 @@ public class ImportEngine extends IOEngine<Importer> {
     private final DirectoryRepository directoryRepository;
     
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
+    
+    private final Map<String, Future> schemeMap = new ConcurrentHashMap();
+    
+    private final Map<String, ModuleWrapper> moduleMap = new HashMap();
 
     public ImportEngine(String[] classes, SchemeRepository schemeRepository, 
             SchemeConverter schemeConverter, RegisterRepository registerRepository,
@@ -86,11 +95,8 @@ public class ImportEngine extends IOEngine<Importer> {
             for (Scheme scheme: schemes) {
                 LOGGER.info("Processing scheme {}", scheme.getName());
                 if (isConfigValid(scheme.getConfig(), wrapper.getModuleData().requiredConfigKeys())) {
-                    LOGGER.info("Launching import for scheme {} by module {}", scheme.getName(), wrapper.getModuleData().id());
-                    ImportSource source = wrapper.getModuleInstance().createSource(schemeConverter.convert(scheme));
-                    scheduler.scheduleAtFixedRate(new ImportTask(source, registerRepository, directoryRepository), 0, 
-                            (long) scheme.getConfig().get(GENERAL_TIMEOUT_KEY), TimeUnit.SECONDS);
-                    wrapper.getSchemes().add(scheme.getName());
+                    launchScheme(wrapper, schemeConverter.convert(scheme));
+                    moduleMap.put(wrapper.getModuleData().protocol(), wrapper);
                 } else {
                     LOGGER.warn("Some config keys are absent in scheme {}, skipping", scheme.getName());
                 }
@@ -99,6 +105,64 @@ public class ImportEngine extends IOEngine<Importer> {
                 sendRegistration(wrapper, ModuleType.IMPORT, wrapper.getSchemes());
             }
         }
+    }
+
+    @Override
+    public IOScheme saveScheme(IOScheme scheme) {
+        LOGGER.info("Saving scheme {} with protocol {}", scheme.getName(), scheme.getProtocol());
+        if (scheme.getConfig().containsKey(GENERAL_TIMEOUT_KEY)) {
+            Double timeout = (Double) scheme.getConfig().get(GENERAL_TIMEOUT_KEY);
+            scheme.getConfig().put(GENERAL_TIMEOUT_KEY, timeout.longValue());
+        }
+        Scheme saved = schemeRepository.save(schemeConverter.convertBack(scheme));
+        ModuleWrapper<Importer> wrapper = moduleMap.get(saved.getProtocol());
+        if (schemeMap.containsKey(saved.getName())) {
+            stopScheme(wrapper, saved);
+        }
+        launchScheme(wrapper, scheme);
+        return schemeConverter.convert(saved);
+    }
+
+    @Override
+    public IOScheme getScheme(String name) {
+        LOGGER.info("Get scheme by name {}", name);
+        Scheme scheme = schemeRepository.findByName(name);
+        if (scheme != null) {
+            return schemeConverter.convert(scheme);
+        }
+        LOGGER.error("Scheme by name {} not found", name);
+        throw new CoreException(IO_SCHEME_NOT_FOUND, 
+                String.format("Scheme by name %s not found!", name));
+    }
+
+    @Override
+    public Boolean deleteScheme(String name) {
+        Scheme existingScheme = schemeRepository.findByName(name);
+        if (existingScheme != null) {
+            LOGGER.warn("Deleting scheme {}", existingScheme.getName());
+            ModuleWrapper<Importer> wrapper = moduleMap.get(existingScheme.getProtocol());
+            stopScheme(wrapper, existingScheme);
+            return existingScheme.delete();
+        }
+        LOGGER.error("Scheme by name {} not found", name);
+        throw new CoreException(IO_SCHEME_NOT_FOUND, 
+                String.format("Scheme by name %s not found!", name));
+    }
+    
+    private void launchScheme(ModuleWrapper<Importer> wrapper, IOScheme scheme) {
+        LOGGER.info("Launching import for scheme {} by module {}", scheme.getName(), wrapper.getModuleData().id());
+        ImportSource source = wrapper.getModuleInstance().createSource(scheme);
+        Future future = scheduler.scheduleAtFixedRate(new ImportTask(source, registerRepository, directoryRepository), 0, 
+                (long) scheme.getConfig().get(GENERAL_TIMEOUT_KEY), TimeUnit.SECONDS);
+        schemeMap.put(scheme.getName(), future);
+        wrapper.getSchemes().add(scheme.getName());
+    }
+    
+    private void stopScheme(ModuleWrapper<Importer> wrapper, Scheme scheme) {
+        LOGGER.warn("Stopping scheme {} current task.", scheme.getName());
+        schemeMap.get(scheme.getName()).cancel(true);
+        schemeMap.remove(scheme.getName());
+        wrapper.getSchemes().remove(scheme.getName());
     }
     
     private Boolean isConfigValid(Map<String,Object> config, String[] requiredConfigKeys) {

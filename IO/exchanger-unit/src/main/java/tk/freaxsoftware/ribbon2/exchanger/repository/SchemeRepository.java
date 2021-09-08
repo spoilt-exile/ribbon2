@@ -32,4 +32,20 @@ public class SchemeRepository {
         return DB.find(Scheme.class).where().eq("moduleId", moduleId).findList();
     }
     
+    public Scheme save(Scheme scheme) {
+        Scheme existed = DB.find(Scheme.class).where().eq("name", scheme.getName()).findOne();
+        if (existed != null) {
+            existed.setConfig(scheme.getConfig());
+            existed.save();
+            return existed;
+        } else {
+            scheme.save();
+            return scheme;
+        }
+    }
+    
+    public Scheme findByName(String name) {
+        return DB.find(Scheme.class).where().eq("name", name).findOne();
+    }
+    
 }

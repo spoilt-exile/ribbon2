@@ -42,7 +42,9 @@ public enum RibbonErrorCodes {
     MESSAGE_NOT_FOUND(404),
     MESSAGE_DIRECORIES_REQUIRED(400),
     
-    PROPERTY_TYPE_NOT_FOUND(404);
+    PROPERTY_TYPE_NOT_FOUND(404),
+    
+    IO_SCHEME_NOT_FOUND(404);
     
     private int httpCode;
     

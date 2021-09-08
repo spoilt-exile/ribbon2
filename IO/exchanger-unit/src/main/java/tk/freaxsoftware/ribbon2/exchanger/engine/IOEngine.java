@@ -33,6 +33,7 @@ import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.request.MessagePropertyRegistrationRequest;
 import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
+import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.ModuleRegistration;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
 import tk.freaxsoftware.ribbon2.io.core.exporter.Exporter;
@@ -69,6 +70,29 @@ public abstract class IOEngine<T> {
      * Starts IO engine.
      */
     public abstract void start();
+    
+    /**
+     * Creates or updates existing scheme. 
+     * Also launch new task or restart existing if present. 
+     * Effectivly only description and config can be updated.
+     * @param scheme scheme to save;
+     * @return same scheme;
+     */
+    public abstract IOScheme saveScheme(IOScheme scheme);
+    
+    /**
+     * Get scheme by name.
+     * @param name name of scheme to get;
+     * @return scheme or throws exception if not found;
+     */
+    public abstract IOScheme getScheme(String name);
+    
+    /**
+     * Deletes scheme by name and stops it's task.
+     * @param name
+     * @return 
+     */
+    public abstract Boolean deleteScheme(String name);
     
     /**
      * Process module class.
@@ -133,6 +157,15 @@ public abstract class IOEngine<T> {
         MessageBus.fire(MessagePropertyRegistrationRequest.CALL_REGISTER_PROPERTY, propertyRegistrationRequest, 
                 MessageOptions.Builder.newInstance().deliveryNotification()
                         .async().pointToPoint().build());
+        MessageBus.addSubscription(registration.schemeSaveTopic(), (holder) -> {
+            holder.getResponse().setContent(saveScheme((IOScheme) holder.getContent()));
+        });
+        MessageBus.addSubscription(registration.schemeGetTopic(), (holder) -> {
+            holder.getResponse().setContent(getScheme((String) holder.getContent()));
+        });
+        MessageBus.addSubscription(registration.schemeDeleteTopic(), (holder) -> {
+            holder.getResponse().setContent(deleteScheme((String) holder.getContent()));
+        });
     }
     
     /**
