@@ -48,4 +48,7 @@ public class SchemeRepository {
         return DB.find(Scheme.class).where().eq("name", name).findOne();
     }
     
+    public List<Scheme> findByExportDir(String exportDir) {
+        return DB.find(Scheme.class).where().arrayContains("exportList", exportDir).findList();
+    }
 }

@@ -18,6 +18,9 @@
  */
 package tk.freaxsoftware.ribbon2.io.core.exporter;
 
+import tk.freaxsoftware.ribbon2.core.data.MessageModel;
+import tk.freaxsoftware.ribbon2.io.core.IOScheme;
+
 
 /**
  * Exporter methods inteface.
@@ -25,5 +28,12 @@ package tk.freaxsoftware.ribbon2.io.core.exporter;
  */
 public interface Exporter {
     
+    /**
+     * Exports specified messaged by supplied scheme.
+     * @param message message to export;
+     * @param scheme io scheme of export;
+     * @return id of the message in other system;
+     */
+    String export(MessageModel message, IOScheme scheme);
     
 }
