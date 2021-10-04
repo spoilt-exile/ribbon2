@@ -102,4 +102,9 @@ public class ModuleRegistration {
         return String.format("%s.%s.%s", IOLocalIds.IO_SCHEME_DELETE_TOPIC, 
                 type.name().toLowerCase(), protocol);
     }
+    
+    public String schemeExportAssignTopic() {
+        return String.format("%s.%s", IOLocalIds.IO_SCHEME_EXPORT_ASSIGN_TOPIC, 
+                protocol);
+    }
 }

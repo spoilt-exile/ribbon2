@@ -48,4 +48,14 @@ public class IOLocalIds {
      * Scheme delete topic.
      */
     public final static String IO_SCHEME_DELETE_TOPIC = "Ribbon.IO.SchemeDelete";
+    
+    /**
+     * Scheme export assign topic.
+     */
+    public final static String IO_SCHEME_EXPORT_ASSIGN_TOPIC = "Ribbon.IO.ExportSchemeAssign";
+    
+    /**
+     * Header for scheme name.
+     */
+    public final static String IO_SCHEME_NAME_HEADER = "Ribbon.IO.Headers.SchemeName";
 }

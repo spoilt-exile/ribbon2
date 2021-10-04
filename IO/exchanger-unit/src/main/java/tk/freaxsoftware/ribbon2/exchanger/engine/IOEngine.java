@@ -143,8 +143,9 @@ public abstract class IOEngine<T> {
      * @param wrapper wrapper of module;
      * @param type type of IO;
      * @param schemes array with name of schemes;
+     * @return created module registration;
      */
-    protected void sendRegistration(ModuleWrapper<T> wrapper, ModuleType type, Set<String> schemes) {
+    protected ModuleRegistration sendRegistration(ModuleWrapper<T> wrapper, ModuleType type, Set<String> schemes) {
         ModuleRegistration registration = new ModuleRegistration(wrapper.getModuleData().id(), 
                 type, wrapper.getModuleData().protocol(), wrapper.getModuleData().requiredConfigKeys(), 
                 wrapper.getSchemes());
@@ -166,6 +167,7 @@ public abstract class IOEngine<T> {
         MessageBus.addSubscription(registration.schemeDeleteTopic(), (holder) -> {
             holder.getResponse().setContent(deleteScheme((String) holder.getContent()));
         });
+        return registration;
     }
     
     /**

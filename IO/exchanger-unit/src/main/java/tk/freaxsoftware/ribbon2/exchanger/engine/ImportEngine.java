@@ -92,11 +92,11 @@ public class ImportEngine extends IOEngine<Importer> {
             ModuleWrapper<Importer> wrapper = (ModuleWrapper<Importer>) importer;
             LOGGER.info("Processing module {}", wrapper.getModuleData().id());
             List<Scheme> schemes = schemeRepository.findByModuleId(wrapper.getModuleData().id());
+            moduleMap.put(wrapper.getModuleData().protocol(), wrapper);
             for (Scheme scheme: schemes) {
                 LOGGER.info("Processing scheme {}", scheme.getName());
                 if (isConfigValid(scheme.getConfig(), wrapper.getModuleData().requiredConfigKeys())) {
                     launchScheme(wrapper, schemeConverter.convert(scheme));
-                    moduleMap.put(wrapper.getModuleData().protocol(), wrapper);
                 } else {
                     LOGGER.warn("Some config keys are absent in scheme {}, skipping", scheme.getName());
                 }

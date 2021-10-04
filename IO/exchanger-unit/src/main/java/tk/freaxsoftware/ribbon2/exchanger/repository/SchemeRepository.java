@@ -20,6 +20,7 @@ package tk.freaxsoftware.ribbon2.exchanger.repository;
 
 import io.ebean.DB;
 import java.util.List;
+import java.util.Set;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Scheme;
 
 /**
@@ -48,7 +49,7 @@ public class SchemeRepository {
         return DB.find(Scheme.class).where().eq("name", name).findOne();
     }
     
-    public List<Scheme> findByExportDir(String exportDir) {
-        return DB.find(Scheme.class).where().arrayContains("exportList", exportDir).findList();
+    public List<Scheme> findByExportDir(Set<String> exportDirSet) {
+        return DB.find(Scheme.class).where().arrayContains("exportList", exportDirSet.toArray(new String[exportDirSet.size()])).findList();
     }
 }
