@@ -42,6 +42,11 @@ public enum IOExceptionCodes {
     /**
      * Error happend on marking messages as read.
      */
-    MARK_ERROR;
+    MARK_ERROR,
+    
+    /**
+     * Error happend during exporting content to external system.
+     */
+    EXPORT_ERROR;
     
 }
