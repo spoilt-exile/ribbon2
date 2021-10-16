@@ -19,7 +19,8 @@
         "crossConnectionsOffer": [
             "Ribbon.Global.Notification.DirectoryCreated",
             "Ribbon.Global.Notification.DirectoryUpdated",
-            "Ribbon.Global.Notification.DirectoryDeleted"
+            "Ribbon.Global.Notification.DirectoryDeleted",
+            "Ribbon.Global.Notification.MessageCreated"
         ],
         "additionalSubscriptions": [
             "Ribbon.IO.Register"

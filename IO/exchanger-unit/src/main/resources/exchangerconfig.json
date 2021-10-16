@@ -14,8 +14,8 @@
                 "defaultValue": false
             }
         ],
-        "type": "IMPORT",
-        "moduleClass": "tk.freaxsoftware.ribbon2.io.importer.plain.PlainImporter"
+        "type": "EXPORT",
+        "moduleClass": "tk.freaxsoftware.ribbon2.io.exporter.plain.PlainExporter"
     },
     "db": {
         "jdbcUrl": "jdbc:postgresql://localhost:5432/ribbon2-exchange",

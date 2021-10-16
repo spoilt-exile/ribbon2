@@ -127,6 +127,26 @@ public class IORoutes {
             }
             return "";
         });
+        
+        post("/api/io/export/scheme/:protocol/:name/assign/:dir", (req, res) -> {
+            isAccessiableForIO();
+            String dir = req.params("dir");
+            String protocol = req.params("protocol");
+            String name = req.params("name");
+            LOGGER.info("Request to assign directory {} to export scheme {} by protocol {}", dir, name, protocol);
+            Boolean assigned = MessageBus.fireCall(String.format("%s.%s", IOLocalIds.IO_SCHEME_EXPORT_ASSIGN_TOPIC, 
+                protocol), dir, MessageOptions.Builder.newInstance()
+                    .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                    .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                    .header(IOLocalIds.IO_SCHEME_NAME_HEADER, name)
+                    .deliveryCall().build(), Boolean.class);
+            if (assigned != null && assigned) {
+                res.status(200);
+            } else {
+                res.status(400);
+            }
+            return "";
+        });
     }
     
     private static void isAccessiableForIO() {

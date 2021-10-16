@@ -86,14 +86,12 @@ public class ExportEngine extends IOEngine<Exporter>{
             LOGGER.info("Processing module {}", wrapper.getModuleData().id());
             List<Scheme> schemes = schemeRepository.findByModuleId(wrapper.getModuleData().id());
             wrapper.setSchemes(schemes.stream().map(scheme -> scheme.getName()).collect(Collectors.toSet()));
-            if (!wrapper.getSchemes().isEmpty()) {
-                ModuleRegistration registration = sendRegistration(wrapper, ModuleType.EXPORT, wrapper.getSchemes());
-                MessageBus.addSubscription(registration.schemeExportAssignTopic(), (holder) -> {
-                    String schemeName = (String) holder.getHeaders().get(IOLocalIds.IO_SCHEME_NAME_HEADER);
-                    String dirName = (String) holder.getContent();
-                    holder.getResponse().setContent(assignSchemeToExport(schemeName, dirName));
-                });
-            }
+            ModuleRegistration registration = sendRegistration(wrapper, ModuleType.EXPORT, wrapper.getSchemes());
+            MessageBus.addSubscription(registration.schemeExportAssignTopic(), (holder) -> {
+                String schemeName = (String) holder.getHeaders().get(IOLocalIds.IO_SCHEME_NAME_HEADER);
+                String dirName = (String) holder.getContent();
+                holder.getResponse().setContent(assignSchemeToExport(schemeName, dirName));
+            });
             moduleMap.put(wrapper.getModuleData().protocol(), wrapper);
         }
         MessageBus.addSubscription(MessageModel.NOTIFICATION_MESSAGE_CREATED, 
@@ -109,6 +107,7 @@ public class ExportEngine extends IOEngine<Exporter>{
                 dirIntersect.retainAll(message.getDirectories());
                 for (String exportDir: dirIntersect) {
                     ExportTask task = new ExportTask(moduleMap.get(scheme.getProtocol()).getModuleInstance(), message, schemeConverter.convert(scheme), registerRepository, exportDir);
+                    executorService.submit(task);
                 }
             }
         }
