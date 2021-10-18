@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportMessage;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportSource;
@@ -65,5 +66,16 @@ public class PlainImportSource implements ImportSource {
         }
         return messages;
     }
-    
+
+    @Override
+    public void open() {}
+
+    @Override
+    public void close() {}
+
+    @Override
+    public void onSuccess(ImportMessage message, String uid) {}
+
+    @Override
+    public void onError(ImportMessage message, CoreException ex) {}
 }

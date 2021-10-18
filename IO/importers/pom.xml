@@ -13,5 +13,6 @@
     <description>Importers root project;</description>
     <modules>
         <module>importer-plain</module>
+        <module>importer.mail</module>
     </modules>
 </project>

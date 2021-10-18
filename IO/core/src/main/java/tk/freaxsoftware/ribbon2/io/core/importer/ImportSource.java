@@ -19,6 +19,7 @@
 package tk.freaxsoftware.ribbon2.io.core.importer;
 
 import java.util.List;
+import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 
 /**
@@ -26,6 +27,30 @@ import tk.freaxsoftware.ribbon2.io.core.IOScheme;
  * @author Stanislav Nepochatov
  */
 public interface ImportSource {
+    
+    /**
+     * Opens import source at each import run.
+     */
+    void open();
+    
+    /**
+     * Closes import source after import run.
+     */
+    void close();
+    
+    /**
+     * Notify import source on successful import of the message to the system.
+     * @param message imported message;
+     * @param uid id of the message in the system;
+     */
+    void onSuccess(ImportMessage message, String uid);
+    
+    /**
+     * Notify import source on error during importing of the message.
+     * @param message message which failed to import;
+     * @param ex error during a message;
+     */
+    void onError(ImportMessage message, CoreException ex);
     
     /**
      * Get current scheme.

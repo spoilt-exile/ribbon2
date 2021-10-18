@@ -191,7 +191,7 @@ public class ExportEngine extends IOEngine<Exporter>{
             String externalUid = exporter.export(message, scheme);
             LOGGER.info("Message {} exported by scheme {} protocol {} with id {}", message.getUid(), scheme.getName(), scheme.getProtocol(), externalUid);
             MessagePropertyModel property = new MessagePropertyModel();
-            property.setContent(externalUid);
+            property.setContent(scheme.getName());
             property.setType(scheme.getId());
             MessageBus.fire(MessagePropertyModel.CALL_ADD_PROPERTY, property, MessageOptions.Builder.newInstance()
                     .header(UserModel.AUTH_HEADER_USERNAME, "root")

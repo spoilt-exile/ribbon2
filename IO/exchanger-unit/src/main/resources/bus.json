@@ -13,6 +13,7 @@
         "port": 9000,
         "heartbeatRate": 30,
         "crossConnectionsDemand": [
+            "Ribbon.Global.AddMessageProperty",
             "Ribbon.Global.CreateMessage",
             "Ribbon.Property.Register"
         ],

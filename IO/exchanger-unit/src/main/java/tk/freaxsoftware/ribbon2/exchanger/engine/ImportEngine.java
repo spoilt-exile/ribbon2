@@ -36,6 +36,7 @@ import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
+import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME_NOT_FOUND;
 import tk.freaxsoftware.ribbon2.exchanger.converters.SchemeConverter;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Register;
@@ -198,6 +199,7 @@ public class ImportEngine extends IOEngine<Importer> {
         @Override
         public void run() {
             try {
+                importSource.open();
                 List<ImportMessage> unreadMessages = importSource.getUnreadMessages();
                 Map<String, Register> registerMap = registerRepository.findReadedMessages(importSource.getScheme().getId(), 
                         importSource.getScheme().getName(), unreadMessages.stream().map(m -> m.getId()).collect(Collectors.toSet()));
@@ -209,6 +211,7 @@ public class ImportEngine extends IOEngine<Importer> {
                     }
                     try {
                         String uid = processMessage(importSource.getScheme(), message);
+                        importSource.onSuccess(message, uid);
                         message.markAsRead();
                         registerRepository.saveRegisterRecord(importSource.getScheme().getId(), message.getId(), 
                                 message.getHeader(), (String) importSource.getScheme().getConfig().get(GENERAL_DIRECTORY), 
@@ -216,13 +219,15 @@ public class ImportEngine extends IOEngine<Importer> {
                         LOGGER.info("Message {} : {} imported by module {} via {} scheme.", 
                                 uid, message.getHeader(), importSource.getScheme().getId(), 
                                 importSource.getScheme().getName());
-                    } catch (Exception ex) {
+                    } catch (CoreException ex) {
                         LOGGER.error("Error on processing message {} during import of scheme {} for module {}",
                                 message.getId(),
                                 importSource.getScheme().getName(), importSource.getScheme().getId());
                         LOGGER.error("Stacktrace:", ex);
+                        importSource.onError(message, ex);
                     }
                 }
+                importSource.close();
             } catch (Exception ex) {
                 LOGGER.error("Error on processing import of scheme {} for module {}", 
                         importSource.getScheme().getName(), importSource.getScheme().getId());
@@ -230,32 +235,46 @@ public class ImportEngine extends IOEngine<Importer> {
             }
         }
         
-        private String processMessage(IOScheme scheme, ImportMessage message) throws Exception {
+        private String processMessage(IOScheme scheme, ImportMessage message) {
             MessageModel messageModel = message.getMessage();
             if (messageModel.getDirectories() == null || (messageModel.getDirectories() != null 
                     && messageModel.getDirectories().isEmpty())) {
                 if (scheme.getConfig().containsKey(GENERAL_DIRECTORY)) {
                     messageModel.setDirectories(Set.of((String) scheme.getConfig().get(GENERAL_DIRECTORY)));
                 } else {
-                    throw new IllegalArgumentException("Can't process message: no directory configured nor module doesn't set them.");
+                    throw new CoreException(RibbonErrorCodes.IO_SCHEME_CONFIG_ERROR, 
+                            "Can't process message: no directory configured nor module doesn't set them.");
                 }
             }
             
-            String dir = messageModel.getDirectories().iterator().next();
-            if (directoryRepository.findByFullName(dir) == null) {
-                throw new IllegalArgumentException(String.format("Can't process message: specified directory %s not available!", dir));
+            for (String dir: messageModel.getDirectories()) {
+                if (directoryRepository.findByFullName(dir) == null) {
+                    throw new CoreException(RibbonErrorCodes.DIRECTORY_NOT_FOUND, 
+                            String.format("Can't process message: specified directory %s not available!", dir));
+                }
             }
-
-            messageModel.setProperties(Set.of(new MessagePropertyModel(scheme.getId(), scheme.getName())));
+            MessagePropertyModel importProperty = new MessagePropertyModel(scheme.getId(), scheme.getName());
+            if (messageModel.getProperties() == null) {
+                messageModel.setProperties(Set.of(importProperty));
+            } else {
+                messageModel.getProperties().add(importProperty);
+            }
+            
             MessageModel sent = sendMessage(messageModel);
             return sent.getUid();
         }
         
-        private MessageModel sendMessage(MessageModel model) throws Exception {
-            return MessageBus.fireCall(MessageModel.CALL_CREATE_MESSAGE, model, MessageOptions.Builder.newInstance()
-                    .header(UserModel.AUTH_HEADER_USERNAME, "root")
-                    .header(UserModel.AUTH_HEADER_FULLNAME, "root")
-                    .deliveryCall().build(), MessageModel.class);
+        private MessageModel sendMessage(MessageModel model) {
+            try {
+                return MessageBus.fireCall(MessageModel.CALL_CREATE_MESSAGE, model, MessageOptions.Builder.newInstance()
+                        .header(UserModel.AUTH_HEADER_USERNAME, "root")
+                        .header(UserModel.AUTH_HEADER_FULLNAME, "root")
+                        .deliveryCall().build(), MessageModel.class);
+            } catch (Exception ex) {
+                LOGGER.error("Error during sending message {}: {}", model.getHeader(), ex.getMessage());
+                throw new CoreException(RibbonErrorCodes.CALL_ERROR, 
+                        String.format("Error during sending message %s: %s", model.getHeader(), ex.getMessage()));
+            }
         }
     }
     
