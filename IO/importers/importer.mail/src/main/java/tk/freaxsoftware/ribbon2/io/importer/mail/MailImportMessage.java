@@ -24,18 +24,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashSet;
 import java.util.Set;
 import javax.mail.Flags;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.util.SharedByteArrayInputStream;
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
-import tk.freaxsoftware.ribbon2.core.exception.CoreException;
-import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
+import tk.freaxsoftware.ribbon2.io.core.IOExceptionCodes;
+import tk.freaxsoftware.ribbon2.io.core.InputOutputException;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportMessage;
 
 /**
@@ -73,11 +75,10 @@ public class MailImportMessage implements ImportMessage {
         try {
             id = mailMessage.getHeader("Message-ID")[0];
             header = mailMessage.getSubject();
-            parseContent();
             copyright = config.getCopyright() == null ? fromAddress.getPersonal() : config.getCopyright();
         } catch (Exception ex) {
             LOGGER.error("Error during reading of the message", ex);
-            throw new CoreException(RibbonErrorCodes.IO_MODULE_ERROR, "Error during reading of the message");
+            throw new InputOutputException(IOExceptionCodes.IMPORT_ERROR, "Error during reading of the message");
         }
     }
     
@@ -89,41 +90,43 @@ public class MailImportMessage implements ImportMessage {
                 directories = Set.of(header.substring(1).split(","));
                 content = content.substring(header.length()).trim();
                 if (!config.getDirectoryList().containsAll(directories)) {
-                    
+                    directories.removeIf(dir -> config.getDirectoryList().contains(dir));
+                    LOGGER.error("Directories {} not allowed to import by config", directories);
+                    throw new InputOutputException(IOExceptionCodes.IMPORT_ERROR, 
+                            String.format("Directories %s not allowed to import by config", directories));
                 }
             }
         }
     }
     
     private String readContent() throws MessagingException, IOException {
+        LOGGER.info("Reading contnet of the message {}, type {}", id, mailMessage.getContentType());
         Object content = mailMessage.getContent();
         if (mailMessage.isMimeType("text/plain")) {
-            if (content instanceof SharedByteArrayInputStream || content instanceof QPDecoderStream || content instanceof BASE64DecoderStream) {
-                InputStream stream = (InputStream) content;
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-
-                StringBuffer contentBuffer = new StringBuffer();
-                String currentLine = null;
-                while ((currentLine = reader.readLine()) != null) {
-                    contentBuffer.append(currentLine);
-                    contentBuffer.append("\n");
-                }
-                return contentBuffer.toString();
-            }
+            return (String) content;
+        } else if (mailMessage.isMimeType("text/html")) {
+            return Jsoup.parse((String) content).wholeText();
         }
-        LOGGER.error("Error during reading of the message caust content type is not text/plain");
-        throw new CoreException(RibbonErrorCodes.IO_MODULE_ERROR, "Error during reading of the message caust content type is not text/plain");
+        LOGGER.error("Error during reading of the message caust content type is not text/plain or text/html");
+        throw new InputOutputException(IOExceptionCodes.IMPORT_ERROR, "Error during reading of the message caust content type is not text/plain or text/html");
     }
 
     @Override
     public MessageModel getMessage() {
+        try {
+            parseContent();
+        } catch (Exception ex) {
+            LOGGER.error("Error during reading of the message", ex);
+            throw new InputOutputException(IOExceptionCodes.IMPORT_ERROR, "Error during reading of the message");
+        }
         MessageModel message = new MessageModel();
         message.setHeader(header);
-        if (!directories.isEmpty()) {
+        if (directories != null && !directories.isEmpty()) {
             message.setDirectories(directories);
+        } else {
+            message.setDirectories(Set.of(config.getGeneralDirectory()));
         }
-        message.setProperties(Set.of(new MessagePropertyModel("COPYRIGHT", copyright)));
+        message.setProperties(new HashSet(Set.of(new MessagePropertyModel("COPYRIGHT", copyright))));
         message.setContent(content);
         return message;
     }
@@ -141,7 +144,7 @@ public class MailImportMessage implements ImportMessage {
             }
         } catch (Exception ex) {
             LOGGER.error("Error during marking of the message " + id, ex);
-            throw new CoreException(RibbonErrorCodes.IO_MODULE_ERROR, 
+            throw new InputOutputException(IOExceptionCodes.MARK_ERROR, 
                     String.format("Error marking reading of the message %s", id));
         }
     }
@@ -154,6 +157,14 @@ public class MailImportMessage implements ImportMessage {
     @Override
     public String getHeader() {
         return header;
+    }
+
+    public InternetAddress getFromAddress() {
+        return fromAddress;
+    }
+    
+    public Set<String> getDirectories() {
+        return directories;
     }
     
 }

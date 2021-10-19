@@ -45,8 +45,7 @@ public enum RibbonErrorCodes {
     PROPERTY_TYPE_NOT_FOUND(404),
     
     IO_SCHEME_NOT_FOUND(404),
-    IO_SCHEME_CONFIG_ERROR(400),
-    IO_MODULE_ERROR(500);
+    IO_SCHEME_CONFIG_ERROR(400);
     
     private int httpCode;
     

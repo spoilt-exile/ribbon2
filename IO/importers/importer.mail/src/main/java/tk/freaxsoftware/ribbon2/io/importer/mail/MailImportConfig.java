@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.io.importer.mail;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -53,13 +54,15 @@ public class MailImportConfig {
     
     private final boolean sendReportBack;
     
-    private final String smtpAddress;
+    private final String adminAddress;
     
-    private final Integer smtpPort;
+    private final String smtpAddress;
     
     private final String smtpLogin;
     
     private final String smtpPassword;
+    
+    private final Integer smtpPort;
     
     private final SecurityType smtpSecurity;
     
@@ -79,12 +82,13 @@ public class MailImportConfig {
         this.directoryList = scheme.getConfig().containsKey("mailDirectoryList") ? Set.of(((String) scheme.getConfig().get("mailDirectoryList")).split(",")) : Collections.EMPTY_SET;
         this.copyright = (String) scheme.getConfig().get("mailCopyright");
         this.sendReportBack = (Boolean) scheme.getConfig().getOrDefault("mailSendReportBack", Boolean.FALSE);
-        this.smtpAddress = (String) scheme.getConfig().getOrDefault("mailSmtpAddress", this.address);
-        this.smtpPort = getNumber(scheme.getConfig().getOrDefault("mailSmtpPort", 25L));
+        this.adminAddress = (String) scheme.getConfig().get("mailReportAdminAddress");
+        this.smtpAddress = sendReportBack ? (String) getOrThrow(scheme.getConfig(), "mailSmtpAddress") : null;
         this.smtpLogin = (String) scheme.getConfig().getOrDefault("mailSmtpLogin", this.login);
         this.smtpPassword = (String) scheme.getConfig().getOrDefault("mailSmtpPassword", this.password);
+        this.smtpPort = getNumber(scheme.getConfig().getOrDefault("mailSmtpPort", 25L));
         this.smtpSecurity = SecurityType.valueOf((String) scheme.getConfig().getOrDefault("mailSmtpSecurity", SecurityType.NONE.name()));
-        this.smtpFrom = (String) scheme.getConfig().get("mailSmtpFrom");
+        this.smtpFrom = sendReportBack ? (String) getOrThrow(scheme.getConfig(), "mailSmtpFrom") : null;
         this.generalDirectory = directoryList.isEmpty() ? (String) getOrThrow(scheme.getConfig(), "generalDirectory") : null;
     }
     
@@ -101,6 +105,9 @@ public class MailImportConfig {
         if (number instanceof Double) {
             Double doubleValue = (Double) number;
             return doubleValue.intValue();
+        } else if (number instanceof BigDecimal) {
+            BigDecimal bigDecimalValue = (BigDecimal) number;
+            return bigDecimalValue.intValue();
         } else {
             Long longValue = (Long) number;
             return longValue.intValue();
@@ -161,12 +168,12 @@ public class MailImportConfig {
         return sendReportBack;
     }
 
-    public String getSmtpAddress() {
-        return smtpAddress;
+    public String getAdminAddress() {
+        return adminAddress;
     }
 
-    public Integer getSmtpPort() {
-        return smtpPort;
+    public String getSmtpAddress() {
+        return smtpAddress;
     }
 
     public String getSmtpLogin() {
@@ -175,6 +182,10 @@ public class MailImportConfig {
 
     public String getSmtpPassword() {
         return smtpPassword;
+    }
+    
+    public Integer getSmtpPort() {
+        return smtpPort;
     }
 
     public SecurityType getSmtpSecurity() {

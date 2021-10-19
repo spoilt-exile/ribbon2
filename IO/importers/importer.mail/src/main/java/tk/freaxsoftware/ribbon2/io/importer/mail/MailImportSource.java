@@ -31,9 +31,9 @@ import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tk.freaxsoftware.ribbon2.core.exception.CoreException;
-import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
+import tk.freaxsoftware.ribbon2.io.core.IOExceptionCodes;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
+import tk.freaxsoftware.ribbon2.io.core.InputOutputException;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportMessage;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportSource;
 
@@ -52,10 +52,15 @@ public class MailImportSource implements ImportSource {
     private Folder mailFolder;
     
     private Store mailStore;
+    
+    private ReportSender reportSender;
 
     public MailImportSource(IOScheme scheme) {
         this.scheme = scheme;
         this.config = new MailImportConfig(scheme);
+        if (config.isSendReportBack()) {
+            reportSender = new ReportSender(config);
+        }
     }
     
     private void initPop3Connection() throws NoSuchProviderException, MessagingException {
@@ -69,14 +74,16 @@ public class MailImportSource implements ImportSource {
 
         Session session = Session.getInstance(mailInit);
         session.setDebug(config.getDebug());
-        Store store = session.getStore();
-        LOGGER.info("Connecting to POP3 server by address {}, port {}", config.getAddress(), config.getPort());
-        store.connect(config.getAddress(), config.getLogin(), config.getPassword());
+        mailStore = session.getStore();
+        LOGGER.info("Connecting to POP3 server by address {}, port {}, scheme {}", config.getAddress(), config.getPort(), scheme.getName());
+        mailStore.connect(config.getAddress(), config.getLogin(), config.getPassword());
 
-        mailFolder = store.getDefaultFolder().getFolder("INBOX");
+        mailFolder = mailStore.getDefaultFolder().getFolder("INBOX");
+        mailFolder.open(Folder.READ_WRITE);
     }
     
     private void closePop3Connection() throws MessagingException {
+        LOGGER.info("Closing connection to POP3 server by address {}, port {}, scheme {}", config.getAddress(), config.getPort(), scheme.getName());
         mailFolder.close(true);
         mailStore.close();
         mailFolder = null;
@@ -90,26 +97,29 @@ public class MailImportSource implements ImportSource {
 
     @Override
     public List<ImportMessage> getUnreadMessages() {
+        LOGGER.info("Loading unread messages for scheme {}", scheme.getName());
         List<ImportMessage> messages = new ArrayList();
         try {
             Message[] rawMessages = mailFolder.getMessages();
             for (Message rawMessage: rawMessages) {
                 InternetAddress fromAddress = getPassedAddress(rawMessage);
-                if (fromAddress == null || !isPassingByState(rawMessage)) {
+                if (fromAddress == null || isSkipped(rawMessage)) {
                     continue;
                 }
-                
+                MailImportMessage message = new MailImportMessage(config, rawMessage, fromAddress);
+                LOGGER.info("New unread message {} with id {}, scheme {}", message.getHeader(), message.getId(), scheme.getName());
+                messages.add(message);
             }
         } catch (Exception ex) {
             LOGGER.error("Error during processing messages for scheme {}", scheme.getName());
             LOGGER.error("Error", ex);
-            throw new CoreException(RibbonErrorCodes.IO_MODULE_ERROR, 
+            throw new InputOutputException(IOExceptionCodes.IMPORT_CHECK_ERROR, 
                     String.format("Error during processing messages for scheme %s", scheme.getName()));
         }
         return messages;
     }
     
-    private Boolean isPassingByState(Message message) throws MessagingException {
+    private Boolean isSkipped(Message message) throws MessagingException {
         return config.getPostAction() == MailImportConfig.PostActionType.MARK && message.getFlags().contains(Flags.Flag.SEEN);
     }
     
@@ -133,7 +143,7 @@ public class MailImportSource implements ImportSource {
         } catch (Exception ex) {
             LOGGER.error("Error during opening of POP3 connection for scheme {}", scheme.getName());
             LOGGER.error("Error", ex);
-            throw new CoreException(RibbonErrorCodes.IO_MODULE_ERROR, 
+            throw new InputOutputException(IOExceptionCodes.IMPORT_CHECK_ERROR, 
                     String.format("Error during opening of POP3 connection for scheme %s", scheme.getName()));
         }
     }
@@ -145,19 +155,25 @@ public class MailImportSource implements ImportSource {
         } catch (Exception ex) {
             LOGGER.error("Error during closing POP3 connection for scheme {}", scheme.getName());
             LOGGER.error("Error", ex);
-            throw new CoreException(RibbonErrorCodes.IO_MODULE_ERROR, 
+            throw new InputOutputException(IOExceptionCodes.PROCESSING_ERROR,
                     String.format("Error during closing POP3 connection for scheme %s", scheme.getName()));
         }
     }
 
     @Override
     public void onSuccess(ImportMessage message, String uid) {
-        
+        MailImportMessage mailMessage = (MailImportMessage) message;
+        if (reportSender != null) {
+            reportSender.sendSuccessReport(mailMessage.getFromAddress().getAddress(), mailMessage.getHeader(), mailMessage.getDirectories(), uid);
+        }
     }
 
     @Override
-    public void onError(ImportMessage message, CoreException ex) {
-        
+    public void onError(ImportMessage message, InputOutputException ex) {
+        MailImportMessage mailMessage = (MailImportMessage) message;
+        if (reportSender != null) {
+            reportSender.sendErrorReport(mailMessage.getFromAddress().getAddress(), config.getAddress(), mailMessage.getHeader(), ex);
+        }
     }
     
 }

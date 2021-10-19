@@ -26,7 +26,8 @@
             "Ribbon.Global.DeleteMessage",
             "Ribbon.Global.Notification.DirectoryCreated",
             "Ribbon.Global.Notification.DirectoryUpdated",
-            "Ribbon.Global.Notification.DirectoryDeleted"
+            "Ribbon.Global.Notification.DirectoryDeleted",
+            "Ribbon.Global.AddMessageProperty"
         ]
     },
     "storage": {

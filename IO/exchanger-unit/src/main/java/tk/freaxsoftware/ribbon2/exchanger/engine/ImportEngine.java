@@ -36,7 +36,6 @@ import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
-import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME_NOT_FOUND;
 import tk.freaxsoftware.ribbon2.exchanger.converters.SchemeConverter;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Register;
@@ -44,7 +43,9 @@ import tk.freaxsoftware.ribbon2.exchanger.entity.Scheme;
 import tk.freaxsoftware.ribbon2.exchanger.repository.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.RegisterRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.SchemeRepository;
+import tk.freaxsoftware.ribbon2.io.core.IOExceptionCodes;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
+import tk.freaxsoftware.ribbon2.io.core.InputOutputException;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportMessage;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportSource;
@@ -102,9 +103,7 @@ public class ImportEngine extends IOEngine<Importer> {
                     LOGGER.warn("Some config keys are absent in scheme {}, skipping", scheme.getName());
                 }
             }
-            if (!wrapper.getSchemes().isEmpty()) {
-                sendRegistration(wrapper, ModuleType.IMPORT, wrapper.getSchemes());
-            }
+            sendRegistration(wrapper, ModuleType.IMPORT, wrapper.getSchemes());
         }
     }
 
@@ -219,7 +218,7 @@ public class ImportEngine extends IOEngine<Importer> {
                         LOGGER.info("Message {} : {} imported by module {} via {} scheme.", 
                                 uid, message.getHeader(), importSource.getScheme().getId(), 
                                 importSource.getScheme().getName());
-                    } catch (CoreException ex) {
+                    } catch (InputOutputException ex) {
                         LOGGER.error("Error on processing message {} during import of scheme {} for module {}",
                                 message.getId(),
                                 importSource.getScheme().getName(), importSource.getScheme().getId());
@@ -242,14 +241,14 @@ public class ImportEngine extends IOEngine<Importer> {
                 if (scheme.getConfig().containsKey(GENERAL_DIRECTORY)) {
                     messageModel.setDirectories(Set.of((String) scheme.getConfig().get(GENERAL_DIRECTORY)));
                 } else {
-                    throw new CoreException(RibbonErrorCodes.IO_SCHEME_CONFIG_ERROR, 
+                    throw new InputOutputException(IOExceptionCodes.IMPORT_ERROR,
                             "Can't process message: no directory configured nor module doesn't set them.");
                 }
             }
             
             for (String dir: messageModel.getDirectories()) {
                 if (directoryRepository.findByFullName(dir) == null) {
-                    throw new CoreException(RibbonErrorCodes.DIRECTORY_NOT_FOUND, 
+                    throw new InputOutputException(IOExceptionCodes.IMPORT_ERROR, 
                             String.format("Can't process message: specified directory %s not available!", dir));
                 }
             }
@@ -272,7 +271,7 @@ public class ImportEngine extends IOEngine<Importer> {
                         .deliveryCall().build(), MessageModel.class);
             } catch (Exception ex) {
                 LOGGER.error("Error during sending message {}: {}", model.getHeader(), ex.getMessage());
-                throw new CoreException(RibbonErrorCodes.CALL_ERROR, 
+                throw new InputOutputException(IOExceptionCodes.PROCESSING_ERROR, 
                         String.format("Error during sending message %s: %s", model.getHeader(), ex.getMessage()));
             }
         }

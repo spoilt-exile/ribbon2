@@ -19,8 +19,8 @@
 package tk.freaxsoftware.ribbon2.io.core.importer;
 
 import java.util.List;
-import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
+import tk.freaxsoftware.ribbon2.io.core.InputOutputException;
 
 /**
  * Represents any import message source. Provides methods for the handling import queue.
@@ -50,7 +50,7 @@ public interface ImportSource {
      * @param message message which failed to import;
      * @param ex error during a message;
      */
-    void onError(ImportMessage message, CoreException ex);
+    void onError(ImportMessage message, InputOutputException ex);
     
     /**
      * Get current scheme.
