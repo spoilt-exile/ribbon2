@@ -21,6 +21,7 @@ package tk.freaxsoftware.ribbon2.io.importer.mail;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
@@ -164,7 +165,7 @@ public class MailImportSource implements ImportSource {
     public void onSuccess(ImportMessage message, String uid) {
         MailImportMessage mailMessage = (MailImportMessage) message;
         if (reportSender != null) {
-            reportSender.sendSuccessReport(mailMessage.getFromAddress().getAddress(), mailMessage.getHeader(), mailMessage.getDirectories(), uid);
+            reportSender.sendSuccessReport(mailMessage.getFromAddress().getAddress(), mailMessage.getHeader(), mailMessage.getDirectories() != null ? mailMessage.getDirectories() : Set.of(config.getGeneralDirectory()), uid);
         }
     }
 

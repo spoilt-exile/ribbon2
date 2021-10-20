@@ -43,7 +43,6 @@ public class ReportSender {
 
     public ReportSender(MailImportConfig config) {
         this.config = config;
-        initSmtpSession();
     }
     
     private void initSmtpSession() {
@@ -67,7 +66,7 @@ public class ReportSender {
     }
     
     public void sendSuccessReport(String address, String importedSubject, Set<String> directories, String uid) {
-        String content = String.format("Hello!\n\nYour message %s were successfully imported to Ribbon2 system by uid %s to following directories:\n[%s]\n\nRibbon2 Mail Reporter", 
+        String content = String.format("Hello!\n\nYour message '%s' were successfully imported to Ribbon2 system by uid %s to following directories:\n%s\n\nRibbon2 Mail Reporter", 
                 importedSubject, uid, directories);
         String subject = String.format("[Ribbon2] Message %s imported", uid);
         sendEmail(address, subject, content);
@@ -84,6 +83,7 @@ public class ReportSender {
     
     private void sendEmail(String to, String subject, String content) {
         try {
+            initSmtpSession();
             MimeMessage message = new MimeMessage(smtpSession);
             message.setFrom(new InternetAddress(config.getSmtpFrom()));
             message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(to));
