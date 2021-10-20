@@ -76,7 +76,7 @@ public class ReportSender {
         String content = String.format("Hello!\n\nError occurred during import of your message %s. By now it's not imported yet. %s\n\nRibbon2 Mail Reporter", 
                 errorSubject, adminAddress != null ? "Administrator informed.\n" : "");
         String subject = String.format("[Ribbon2] Message %s failed to import", errorSubject);
-        String adminContent = String.format("Hello!\n\nError occurred during import message %s. Error with code %s and message %s.\n\nRibbon2 Mail Reporter", errorSubject, ex.getCode().name(), ex.getMessage());
+        String adminContent = String.format("Hello!\n\nError occurred during import message '%s'. Error with code '%s' and message '%s'.\n\nRibbon2 Mail Reporter", errorSubject, ex.getCode().name(), ex.getMessage());
         sendEmail(address, subject, content);
         sendEmail(adminAddress, subject, adminContent);
     }

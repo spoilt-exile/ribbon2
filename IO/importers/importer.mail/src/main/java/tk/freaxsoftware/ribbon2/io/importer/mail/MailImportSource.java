@@ -173,7 +173,7 @@ public class MailImportSource implements ImportSource {
     public void onError(ImportMessage message, InputOutputException ex) {
         MailImportMessage mailMessage = (MailImportMessage) message;
         if (reportSender != null) {
-            reportSender.sendErrorReport(mailMessage.getFromAddress().getAddress(), config.getAddress(), mailMessage.getHeader(), ex);
+            reportSender.sendErrorReport(mailMessage.getFromAddress().getAddress(), config.getAdminAddress(), mailMessage.getHeader(), ex);
         }
     }
     

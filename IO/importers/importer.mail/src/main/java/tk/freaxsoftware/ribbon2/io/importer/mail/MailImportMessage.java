@@ -85,9 +85,9 @@ public class MailImportMessage implements ImportMessage {
     private void parseContent() throws MessagingException, IOException {
         content = readContent();
         if (!config.getDirectoryList().isEmpty()) {
-            String header = content.substring(0, content.indexOf('\n'));
+            String header = content.substring(0, content.indexOf('\n')).trim();
             if (header.startsWith("+")) {
-                directories = Set.of(header.substring(1).split(","));
+                directories = new HashSet(Set.of(header.substring(1).split(",")));
                 content = content.substring(header.length()).trim();
                 if (!config.getDirectoryList().containsAll(directories)) {
                     directories.removeIf(dir -> config.getDirectoryList().contains(dir));
@@ -95,6 +95,10 @@ public class MailImportMessage implements ImportMessage {
                     throw new InputOutputException(IOExceptionCodes.IMPORT_ERROR, 
                             String.format("Directories %s not allowed to import by config", directories));
                 }
+            } else {
+                LOGGER.error("Unable to determine directories to post message {} from {}", id, fromAddress.toString());
+                throw new InputOutputException(IOExceptionCodes.IMPORT_ERROR, 
+                        String.format("Unable to determine directories to post message %s from %s", id, fromAddress.toString()));
             }
         }
     }

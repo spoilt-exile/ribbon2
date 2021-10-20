@@ -209,20 +209,23 @@ public class ImportEngine extends IOEngine<Importer> {
                         continue;
                     }
                     try {
-                        String uid = processMessage(importSource.getScheme(), message);
-                        importSource.onSuccess(message, uid);
+                        MessageModel importedMessage = processMessage(importSource.getScheme(), message);
+                        importSource.onSuccess(message, importedMessage.getUid());
                         message.markAsRead();
-                        registerRepository.saveRegisterRecord(importSource.getScheme().getId(), message.getId(), 
-                                message.getHeader(), (String) importSource.getScheme().getConfig().get(GENERAL_DIRECTORY), 
-                                importSource.getScheme().getName(), uid);
-                        LOGGER.info("Message {} : {} imported by module {} via {} scheme.", 
-                                uid, message.getHeader(), importSource.getScheme().getId(), 
-                                importSource.getScheme().getName());
+                        for (String directory: importedMessage.getDirectories()) {
+                            registerRepository.saveRegisterRecord(importSource.getScheme().getId(), message.getId(), 
+                                    message.getHeader(), directory, 
+                                    importSource.getScheme().getName(), importedMessage.getUid());
+                        }
+                        LOGGER.info("Message {} : {} imported by module {} via {} scheme to directories {}.", 
+                                importedMessage.getUid(), message.getHeader(), importSource.getScheme().getId(), 
+                                importSource.getScheme().getName(), importedMessage.getDirectories());
                     } catch (InputOutputException ex) {
                         LOGGER.error("Error on processing message {} during import of scheme {} for module {}",
                                 message.getId(),
                                 importSource.getScheme().getName(), importSource.getScheme().getId());
                         LOGGER.error("Stacktrace:", ex);
+                        message.markAsRead();
                         importSource.onError(message, ex);
                     }
                 }
@@ -234,7 +237,7 @@ public class ImportEngine extends IOEngine<Importer> {
             }
         }
         
-        private String processMessage(IOScheme scheme, ImportMessage message) {
+        private MessageModel processMessage(IOScheme scheme, ImportMessage message) {
             MessageModel messageModel = message.getMessage();
             if (messageModel.getDirectories() == null || (messageModel.getDirectories() != null 
                     && messageModel.getDirectories().isEmpty())) {
@@ -259,8 +262,7 @@ public class ImportEngine extends IOEngine<Importer> {
                 messageModel.getProperties().add(importProperty);
             }
             
-            MessageModel sent = sendMessage(messageModel);
-            return sent.getUid();
+            return sendMessage(messageModel);
         }
         
         private MessageModel sendMessage(MessageModel model) {
