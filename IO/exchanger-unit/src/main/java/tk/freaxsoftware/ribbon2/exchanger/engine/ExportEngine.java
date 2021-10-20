@@ -196,6 +196,7 @@ public class ExportEngine extends IOEngine<Exporter>{
             MessageBus.fire(MessagePropertyModel.CALL_ADD_PROPERTY, property, MessageOptions.Builder.newInstance()
                     .header(UserModel.AUTH_HEADER_USERNAME, "root")
                     .header(UserModel.AUTH_HEADER_FULLNAME, "root")
+                    .header(MessageModel.HEADER_MESSAGE_UID, message.getUid())
                     .deliveryNotification().build());
             registerRepository.saveRegisterRecord(scheme.getId(), message.getUid(), 
                     message.getHeader(), exportDirectory, 

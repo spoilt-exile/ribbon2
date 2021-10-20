@@ -76,7 +76,12 @@ public class Init {
         initDb(config.getDb());
         
         LOGGER.info("Init MessagBus...");
-        MessageBus.init();
+        if (config.getExchanger().getType() == ModuleType.IMPORT) {
+            MessageBus.init("bus_import.json");
+        } else {
+            MessageBus.init("bus_export.json");
+        }
+        
         ExceptionServices.registerHandler(new RibbonMessageExceptionHandler());
         
         Set<DirectoryPermissionModel> permissions = config.getExchanger().getType() == ModuleType.IMPORT ? 

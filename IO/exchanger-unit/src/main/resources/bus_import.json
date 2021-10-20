@@ -13,15 +13,13 @@
         "port": 9000,
         "heartbeatRate": 30,
         "crossConnectionsDemand": [
-            "Ribbon.Global.AddMessageProperty",
             "Ribbon.Global.CreateMessage",
             "Ribbon.Property.Register"
         ],
         "crossConnectionsOffer": [
             "Ribbon.Global.Notification.DirectoryCreated",
             "Ribbon.Global.Notification.DirectoryUpdated",
-            "Ribbon.Global.Notification.DirectoryDeleted",
-            "Ribbon.Global.Notification.MessageCreated"
+            "Ribbon.Global.Notification.DirectoryDeleted"
         ],
         "additionalSubscriptions": [
             "Ribbon.IO.Register"

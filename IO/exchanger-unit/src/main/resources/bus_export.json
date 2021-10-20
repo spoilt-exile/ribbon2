@@ -1,0 +1,37 @@
+{
+    "threadPoolConfig": {
+        "type": "FIXED_POOL",
+        "threadCount": 8
+    },
+    "bridgeServer": {
+        "nested": false,
+        "httpPort": 9102,
+        "sparkThreadPoolMaxSize": 16
+    },
+    "bridgeClient": {
+        "address": "127.0.0.1",
+        "port": 9000,
+        "heartbeatRate": 30,
+        "crossConnectionsDemand": [
+            "Ribbon.Global.AddMessageProperty",
+            "Ribbon.Property.Register"
+        ],
+        "crossConnectionsOffer": [
+            "Ribbon.Global.Notification.DirectoryCreated",
+            "Ribbon.Global.Notification.DirectoryUpdated",
+            "Ribbon.Global.Notification.DirectoryDeleted",
+            "Ribbon.Global.Notification.MessageCreated"
+        ],
+        "additionalSubscriptions": [
+            "Ribbon.IO.Register"
+        ]
+    },
+    "storage": {
+        "storageClass": "tk.freaxsoftware.ribbon2.core.data.messagestorage.DBMessageStorage",
+        "redeliveryPeriod": 15,
+        "topicPattern": "Ribbon.*",
+        "storeCalls": true,
+        "removeProcessed": false,
+        "redeliveryOnlyIfReceiversExists": true
+    }
+}
