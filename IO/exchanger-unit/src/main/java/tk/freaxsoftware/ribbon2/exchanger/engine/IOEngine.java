@@ -153,8 +153,8 @@ public abstract class IOEngine<T> {
                 MessageOptions.Builder.newInstance().deliveryNotification()
                         .async().pointToPoint().build());
         MessagePropertyRegistrationRequest propertyRegistrationRequest = new MessagePropertyRegistrationRequest();
-        propertyRegistrationRequest.setTag("exchanger");
-        propertyRegistrationRequest.setPropertyTypes(Arrays.asList(new MessagePropertyRegistrationRequest.Entry(wrapper.getModuleData().id(), wrapper.getModuleData().name())));
+        propertyRegistrationRequest.setTag(wrapper.getPropertyTag());
+        propertyRegistrationRequest.setPropertyTypes(Arrays.asList(new MessagePropertyRegistrationRequest.Entry(wrapper.getPropetyType(), wrapper.getModuleData().name())));
         MessageBus.fire(MessagePropertyRegistrationRequest.CALL_REGISTER_PROPERTY, propertyRegistrationRequest, 
                 MessageOptions.Builder.newInstance().deliveryNotification()
                         .async().pointToPoint().build());
@@ -216,5 +216,12 @@ public abstract class IOEngine<T> {
             this.schemes = schemes;
         }
         
+        public String getPropertyTag() {
+            return String.format("exc-%s", moduleData.id().replace(':', '-'));
+        }
+        
+        public String getPropetyType() {
+            return moduleData.id().replace(':', '_').toUpperCase();
+        }
     }
 }

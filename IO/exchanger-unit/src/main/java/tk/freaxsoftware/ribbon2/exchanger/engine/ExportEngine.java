@@ -192,7 +192,7 @@ public class ExportEngine extends IOEngine<Exporter>{
             LOGGER.info("Message {} exported by scheme {} protocol {} with id {}", message.getUid(), scheme.getName(), scheme.getProtocol(), externalUid);
             MessagePropertyModel property = new MessagePropertyModel();
             property.setContent(scheme.getName());
-            property.setType(scheme.getId());
+            property.setType(scheme.getId().replace(':', '_').toUpperCase());
             MessageBus.fire(MessagePropertyModel.CALL_ADD_PROPERTY, property, MessageOptions.Builder.newInstance()
                     .header(UserModel.AUTH_HEADER_USERNAME, "root")
                     .header(UserModel.AUTH_HEADER_FULLNAME, "root")
