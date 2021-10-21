@@ -99,7 +99,8 @@ public class ExportEngine extends IOEngine<Exporter>{
     }
     
     private void processExportMessage(MessageModel message) {
-        List<Scheme> schemes = schemeRepository.findByExportDir(message.getDirectories());
+        Set<String> moduleIds = moduleMap.values().stream().map(exporter -> exporter.getModuleData().id()).collect(Collectors.toSet());
+        List<Scheme> schemes = schemeRepository.findByExportDir(moduleIds, message.getDirectories());
         if (!schemes.isEmpty()) {
             LOGGER.warn("Starting export message {} {}", message.getUid(), message.getHeader());
             for (Scheme scheme: schemes) {

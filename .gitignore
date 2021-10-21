@@ -8,3 +8,5 @@
 /IO/exchanger-unit/target/
 /IO/exporters/exporter-plain/target/
 /IO/importers/importer.mail/target/
+/IO/exporters/export-mail/target/
+/IO/exporters/exporter-mail/target/

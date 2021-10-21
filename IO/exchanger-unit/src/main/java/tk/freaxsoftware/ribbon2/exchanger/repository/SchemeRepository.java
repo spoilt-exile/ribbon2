@@ -49,7 +49,7 @@ public class SchemeRepository {
         return DB.find(Scheme.class).where().eq("name", name).findOne();
     }
     
-    public List<Scheme> findByExportDir(Set<String> exportDirSet) {
-        return DB.find(Scheme.class).where().arrayContains("exportList", exportDirSet.toArray(new String[exportDirSet.size()])).findList();
+    public List<Scheme> findByExportDir(Set<String> moduleIds, Set<String> exportDirSet) {
+        return DB.find(Scheme.class).where().in("moduleId", moduleIds).and().arrayContains("exportList", exportDirSet.toArray(new String[exportDirSet.size()])).findList();
     }
 }

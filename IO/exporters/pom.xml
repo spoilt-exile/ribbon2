@@ -13,5 +13,6 @@
     <description>Exporters root project;</description>
     <modules>
         <module>exporter-plain</module>
+        <module>exporter-mail</module>
     </modules>
 </project>
