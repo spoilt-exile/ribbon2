@@ -14,5 +14,6 @@
     <modules>
         <module>importer-plain</module>
         <module>importer.mail</module>
+        <module>importer-telegram</module>
     </modules>
 </project>

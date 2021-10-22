@@ -255,7 +255,7 @@ public class ImportEngine extends IOEngine<Importer> {
                             String.format("Can't process message: specified directory %s not available!", dir));
                 }
             }
-            MessagePropertyModel importProperty = new MessagePropertyModel(scheme.getId(), scheme.getName());
+            MessagePropertyModel importProperty = new MessagePropertyModel(scheme.getId().replace(':', '_').toUpperCase(), scheme.getName());
             if (messageModel.getProperties() == null) {
                 messageModel.setProperties(Set.of(importProperty));
             } else {
