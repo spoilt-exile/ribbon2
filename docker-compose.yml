@@ -2,40 +2,78 @@ version: '3'
 services:
 
     ribbon2-gateway:
-        image: freax/ribbon2-gateway:1.0
+        image: freax/ribbon2-gateway:2.0
         environment:
             - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-gateway
         depends_on:
-            - ribbon2-postgresql
+            ribbon2-postgresql:
+                condition: service_healthy
         ports:
             - 9000:9000
             
     ribbon2-directory:
-        image: freax/ribbon2-directory:1.0
+        image: freax/ribbon2-directory:2.0
         environment:
             - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-directory
             - BRIDGE_CLIENT_ADDRESS=ribbon2-gateway
         depends_on:
-            - ribbon2-postgresql
-            - ribbon2-gateway
+            ribbon2-gateway:
+                condition: service_started
             
     ribbon2-messenger:
-        image: freax/ribbon2-messenger:1.0
+        image: freax/ribbon2-messenger:2.0
         environment:
             - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-messenger
             - BRIDGE_CLIENT_ADDRESS=ribbon2-gateway
         depends_on:
-            - ribbon2-postgresql
-            - ribbon2-gateway
+            ribbon2-gateway:
+                condition: service_started
+            ribbon2-directory:
+                condition: service_started
+            
+    ribbon2-exc-import-tg:
+        image: freax/ribbon2-exchanger:1.0
+        environment:
+            - EXCHANGER_TYPE=IMPORT
+            - EXCHANGER_CLASS=tk.freaxsoftware.ribbon2.io.importer.telegram.TelegramImporter
+            - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-exc-import-tg
+            - BRIDGE_CLIENT_ADDRESS=ribbon2-gateway
+        depends_on:
+            ribbon2-gateway:
+                condition: service_started
+            ribbon2-directory:
+                condition: service_started
+            ribbon2-messenger:
+                condition: service_started
+            
+    ribbon2-exc-export-mail:
+        image: freax/ribbon2-exchanger:1.0
+        environment:
+            - EXCHANGER_TYPE=EXPORT
+            - EXCHANGER_CLASS=tk.freaxsoftware.ribbon2.io.exporter.mail.MailExporter
+            - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-exc-export-mail
+            - BRIDGE_CLIENT_ADDRESS=ribbon2-gateway
+        depends_on:
+            ribbon2-gateway:
+                condition: service_started
+            ribbon2-directory:
+                condition: service_started
+            ribbon2-messenger:
+                condition: service_started
 
     ribbon2-postgresql:
         image: postgres:11
         environment:
             - POSTGRES_USER=ribbon2
             - POSTGRES_PASSWORD=ribbon2
-            - POSTGRES_MULTIPLE_DATABASES="ribbon2-gateway","ribbon2-directory","ribbon2-messenger"
+            - POSTGRES_MULTIPLE_DATABASES="ribbon2-gateway","ribbon2-directory","ribbon2-messenger","ribbon2-exc-import-tg","ribbon2-exc-export-mail"
         volumes:
             - ./pg-multiple-db:/docker-entrypoint-initdb.d
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
             
     ribbon2-phppgadmin:
          image: dockage/phppgadmin

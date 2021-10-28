@@ -96,7 +96,7 @@ public class Init {
         if (!appendixMessages.isEmpty()) {
             MessengerUnit.executor.submit(() -> {
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(25000);
                 } catch (InterruptedException ex) {
                     //Do nothing;
                 }

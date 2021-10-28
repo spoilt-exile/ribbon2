@@ -88,7 +88,7 @@ public class Init {
         if (!appendixMessages.isEmpty()) {
             DirectoryUnit.executor.submit(() -> {
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(25000);
                 } catch (InterruptedException ex) {
                     //Do nothing;
                 }
