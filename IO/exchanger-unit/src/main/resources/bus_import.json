@@ -12,11 +12,11 @@
         "address": "127.0.0.1",
         "port": 9000,
         "heartbeatRate": 30,
-        "crossConnectionsDemand": [
+        "crossConnectionsSends": [
             "Ribbon.Global.CreateMessage",
             "Ribbon.Property.Register"
         ],
-        "crossConnectionsOffer": [
+        "crossConnectionsReceives": [
             "Ribbon.Global.Notification.DirectoryCreated",
             "Ribbon.Global.Notification.DirectoryUpdated",
             "Ribbon.Global.Notification.DirectoryDeleted"
