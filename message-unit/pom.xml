@@ -126,6 +126,6 @@
             </resource>
         </resources>
     </build>
-    <name>Ribbon2 Messanger</name>
+    <name>Ribbon2 Messenger</name>
     <description>Unit for handling message posting;</description>
 </project>

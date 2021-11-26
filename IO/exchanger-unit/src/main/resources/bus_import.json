@@ -12,6 +12,7 @@
         "address": "127.0.0.1",
         "port": 9000,
         "heartbeatRate": 30,
+        "tag": "exchanger-import",
         "crossConnectionsSends": [
             "Ribbon.Global.CreateMessage",
             "Ribbon.Property.Register"
