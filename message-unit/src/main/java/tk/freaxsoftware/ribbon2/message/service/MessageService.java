@@ -40,7 +40,6 @@ import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.ACCESS_DENIED;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.CALL_ERROR;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.DIRECTORY_NOT_FOUND;
-import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.MESSAGE_DIRECORIES_REQUIRED;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.MESSAGE_NOT_FOUND;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.PROPERTY_TYPE_NOT_FOUND;
 import tk.freaxsoftware.ribbon2.message.MessengerUnit;
@@ -50,6 +49,7 @@ import tk.freaxsoftware.ribbon2.message.entity.PropertyType;
 import tk.freaxsoftware.ribbon2.message.repo.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.message.repo.MessageRepository;
 import tk.freaxsoftware.ribbon2.message.repo.PropertyTypeRepository;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.MESSAGE_DIRECTORIES_REQUIRED;
 
 /**
  * Message service.
@@ -86,6 +86,14 @@ public class MessageService {
     public Message createMessage(Message message, String user) {
         LOGGER.info("Create message {} on directories {} by user {}", 
                 message.getHeader(), message.getDirectoryNames(), user);
+        if (message.getParentUid() != null && !message.getParentUid().isEmpty()) {
+            Message parentMessage = messageRepository.findByUid(message.getParentUid());
+            if (parentMessage == null) {
+                throw new CoreException(MESSAGE_NOT_FOUND, 
+                        String.format("Parent message by UID %s not found!", message.getUid()));
+            }
+            LOGGER.info("New message is linked to existing message '{}'", parentMessage.getHeader());
+        }
         message.setUid(UUID.randomUUID().toString());
         message.setCreated(ZonedDateTime.now());
         message.setCreatedBy(user);
@@ -263,7 +271,7 @@ public class MessageService {
     private Set<Directory> linkDirectories(Set<String> directoryNames) {
         Set<Directory> directories = new HashSet<>();
         if (directoryNames == null || (directoryNames != null && directoryNames.isEmpty())) {
-            throw new CoreException(MESSAGE_DIRECORIES_REQUIRED, "Can't create message without directories.");
+            throw new CoreException(MESSAGE_DIRECTORIES_REQUIRED, "Can't create message without directories.");
         }
         for (String directoryName: directoryNames) {
             Directory finded = directoryRepository.findByFullName(directoryName);

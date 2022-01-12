@@ -19,7 +19,6 @@
 package tk.freaxsoftware.ribbon2.gateway.routes;
 
 import io.ebean.DB;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static spark.Spark.delete;
@@ -29,8 +28,11 @@ import static spark.Spark.put;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.GroupModel;
+import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
+import tk.freaxsoftware.ribbon2.core.data.response.DefaultPage;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
+import tk.freaxsoftware.ribbon2.core.utils.DBUtils;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.converters.GroupConverter;
@@ -84,15 +86,15 @@ public class GroupRoutes {
         });
         
         get("/api/group", (req, res) -> {
-            LOGGER.info("Request to get all groups");
+            PaginationRequest request = PaginationRequest.ofRequest(req.queryMap());
+            LOGGER.info("Request to get all groups {}", request);
             res.type("application/json");
-            return DB.getDefault().find(GroupEntity.class).findList().stream()
-                    .map(group -> new GroupConverter().convert(group)).collect(Collectors.toSet());
+            return new DefaultPage(DBUtils.findPaginatedEntity(request, GroupEntity.class), new GroupConverter());
         }, GatewayMain.gson::toJson);
         
         get("/api/group/:id", (req, res) -> {
-            GroupEntity entity = DB.getDefault().find(GroupEntity.class).where().idEq(Long.parseLong(req.params("id"))).findOne();
             LOGGER.info("Request to get Group: {}", req.params("id"));
+            GroupEntity entity = DB.getDefault().find(GroupEntity.class).where().idEq(Long.parseLong(req.params("id"))).findOne();
             if (entity == null) {
                 throw new CoreException(RibbonErrorCodes.USER_NOT_FOUND, 
                         String.format("Unable to find Group with id %s", req.params("id")));

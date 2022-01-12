@@ -19,7 +19,6 @@
 package tk.freaxsoftware.ribbon2.gateway.routes;
 
 import io.ebean.DB;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static spark.Spark.delete;
@@ -30,8 +29,11 @@ import spark.utils.StringUtils;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
+import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
+import tk.freaxsoftware.ribbon2.core.data.response.DefaultPage;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
+import tk.freaxsoftware.ribbon2.core.utils.DBUtils;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.data.UserWithPassword;
 import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
@@ -104,15 +106,15 @@ public class UserRoutes {
         });
         
         get("/api/user", (req, res) -> {
-            LOGGER.info("Request to get all users");
+            PaginationRequest request = PaginationRequest.ofRequest(req.queryMap());
+            LOGGER.info("Request to get all users {}", request);
             res.type("application/json");
-            return DB.getDefault().find(UserEntity.class).findList().stream()
-                    .map(user -> new UserConverter().convert(user)).collect(Collectors.toSet());
+            return new DefaultPage(DBUtils.findPaginatedEntity(request, UserEntity.class), new UserConverter());
         }, GatewayMain.gson::toJson);
         
         get("/api/user/:id", (req, res) -> {
-            UserEntity entity = DB.getDefault().find(UserEntity.class).where().idEq(Long.parseLong(req.params("id"))).findOne();
             LOGGER.info("Request to get User: {}", req.params("id"));
+            UserEntity entity = DB.getDefault().find(UserEntity.class).where().idEq(Long.parseLong(req.params("id"))).findOne();
             if (entity == null) {
                 throw new CoreException(RibbonErrorCodes.USER_NOT_FOUND, 
                         String.format("Unable to find User with id %s", req.params("id")));
