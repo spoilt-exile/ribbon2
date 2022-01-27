@@ -19,6 +19,7 @@
 package tk.freaxsoftware.ribbon2.directory.service;
 
 import io.ebean.DB;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,11 @@ public class PermissionService {
             permission.setTag(permissionHolder.getTag());
             return permission;
         }).collect(Collectors.toSet()));
+    }
+    
+    public List<Permission> getPermissions() {
+        LOGGER.info("Get all permissions");
+        return DB.getDefault().find(Permission.class).findList();
     }
     
 }

@@ -31,10 +31,12 @@ import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionTaggedModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryEditAccessRequest;
 import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
 import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
+import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPermissionTaggedHolder;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
 
@@ -98,6 +100,17 @@ public class DirectoryRoutes {
                     .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
                     .deliveryCall().build(), Boolean.class);
             return saved;
+        }, GatewayMain.gson::toJson);
+        
+        get("/api/directory/access/permission", (req, res) -> {
+            LOGGER.info("Request to get all access permissions {}");
+            DirectoryPermissionTaggedHolder permissionHolder = MessageBus.fireCall(DirectoryPermissionTaggedModel.CALL_GET_PERMISSIONS, null, MessageOptions.Builder.newInstance()
+                    .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
+                    .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                    .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                    .deliveryCall().build(), DirectoryPermissionTaggedHolder.class);
+            res.type("application/json");
+            return permissionHolder.getPermissions();
         }, GatewayMain.gson::toJson);
         
         get("/api/directory", (req, res) -> {

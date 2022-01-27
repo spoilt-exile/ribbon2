@@ -18,10 +18,15 @@
  */
 package tk.freaxsoftware.ribbon2.directory.facade;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.annotation.Receive;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryPermissionHolder;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionModel;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionTaggedModel;
+import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPermissionTaggedHolder;
+import tk.freaxsoftware.ribbon2.directory.entity.converters.DirectoryPermissionConverter;
 import tk.freaxsoftware.ribbon2.directory.service.PermissionService;
 
 /**
@@ -43,6 +48,16 @@ public class PermissionFacade {
     @Receive(DirectoryPermissionModel.CALL_INIT_PERMISSIONS)
     public void initPermissions(MessageHolder<DirectoryPermissionHolder> holder) {
         permissionService.initPermissions(holder.getContent());
+    }
+    
+    @Receive(DirectoryPermissionTaggedModel.CALL_GET_PERMISSIONS)
+    public void getPermissions(MessageHolder<Void> holder) {
+        DirectoryPermissionConverter converter = new DirectoryPermissionConverter();
+        List<DirectoryPermissionTaggedModel> permissions = permissionService.getPermissions()
+                .stream().map(p -> converter.convert(p)).collect(Collectors.toList());
+        DirectoryPermissionTaggedHolder permissionsHolder = new DirectoryPermissionTaggedHolder();
+        permissionsHolder.setPermissions(permissions);
+        holder.getResponse().setContent(permissionsHolder);
     }
     
 }
