@@ -15,7 +15,9 @@
         "tag": "exchanger-export",
         "crossConnectionsSends": [
             "Ribbon.Global.AddMessageProperty",
-            "Ribbon.Property.Register"
+            "Ribbon.Property.Register",
+            "Ribbon.Global.InitPermissions",
+            "Ribbon.Global.CheckDirectoryAccess"
         ],
         "crossConnectionsReceives": [
             "Ribbon.Global.Notification.DirectoryCreated",
