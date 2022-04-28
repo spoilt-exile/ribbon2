@@ -53,7 +53,7 @@ public class IORoutes {
     
     public static void init(IOService ioService) {
         get("/api/io/protocol", (req, res) -> {
-            isAccessiableForIO();
+            isAdmin();
             LOGGER.info("Request to get IO protocols.");
             res.type("application/json");
             return ioService.getRegistrations().stream()
@@ -62,7 +62,7 @@ public class IORoutes {
         }, GatewayMain.gson::toJson);
         
         get("/api/io/scheme", (req, res) -> {
-            isAccessiableForIO();
+            isAdmin();
             LOGGER.info("Request to get IO schemes.");
             List<IOModuleScheme> moduleSchemes = new ArrayList<>();
             ioService.getRegistrations().forEach(reg -> {
@@ -73,7 +73,7 @@ public class IORoutes {
         }, GatewayMain.gson::toJson);
         
         get("/api/io/scheme/:type/:protocol/:name", (req, res) -> {
-            isAccessiableForIO();
+            isAdmin();
             String type = req.params("type");
             String protocol = req.params("protocol");
             String name = req.params("name");
@@ -89,7 +89,7 @@ public class IORoutes {
         }, GatewayMain.gson::toJson);
         
         post("/api/io/scheme/", (req, res) -> {
-            isAccessiableForIO();
+            isAdmin();
             IOScheme scheme = GatewayMain.gson.fromJson(req.body(), IOScheme.class);
             LOGGER.info("Request to save IO scheme {} for protocol {} with type {}.", scheme.getName(), scheme.getProtocol(), scheme.getType());
             IOScheme saved = MessageBus.fireCall(String.format("%s.%s.%s", IOLocalIds.IO_SCHEME_SAVE_TOPIC, 
@@ -106,7 +106,7 @@ public class IORoutes {
         }, GatewayMain.gson::toJson);
         
         delete("/api/io/scheme/:type/:protocol/:name", (req, res) -> {
-            isAccessiableForIO();
+            isAdmin();
             String type = req.params("type");
             String protocol = req.params("protocol");
             String name = req.params("name");
@@ -129,7 +129,7 @@ public class IORoutes {
         });
         
         post("/api/io/export/scheme/:protocol/:name/assign/:dir", (req, res) -> {
-            isAccessiableForIO();
+            isAdmin();
             String dir = req.params("dir");
             String protocol = req.params("protocol");
             String name = req.params("name");
@@ -149,7 +149,7 @@ public class IORoutes {
         });
     }
     
-    private static void isAccessiableForIO() {
+    public static void isAdmin() {
         for (GroupEntity group: UserContext.getUser().getGroups()) {
             if (Objects.equals(group.getName(), GroupEntity.ADMIN_GROUP)) {
                 return;

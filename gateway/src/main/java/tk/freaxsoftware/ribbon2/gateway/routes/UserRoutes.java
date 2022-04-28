@@ -40,6 +40,7 @@ import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.converters.UserConverter;
 import tk.freaxsoftware.ribbon2.gateway.entity.converters.UserWithPasswordConverter;
+import static tk.freaxsoftware.ribbon2.gateway.io.routes.IORoutes.isAdmin;
 import tk.freaxsoftware.ribbon2.gateway.utils.SHAHash;
 
 /**
@@ -52,6 +53,7 @@ public class UserRoutes {
     
     public static void init() {
         post("/api/user", (req, res) -> {
+            isAdmin();
             UserWithPassword user = GatewayMain.gson.fromJson(req.body(), UserWithPassword.class);
             LOGGER.info("Request to create User");
             user.setId(null);
@@ -65,6 +67,7 @@ public class UserRoutes {
         }, GatewayMain.gson::toJson);
         
         put("/api/user", (req, res) -> {
+            isAdmin();
             UserWithPassword user = GatewayMain.gson.fromJson(req.body(), UserWithPassword.class);
             UserEntity updateUser = DB.getDefault().find(UserEntity.class).where().idEq(user.getId()).findOne();
             LOGGER.info("Request to update User: {}", user.getId());
@@ -92,6 +95,7 @@ public class UserRoutes {
         }, GatewayMain.gson::toJson);
         
         delete("/api/user/:id", (req, res) -> {
+            isAdmin();
             UserEntity entity = DB.getDefault().find(UserEntity.class).where().idEq(Long.parseLong(req.params("id"))).findOne();
             LOGGER.info("Request to delete User: {}", req.params("id"));
             if (entity != null) {
@@ -106,6 +110,7 @@ public class UserRoutes {
         });
         
         get("/api/user", (req, res) -> {
+            isAdmin();
             PaginationRequest request = PaginationRequest.ofRequest(req.queryMap());
             LOGGER.info("Request to get all users {}", request);
             res.type("application/json");
@@ -113,6 +118,7 @@ public class UserRoutes {
         }, GatewayMain.gson::toJson);
         
         get("/api/user/:id", (req, res) -> {
+            isAdmin();
             LOGGER.info("Request to get User: {}", req.params("id"));
             UserEntity entity = DB.getDefault().find(UserEntity.class).where().idEq(Long.parseLong(req.params("id"))).findOne();
             if (entity == null) {

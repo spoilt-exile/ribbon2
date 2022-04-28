@@ -36,6 +36,7 @@ import tk.freaxsoftware.ribbon2.core.utils.DBUtils;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.converters.GroupConverter;
+import static tk.freaxsoftware.ribbon2.gateway.io.routes.IORoutes.isAdmin;
 
 /**
  * Routes for CRUD operations with user groups.
@@ -47,6 +48,7 @@ public class GroupRoutes {
     
     public static void init() {
         post("/api/group", (req, res) -> {
+            isAdmin();
             GroupModel group = GatewayMain.gson.fromJson(req.body(), GroupModel.class);
             LOGGER.info("Request to create Group");
             group.setId(null);
@@ -60,6 +62,7 @@ public class GroupRoutes {
         }, GatewayMain.gson::toJson);
         
         put("/api/group", (req, res) -> {
+            isAdmin();
             GroupModel group = GatewayMain.gson.fromJson(req.body(), GroupModel.class);
             LOGGER.info("Request to update Group: {}", group.getId());
             GroupEntity updateGroup = new GroupConverter().convertBack(group);
@@ -72,6 +75,7 @@ public class GroupRoutes {
         }, GatewayMain.gson::toJson);
         
         delete("/api/group/:id", (req, res) -> {
+            isAdmin();
             LOGGER.info("Request to delete Group: {}", req.params("id"));
             GroupEntity entity = DB.getDefault().find(GroupEntity.class).where().idEq(Long.parseLong(req.params("id"))).findOne();
             if (entity != null) {
@@ -86,6 +90,7 @@ public class GroupRoutes {
         });
         
         get("/api/group", (req, res) -> {
+            isAdmin();
             PaginationRequest request = PaginationRequest.ofRequest(req.queryMap());
             LOGGER.info("Request to get all groups {}", request);
             res.type("application/json");
@@ -93,6 +98,7 @@ public class GroupRoutes {
         }, GatewayMain.gson::toJson);
         
         get("/api/group/:id", (req, res) -> {
+            isAdmin();
             LOGGER.info("Request to get Group: {}", req.params("id"));
             GroupEntity entity = DB.getDefault().find(GroupEntity.class).where().idEq(Long.parseLong(req.params("id"))).findOne();
             if (entity == null) {
