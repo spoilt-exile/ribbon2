@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.exchanger.engine;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,8 @@ import tk.freaxsoftware.ribbon2.io.core.importer.Importer;
 public class ImportEngine extends IOEngine<Importer> {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(ImportEngine.class);
+    
+    private final static String PERMISSION_CAN_ASSIGN_IMPORT = "canAssignImport";
     
     private static final String GENERAL_TIMEOUT_KEY = "generalTimeout";
     
@@ -108,8 +111,11 @@ public class ImportEngine extends IOEngine<Importer> {
     }
 
     @Override
-    public IOScheme saveScheme(IOScheme scheme) {
+    public IOScheme saveScheme(IOScheme scheme, String username) {
         LOGGER.info("Saving scheme {} with protocol {}", scheme.getName(), scheme.getProtocol());
+        if (scheme.getConfig().containsKey(GENERAL_DIRECTORY)) {
+            checkDirectoryAccess(username, ImmutableSet.of((String) scheme.getConfig().get(GENERAL_DIRECTORY)), PERMISSION_CAN_ASSIGN_IMPORT);
+        }
         if (scheme.getConfig().containsKey(GENERAL_TIMEOUT_KEY)) {
             Double timeout = (Double) scheme.getConfig().get(GENERAL_TIMEOUT_KEY);
             scheme.getConfig().put(GENERAL_TIMEOUT_KEY, timeout.longValue());

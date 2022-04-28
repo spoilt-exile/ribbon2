@@ -60,6 +60,10 @@ public class ExchangerUnitConfig {
         
         private String moduleClass;
         
+        private Boolean enablePermissionCaching;
+        
+        private Integer permissionCacheExpiry;
+        
         private Set<DirectoryPermissionModel> importPermissions;
         
         private Set<DirectoryPermissionModel> exportPermissions;
@@ -78,6 +82,22 @@ public class ExchangerUnitConfig {
 
         public void setModuleClass(String moduleClass) {
             this.moduleClass = moduleClass;
+        }
+
+        public Boolean getEnablePermissionCaching() {
+            return enablePermissionCaching;
+        }
+
+        public void setEnablePermissionCaching(Boolean enablePermissionCaching) {
+            this.enablePermissionCaching = enablePermissionCaching;
+        }
+
+        public Integer getPermissionCacheExpiry() {
+            return permissionCacheExpiry;
+        }
+
+        public void setPermissionCacheExpiry(Integer permissionCacheExpiry) {
+            this.permissionCacheExpiry = permissionCacheExpiry;
         }
 
         public Set<DirectoryPermissionModel> getImportPermissions() {

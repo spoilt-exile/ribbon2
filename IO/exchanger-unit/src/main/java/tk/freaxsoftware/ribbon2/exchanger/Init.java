@@ -39,10 +39,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageHolder;
+import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.exceptions.ExceptionServices;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionModel;
 import tk.freaxsoftware.ribbon2.core.data.messagestorage.DbMessage;
+import tk.freaxsoftware.ribbon2.core.data.request.DirectoryPermissionHolder;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonMessageExceptionHandler;
 import tk.freaxsoftware.ribbon2.exchanger.config.ExchangerUnitConfig;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Directory;
@@ -58,7 +60,9 @@ public class Init {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(Init.class);
     
-    private final static String TAG = "exchanger";
+    private final static String IMPORT_TAG = "exchanger-import";
+    
+    private final static String EXPORT_TAG = "exchanger-export";
     
     public static List<MessageHolder> appendixMessages = new CopyOnWriteArrayList<>();
     
@@ -87,11 +91,9 @@ public class Init {
         Set<DirectoryPermissionModel> permissions = config.getExchanger().getType() == ModuleType.IMPORT ? 
                 config.getExchanger().getImportPermissions() : config.getExchanger().getExportPermissions();
         
-        /** TODO: uncomment on refactoring of IO;
         appendixMessages.add(new MessageHolder(DirectoryPermissionModel.CALL_INIT_PERMISSIONS, 
                 MessageOptions.Builder.newInstance().deliveryCall().async().build(),
-                new DirectoryPermissionHolder(permissions, TAG)));
-        **/
+                new DirectoryPermissionHolder(permissions, config.getExchanger().getType() == ModuleType.IMPORT ? IMPORT_TAG : EXPORT_TAG)));
         
         if (!appendixMessages.isEmpty()) {
             ExchangerUnit.executor.submit(() -> {

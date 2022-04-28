@@ -1,5 +1,7 @@
 {
     "exchanger": {
+        "enablePermissionCaching": true,
+        "permissionCacheExpiry": 5,
         "importPermissions": [
             {
                 "key": "canAssignImport",

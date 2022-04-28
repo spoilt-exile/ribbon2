@@ -19,18 +19,31 @@
 package tk.freaxsoftware.ribbon2.exchanger.engine;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
+import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
+import tk.freaxsoftware.ribbon2.core.data.request.DirectoryCheckAccessRequest;
 import tk.freaxsoftware.ribbon2.core.data.request.MessagePropertyRegistrationRequest;
+import tk.freaxsoftware.ribbon2.core.exception.CoreException;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.ACCESS_DENIED;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.CALL_ERROR;
+import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
+import tk.freaxsoftware.ribbon2.exchanger.ExchangerUnit;
 import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
@@ -50,12 +63,19 @@ public abstract class IOEngine<T> {
     
     protected List<ModuleWrapper<T>> modules  = new ArrayList<>();
     
+    private final Map<String, Instant> permissionCache;
+    
     /**
      * Default constructor.
      * @param type IO operation type;
      * @param classes list of module classes from config;
      */
     public IOEngine(ModuleType type, String[] classes) {
+        if (ExchangerUnit.config.getExchanger().getEnablePermissionCaching()) {
+            permissionCache = new ConcurrentHashMap<>();
+        } else {
+            permissionCache = Collections.EMPTY_MAP;
+        }
         for (String moduleClass: classes) {
             try {
                 processModuleClass(type, moduleClass);
@@ -76,9 +96,10 @@ public abstract class IOEngine<T> {
      * Also launch new task or restart existing if present. 
      * Effectivly only description and config can be updated.
      * @param scheme scheme to save;
+     * @param username name of user for further permission check;
      * @return same scheme;
      */
-    public abstract IOScheme saveScheme(IOScheme scheme);
+    public abstract IOScheme saveScheme(IOScheme scheme, String username);
     
     /**
      * Get scheme by name.
@@ -159,7 +180,8 @@ public abstract class IOEngine<T> {
                 MessageOptions.Builder.newInstance().deliveryNotification()
                         .async().pointToPoint().build());
         MessageBus.addSubscription(registration.schemeSaveTopic(), (holder) -> {
-            holder.getResponse().setContent(saveScheme((IOScheme) holder.getContent()));
+            String username = MessageUtils.getAuthFromHeader(holder);
+            holder.getResponse().setContent(saveScheme((IOScheme) holder.getContent(), username));
         });
         MessageBus.addSubscription(registration.schemeGetTopic(), (holder) -> {
             holder.getResponse().setContent(getScheme((String) holder.getContent()));
@@ -168,6 +190,57 @@ public abstract class IOEngine<T> {
             holder.getResponse().setContent(deleteScheme((String) holder.getContent()));
         });
         return registration;
+    }
+    
+    protected void checkDirectoryAccess(String user, Set<String> directories, String permission) {
+        LOGGER.info("Checking access for directories {} for user {} by permission.", directories, user, permission);
+        DirectoryCheckAccessRequest request = processByCache(new DirectoryCheckAccessRequest(user, permission, directories));
+        if (request.getDirectories().isEmpty()) {
+            return;
+        }
+        try {
+            Boolean result = MessageBus.fireCall(DirectoryCheckAccessRequest.CALL_CHECK_DIR_ACCESS, 
+                    request, MessageOptions.Builder.newInstance().header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true").deliveryCall().build(), Boolean.class);
+            if (result) {
+                addToCache(request);
+                return;
+            }
+        } catch (Exception ex) {
+            throw new CoreException(CALL_ERROR, ex.getMessage());
+        }
+        throw new CoreException(ACCESS_DENIED, String.format("User %s doesn't have access for current operation.", user));
+    }
+    
+    private DirectoryCheckAccessRequest processByCache(DirectoryCheckAccessRequest request) {
+        if (ExchangerUnit.config.getExchanger().getEnablePermissionCaching()) {
+            Instant now = Instant.now();
+            Set<String> processedDirs = new HashSet<>();
+            for (String directory: request.getDirectories()) {
+                Instant expiry = permissionCache.get(getCacheKey(directory, request.getPermission(), request.getUser()));
+                if (expiry == null || (expiry != null && !expiry.isAfter(now))) {
+                    processedDirs.add(directory);
+                    permissionCache.remove(getCacheKey(directory, request.getPermission(), request.getUser()));
+                }
+            }
+            request.setDirectories(processedDirs);
+        }
+        return request;
+    }
+    
+    private void addToCache(DirectoryCheckAccessRequest request) {
+        if (ExchangerUnit.config.getExchanger().getEnablePermissionCaching()) {
+            Instant expiry = Instant.now().plus(ExchangerUnit.config.getExchanger().getPermissionCacheExpiry(), ChronoUnit.MINUTES);
+            for (String directory: request.getDirectories()) {
+                String key = getCacheKey(directory, request.getPermission(), request.getUser());
+                if (!permissionCache.containsKey(key)) {
+                    permissionCache.put(key, expiry);
+                }
+            }
+        }
+    }
+    
+    private String getCacheKey(String directory, String permission, String user) {
+        return String.format("%s@%s@%s", user, permission, directory);
     }
     
     /**

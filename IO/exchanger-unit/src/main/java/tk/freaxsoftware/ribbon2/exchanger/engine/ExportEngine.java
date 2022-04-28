@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.exchanger.engine;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +37,7 @@ import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.DIRECTORY_NOT_FOUND;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME_NOT_FOUND;
+import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
 import tk.freaxsoftware.ribbon2.exchanger.converters.SchemeConverter;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Directory;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Scheme;
@@ -55,6 +57,8 @@ import tk.freaxsoftware.ribbon2.io.core.exporter.Exporter;
 public class ExportEngine extends IOEngine<Exporter>{
     
     private final static Logger LOGGER = LoggerFactory.getLogger(ExportEngine.class);
+    
+    private final static String PERMISSION_CAN_ASSIGN_EXPORT = "canAssignExport";
     
     private final SchemeRepository schemeRepository;
     
@@ -88,9 +92,10 @@ public class ExportEngine extends IOEngine<Exporter>{
             wrapper.setSchemes(schemes.stream().map(scheme -> scheme.getName()).collect(Collectors.toSet()));
             ModuleRegistration registration = sendRegistration(wrapper, ModuleType.EXPORT, wrapper.getSchemes());
             MessageBus.addSubscription(registration.schemeExportAssignTopic(), (holder) -> {
+                String username = MessageUtils.getAuthFromHeader(holder);
                 String schemeName = (String) holder.getHeaders().get(IOLocalIds.IO_SCHEME_NAME_HEADER);
                 String dirName = (String) holder.getContent();
-                holder.getResponse().setContent(assignSchemeToExport(schemeName, dirName));
+                holder.getResponse().setContent(assignSchemeToExport(schemeName, dirName, username));
             });
             moduleMap.put(wrapper.getModuleData().protocol(), wrapper);
         }
@@ -115,7 +120,7 @@ public class ExportEngine extends IOEngine<Exporter>{
     }
 
     @Override
-    public IOScheme saveScheme(IOScheme scheme) {
+    public IOScheme saveScheme(IOScheme scheme, String username) {
         LOGGER.info("Saving scheme {} with protocol {}", scheme.getName(), scheme.getProtocol());
         return schemeConverter.convert(schemeRepository.save(schemeConverter.convertBack(scheme)));
     }
@@ -144,8 +149,9 @@ public class ExportEngine extends IOEngine<Exporter>{
                 String.format("Scheme by name %s not found!", name));
     }
     
-    private Boolean assignSchemeToExport(String name, String dirName) {
+    private Boolean assignSchemeToExport(String name, String dirName, String username) {
         LOGGER.warn("Assign directory {} to export by scheme {}", dirName, name);
+        checkDirectoryAccess(username, ImmutableSet.of(dirName), PERMISSION_CAN_ASSIGN_EXPORT);
         Scheme scheme = schemeRepository.findByName(name);
         if (scheme == null) {
             throw new CoreException(IO_SCHEME_NOT_FOUND, 
