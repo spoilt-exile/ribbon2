@@ -165,7 +165,7 @@ public class AuthService {
      * @return boolean result of operation;
      */
     public boolean editDirAccess(DirectoryEditAccessRequest request, String userLogin) {
-        if (checkDirAccess(userLogin, request.getDirectoryPath(), DirectoryEditAccessRequest.PERMISSION_CAN_CREATE_DIRECTORY)) {
+        if (checkDirAccess(userLogin, request.getDirectoryPath(), DirectoryEditAccessRequest.PERMISSION_CAN_EDIT_DIR_ACCESS)) {
             Directory finded = directoryRepository.findDirectoryByPath(request.getDirectoryPath());
             if (finded == null) {
                 throw new CoreException(DIRECTORY_NOT_FOUND, "Can't find directory " + request.getDirectoryPath());

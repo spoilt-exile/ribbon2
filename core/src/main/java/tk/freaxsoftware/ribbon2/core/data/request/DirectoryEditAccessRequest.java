@@ -29,7 +29,7 @@ public class DirectoryEditAccessRequest {
     
     public static final String CALL_EDIT_DIR_ACCESS = "Ribbon.Global.EditDirectoryAccess";
     
-    public final static String PERMISSION_CAN_CREATE_DIRECTORY = "canEditDirAccess";
+    public final static String PERMISSION_CAN_EDIT_DIR_ACCESS = "canEditDirAccess";
     
     private String directoryPath;
     
