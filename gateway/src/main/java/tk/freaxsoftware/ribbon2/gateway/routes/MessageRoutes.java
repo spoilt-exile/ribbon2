@@ -29,9 +29,11 @@ import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
+import tk.freaxsoftware.ribbon2.core.data.MessagePropertyTagged;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
 import tk.freaxsoftware.ribbon2.core.data.response.MessagePage;
+import tk.freaxsoftware.ribbon2.core.data.response.MessagePropertyTaggedHolder;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
 
@@ -104,6 +106,17 @@ public class MessageRoutes {
                     .deliveryCall().build(), MessageModel.class);
             res.type("application/json");
             return message;
+        }, GatewayMain.gson::toJson);
+        
+        get("/api/message/property", (req, res) -> {
+            LOGGER.info("Request to get all message property types {}");
+            MessagePropertyTaggedHolder propertyHolder = MessageBus.fireCall(MessagePropertyTagged.CALL_GET_PROPERTIES, null, MessageOptions.Builder.newInstance()
+                    .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
+                    .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                    .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                    .deliveryCall().build(), MessagePropertyTaggedHolder.class);
+            res.type("application/json");
+            return propertyHolder.getPropertyTypes();
         }, GatewayMain.gson::toJson);
         
         post("/api/message/property/:uid", (req, res) -> {
