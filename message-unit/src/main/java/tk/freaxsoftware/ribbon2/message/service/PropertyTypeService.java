@@ -58,4 +58,9 @@ public class PropertyTypeService {
         }).collect(Collectors.toList()));
     }
     
+    public List<PropertyType> findAll() {
+        LOGGER.info("Get all property types");
+        return propertyRepository.findAll();
+    }
+    
 }

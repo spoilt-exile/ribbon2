@@ -16,32 +16,25 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package tk.freaxsoftware.ribbon2.message.repo;
+package tk.freaxsoftware.ribbon2.core.data.response;
 
-import io.ebean.DB;
 import java.util.List;
-import tk.freaxsoftware.ribbon2.message.entity.PropertyType;
+import tk.freaxsoftware.ribbon2.core.data.MessagePropertyTagged;
 
 /**
- * Property type repository.
+ * Holder for tagged message property type.
  * @author Stanislav Nepochatov
  */
-public class PropertyTypeRepository {
+public class MessagePropertyTaggedHolder {
     
-    public void saveAll(List<PropertyType> types) {
-        DB.getDefault().saveAll(types);
+    private List<MessagePropertyTagged> propertyTypes;
+
+    public List<MessagePropertyTagged> getPropertyTypes() {
+        return propertyTypes;
     }
-    
-    public void deleteByTag(String tag) {
-        DB.getDefault().find(PropertyType.class).where().eq("tag", tag).delete();
-    }
-    
-    public PropertyType findByType(String type) {
-        return DB.getDefault().find(PropertyType.class).where().eq("type", type).findOne();
-    }
-    
-    public List<PropertyType> findAll() {
-        return DB.getDefault().find(PropertyType.class).findList();
+
+    public void setPropertyTypes(List<MessagePropertyTagged> propertyTypes) {
+        this.propertyTypes = propertyTypes;
     }
     
 }

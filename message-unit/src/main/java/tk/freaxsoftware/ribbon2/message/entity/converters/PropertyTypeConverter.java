@@ -16,32 +16,25 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package tk.freaxsoftware.ribbon2.message.repo;
+package tk.freaxsoftware.ribbon2.message.entity.converters;
 
-import io.ebean.DB;
-import java.util.List;
+import tk.freaxsoftware.ribbon2.core.data.MessagePropertyTagged;
+import tk.freaxsoftware.ribbon2.core.data.convert.Converter;
 import tk.freaxsoftware.ribbon2.message.entity.PropertyType;
 
 /**
- * Property type repository.
+ * Property type converter.
  * @author Stanislav Nepochatov
  */
-public class PropertyTypeRepository {
-    
-    public void saveAll(List<PropertyType> types) {
-        DB.getDefault().saveAll(types);
-    }
-    
-    public void deleteByTag(String tag) {
-        DB.getDefault().find(PropertyType.class).where().eq("tag", tag).delete();
-    }
-    
-    public PropertyType findByType(String type) {
-        return DB.getDefault().find(PropertyType.class).where().eq("type", type).findOne();
-    }
-    
-    public List<PropertyType> findAll() {
-        return DB.getDefault().find(PropertyType.class).findList();
+public class PropertyTypeConverter implements Converter<PropertyType, MessagePropertyTagged> {
+
+    @Override
+    public MessagePropertyTagged convert(PropertyType source) {
+        MessagePropertyTagged dest = new MessagePropertyTagged();
+        dest.setType(source.getType());
+        dest.setTag(source.getTag());
+        dest.setDescription(source.getDescription());
+        return dest;
     }
     
 }

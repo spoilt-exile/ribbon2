@@ -18,9 +18,14 @@
  */
 package tk.freaxsoftware.ribbon2.message.facade;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.annotation.Receive;
+import tk.freaxsoftware.ribbon2.core.data.MessagePropertyTagged;
 import tk.freaxsoftware.ribbon2.core.data.request.MessagePropertyRegistrationRequest;
+import tk.freaxsoftware.ribbon2.core.data.response.MessagePropertyTaggedHolder;
+import tk.freaxsoftware.ribbon2.message.entity.converters.PropertyTypeConverter;
 import tk.freaxsoftware.ribbon2.message.service.PropertyTypeService;
 
 /**
@@ -33,6 +38,16 @@ public class PropertyTypeFacade {
 
     public PropertyTypeFacade(PropertyTypeService propertyService) {
         this.propertyService = propertyService;
+    }
+    
+    @Receive(MessagePropertyTagged.CALL_GET_PROPERTIES)
+    public void getAllPropertyTypes(MessageHolder<Void> message) {
+        PropertyTypeConverter converter = new PropertyTypeConverter();
+        List<MessagePropertyTagged> types = propertyService.findAll()
+                .stream().map(p -> converter.convert(p)).collect(Collectors.toList());
+        MessagePropertyTaggedHolder holder = new MessagePropertyTaggedHolder();
+        holder.setPropertyTypes(types);
+        message.getResponse().setContent(holder);
     }
     
     @Receive(MessagePropertyRegistrationRequest.CALL_REGISTER_PROPERTY)
