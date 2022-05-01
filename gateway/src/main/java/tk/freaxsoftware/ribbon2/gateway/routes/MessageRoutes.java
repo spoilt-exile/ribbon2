@@ -108,8 +108,8 @@ public class MessageRoutes {
             return message;
         }, GatewayMain.gson::toJson);
         
-        get("/api/message/property", (req, res) -> {
-            LOGGER.info("Request to get all message property types {}");
+        get("/api/message/property/all", (req, res) -> {
+            LOGGER.info("Request to get all message property types");
             MessagePropertyTaggedHolder propertyHolder = MessageBus.fireCall(MessagePropertyTagged.CALL_GET_PROPERTIES, null, MessageOptions.Builder.newInstance()
                     .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
                     .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())

@@ -102,7 +102,7 @@ public class DirectoryRoutes {
             return saved;
         }, GatewayMain.gson::toJson);
         
-        get("/api/directory/access/permission", (req, res) -> {
+        get("/api/directory/access/permission/all", (req, res) -> {
             LOGGER.info("Request to get all access permissions {}");
             DirectoryPermissionTaggedHolder permissionHolder = MessageBus.fireCall(DirectoryPermissionTaggedModel.CALL_GET_PERMISSIONS, null, MessageOptions.Builder.newInstance()
                     .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
