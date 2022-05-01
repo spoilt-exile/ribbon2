@@ -2,7 +2,7 @@ version: '3'
 services:
 
     ribbon2-gateway:
-        image: freax/ribbon2-gateway:2.0
+        image: freax/ribbon2-gateway:2.1
         environment:
             - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-gateway
         depends_on:
@@ -12,7 +12,7 @@ services:
             - 9000:9000
             
     ribbon2-directory:
-        image: freax/ribbon2-directory:2.0
+        image: freax/ribbon2-directory:2.1
         environment:
             - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-directory
             - BRIDGE_CLIENT_ADDRESS=ribbon2-gateway
@@ -21,7 +21,7 @@ services:
                 condition: service_started
             
     ribbon2-messenger-1:
-        image: freax/ribbon2-messenger:2.0
+        image: freax/ribbon2-messenger:2.1
         environment:
             - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-messenger
             - BRIDGE_CLIENT_ADDRESS=ribbon2-gateway
@@ -32,7 +32,7 @@ services:
                 condition: service_started
 
     ribbon2-messenger-2:
-        image: freax/ribbon2-messenger:2.0
+        image: freax/ribbon2-messenger:2.1
         environment:
             - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-messenger
             - BRIDGE_CLIENT_ADDRESS=ribbon2-gateway
