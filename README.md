@@ -1,6 +1,6 @@
 Ribbon2 is concept of news message system for journalism and news agencies. It based on older Ribbon system but with complete new tech stack. System now built around micro-service architecture.
 
-Current version: **2.0**
+Current version: **2.1**
 
 ### List of units
  - `gateway` - REST api facade for units and also holder or user/group data;
