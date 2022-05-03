@@ -11,6 +11,7 @@
         <module>message-unit</module>
         <module>directory-unit</module>
         <module>IO</module>
+        <module>ui</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
