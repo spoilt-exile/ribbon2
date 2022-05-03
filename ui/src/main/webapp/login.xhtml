@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>Login page</title>
+    </h:head>
+    <h:body>
+        <div align="center">
+            <br/>
+            <img src="/images/logo.png"/>
+            <br/>
+            <br/>
+            <br/>
+            <h:form id="login-form">
+                <h:panelGrid columns="3" cellpadding="5" width="600px">
+                    <h:outputLabel for="login" value="Login:" style="font-weight: bold"/>
+                    <p:inputText id="login" value="#{login.login}" required="true" requiredMessage="Enter login!"/>
+                    <p:message for="login"/>
+                    
+                    <h:outputLabel for="password" value="Password:" style="font-weight: bold"/>
+                    <p:password id="password" value="#{login.pass}" required="true" requiredMessage="Enter password!"/>
+                    <p:message for="password"/>
+                </h:panelGrid>
+                <p:messages for="login-error"/><br/>
+                <p:commandButton action="#{login.login()}" value="Enter" ajax="false" update="login-form"/>
+                <p:commandButton type="reset" value="Clear" update="login-form"/>
+            </h:form>
+        </div>
+    </h:body>
+</html>
+

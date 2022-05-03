@@ -15,4 +15,25 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
- */ 
+ */
+package tk.freaxsoftware.ribbon2.ui.managed;
+
+import javax.inject.Named;
+import javax.inject.Singleton;
+import tk.freaxsoftware.ribbon2.ui.rest.AuthRestClient;
+
+/**
+ * Gateway REST service.
+ * @author Stanislav Nepochatov
+ */
+@Named(value = "GatewayService")
+@Singleton
+public class GatewayService {
+    
+    private final AuthRestClient authRestClient = new AuthRestClient("http://127.0.0.1:9000");
+
+    public AuthRestClient getAuthRestClient() {
+        return authRestClient;
+    }
+    
+}
