@@ -9,15 +9,49 @@
  
      <h:body>
  
-         Hi, #{UserSession.login}
+        Hi, #{UserSession.login}
+         
+        <h:form id="currentDirTable">
+            <p:dataTable var="message" selectionMode="single" value="#{mainHandler.messages}" rowKey="#{message.id}" resizableColumns="true" emptyMessage="No messages.">
+                <!-- <p:ajax event="rowSelect" update=":currentNote" listener="#{eventHandler.onNoteSelected}"/> -->
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Id" />
+                    </f:facet>
+                    <h:outputText value="#{message.id}"/>  
+                </p:column>
+                
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Header" />
+                    </f:facet>
+                    <h:outputText value="#{message.header}"/>  
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Created by" />
+                    </f:facet>
+                    <h:outputText value="#{message.createdBy}"/>  
+                </p:column>
+                
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Created" />
+                    </f:facet>
+                    <h:outputText value="#{message.created}"/>  
+                </p:column>
+
+            </p:dataTable>
+        </h:form>
  
-                <h:form>
-                <p:tree value="#{directoryTree.root}" var="node" style="border: none;" selectionMode="single">
-                    <!-- <p:ajax event="select" listener="#{eventHandler.onDirSelected}" update=":currentDirTable, :currentNote"/> -->
+                <!--<h:form>
+                <p:tree value="#{mainHandler.root}" var="node" style="border: none;" selectionMode="single">
+                    <p:ajax event="select" listener="#{mainHandler.onDirSelected}" update=":currentDirTable, :currentNote"/>
                     <p:treeNode>
                         <h:outputText value="#{node.name}" />
                     </p:treeNode>
                 </p:tree>
-                </h:form>
+                </h:form>-->
      </h:body>
 </html>
