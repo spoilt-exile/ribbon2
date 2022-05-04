@@ -23,6 +23,8 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 
 /**
@@ -32,6 +34,8 @@ import tk.freaxsoftware.ribbon2.core.data.UserModel;
 @Named(value = "login")
 @RequestScoped
 public class Login {
+    
+    private final static Logger LOGGER = LoggerFactory.getLogger(Login.class);
     
     @Inject
     private UserSession session;
@@ -76,8 +80,9 @@ public class Login {
     
     public String login() {
         try {
-            System.out.println("LOGIN " + login);
+            LOGGER.info("Performing login of {}", login);
             final String jwtToken = gatewayService.getAuthRestClient().auth(login, pass);
+            pass = null;
             session.setJwtKey(jwtToken);
             session.setLogin(login);
             final UserModel user = gatewayService.getAuthRestClient().getAccount(jwtToken);
@@ -86,11 +91,10 @@ public class Login {
             if (session.getIsAdmin()) {
                 FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("isAdmin", "true");
             }
-            System.out.println("USER LOGINED " + session.toString());
             return "success";
         } catch (Exception ex) {
-            ex.printStackTrace();
-            FacesContext.getCurrentInstance().addMessage("login-error", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Login failed, check your login and password!", ""));
+            LOGGER.error("Login failed", ex);
+            FacesContext.getCurrentInstance().addMessage("login-error", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Login failed, " + ex.getMessage(), ""));
             return "failed";
         }
     }
