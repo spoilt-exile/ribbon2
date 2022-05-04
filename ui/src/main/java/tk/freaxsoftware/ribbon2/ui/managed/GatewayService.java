@@ -21,6 +21,7 @@ package tk.freaxsoftware.ribbon2.ui.managed;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import tk.freaxsoftware.ribbon2.ui.rest.AuthRestClient;
+import tk.freaxsoftware.ribbon2.ui.rest.DirectoryRestClient;
 
 /**
  * Gateway REST service.
@@ -31,9 +32,14 @@ import tk.freaxsoftware.ribbon2.ui.rest.AuthRestClient;
 public class GatewayService {
     
     private final AuthRestClient authRestClient = new AuthRestClient("http://127.0.0.1:9000");
+    private final DirectoryRestClient directoryRestClient = new DirectoryRestClient("http://127.0.0.1:9000");
 
     public AuthRestClient getAuthRestClient() {
         return authRestClient;
+    }
+
+    public DirectoryRestClient getDirectoryRestClient() {
+        return directoryRestClient;
     }
     
 }

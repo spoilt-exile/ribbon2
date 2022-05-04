@@ -11,5 +11,13 @@
  
          Hi, #{UserSession.login}
  
+                <h:form>
+                <p:tree value="#{directoryTree.root}" var="node" style="border: none;" selectionMode="single">
+                    <!-- <p:ajax event="select" listener="#{eventHandler.onDirSelected}" update=":currentDirTable, :currentNote"/> -->
+                    <p:treeNode>
+                        <h:outputText value="#{node.name}" />
+                    </p:treeNode>
+                </p:tree>
+                </h:form>
      </h:body>
 </html>

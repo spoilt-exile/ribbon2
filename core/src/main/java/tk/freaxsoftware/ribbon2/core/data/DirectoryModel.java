@@ -19,12 +19,13 @@
 
 package tk.freaxsoftware.ribbon2.core.data;
 
+import java.io.Serializable;
 
 /**
  * Message directory data class.
  * @author Stanislav Nepochatov
  */
-public class DirectoryModel {
+public class DirectoryModel implements Serializable {
     
     public final static String CALL_CREATE_DIRECTORY = "Ribbon.Global.CreateDirectory";
     public final static String CALL_UPDATE_DIRECTORY = "Ribbon.Global.UpdateDirectory";
@@ -90,5 +91,9 @@ public class DirectoryModel {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+    
+    public String parentName() {
+        return getName().equals(getFullName()) ? "" : getFullName().substring(0, getFullName().length() - getName().length() - 1);
     }
 }
