@@ -20,6 +20,7 @@ package tk.freaxsoftware.ribbon2.ui.managed;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
@@ -30,17 +31,19 @@ import org.primefaces.model.TreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
+import tk.freaxsoftware.ribbon2.core.data.response.MessagePage;
 
 /**
  * Builds tree of system directories and provide access to select one of it.
  * @author Stanislav Nepochatov
  */
-@Named(value = "directoryTree")
+@Named(value = "mainHandler")
 @SessionScoped
-public class DirectoryTree implements Serializable {
+public class MainHandler implements Serializable {
     
-    private final static Logger LOGGER = LoggerFactory.getLogger(DirectoryTree.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(MainHandler.class);
     
     @Inject
     private UserSession session;
@@ -52,7 +55,8 @@ public class DirectoryTree implements Serializable {
     
     private TreeNode<DirectoryModel> selected;
     
-    @PostConstruct
+    private List<MessageModel> messages;
+    
     public void buildTree() {
         root = new DefaultTreeNode(new DirectoryModel());
         
@@ -89,6 +93,16 @@ public class DirectoryTree implements Serializable {
             LOGGER.error("Error on directories loading", ex);
         }
     }
+    
+    @PostConstruct
+    public void loadMessages() {
+        try {
+            MessagePage page = gatewayService.getMessageRestClient().getMessages(session.getJwtKey(), "System.Test");
+            messages = page.getContent();
+        } catch (Exception ex) {
+            LOGGER.error("Error on messages loading", ex);
+        }
+    }
 
     public TreeNode<DirectoryModel> getRoot() {
         return root;
@@ -104,6 +118,14 @@ public class DirectoryTree implements Serializable {
 
     public void setSelected(TreeNode<DirectoryModel> selected) {
         this.selected = selected;
+    }
+
+    public List<MessageModel> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(List<MessageModel> messages) {
+        this.messages = messages;
     }
 
 }
