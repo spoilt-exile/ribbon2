@@ -1,57 +1,78 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
     xmlns:h="http://java.sun.com/jsf/html"
     xmlns:f="http://java.sun.com/jsf/core"
-    xmlns:p="http://primefaces.org/ui">
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:pe="http://primefaces.org/ui/extensions">
  
      <h:head>
- 
+        <title>Ribbon2 Main page</title>
      </h:head>
  
      <h:body>
- 
-        Hi, #{UserSession.login}
-         
-        <h:form id="currentDirTable">
-            <p:dataTable var="message" selectionMode="single" value="#{mainHandler.messages}" rowKey="#{message.id}" resizableColumns="true" emptyMessage="No messages.">
-                <!-- <p:ajax event="rowSelect" update=":currentNote" listener="#{eventHandler.onNoteSelected}"/> -->
-                <p:column>
-                    <f:facet name="header">
-                        <h:outputText value="Id" />
-                    </f:facet>
-                    <h:outputText value="#{message.id}"/>  
-                </p:column>
-                
-                <p:column>
-                    <f:facet name="header">
-                        <h:outputText value="Header" />
-                    </f:facet>
-                    <h:outputText value="#{message.header}"/>  
-                </p:column>
+        
+        <pe:layout fullPage="true">
+            
+            <!-- Directory tree section -->
+            <pe:layoutPane position="west" header="Directories" resizable="true">
+                <h:form>
+                    <p:tree value="#{mainHandler.directoryTree}" var="node" style="border: none;" selectionMode="single">
+                        <p:ajax event="select" listener="#{mainHandler.onDirSelected}" update=":currentMessagePage, :currentMessage"/>
+                        <p:treeNode>
+                            <h:outputText value="#{node.name}" />
+                        </p:treeNode>
+                    </p:tree>
+                </h:form>
+            </pe:layoutPane>
+            
+            <pe:layoutPane position="center" header="Messages" resizable="true">
+                <pe:layout stateful="true">
+                    <!-- Message list section -->
+                    <pe:layoutPane position="center" header="Notes" styleContent="padding: 0px; border-top: 0px;" size="50%">
+                        <h:form id="currentMessagePage">
+                            <p:dataTable var="message" selectionMode="single" value="#{mainHandler.messages}" rowKey="#{message.id}" resizableColumns="true" emptyMessage="No messages.">
+                                <p:ajax event="rowSelect" update=":currentMessage" listener="#{mainHandler.onMessageSelected}"/>
+                                <p:column>
+                                    <f:facet name="header">
+                                        <h:outputText value="Id" />
+                                    </f:facet>
+                                    <h:outputText value="#{message.id}"/>  
+                                </p:column>
 
-                <p:column>
-                    <f:facet name="header">
-                        <h:outputText value="Created by" />
-                    </f:facet>
-                    <h:outputText value="#{message.createdBy}"/>  
-                </p:column>
-                
-                <p:column>
-                    <f:facet name="header">
-                        <h:outputText value="Created" />
-                    </f:facet>
-                    <h:outputText value="#{message.created}"/>  
-                </p:column>
+                                <p:column>
+                                    <f:facet name="header">
+                                        <h:outputText value="Header" />
+                                    </f:facet>
+                                    <h:outputText value="#{message.header}"/>  
+                                </p:column>
 
-            </p:dataTable>
-        </h:form>
- 
-                <!--<h:form>
-                <p:tree value="#{mainHandler.root}" var="node" style="border: none;" selectionMode="single">
-                    <p:ajax event="select" listener="#{mainHandler.onDirSelected}" update=":currentDirTable, :currentNote"/>
-                    <p:treeNode>
-                        <h:outputText value="#{node.name}" />
-                    </p:treeNode>
-                </p:tree>
-                </h:form>-->
+                                <p:column>
+                                    <f:facet name="header">
+                                        <h:outputText value="Created by" />
+                                    </f:facet>
+                                    <h:outputText value="#{message.createdBy}"/>  
+                                </p:column>
+
+                                <p:column>
+                                    <f:facet name="header">
+                                        <h:outputText value="Created" />
+                                    </f:facet>
+                                    <h:outputText value="#{message.created}"/>  
+                                </p:column>
+                            </p:dataTable>
+                        </h:form>
+                    </pe:layoutPane>
+                    
+                    <!-- Message content section -->
+                    <pe:layoutPane position="south" resizable="true">
+                        <h:form id="currentMessage">
+                            <!-- #{mainHandler.selectedMessage.content} -->
+                            <h:outputText value="#{mainHandler.selectedMessage.content}" escape="false"/>
+                        </h:form>
+                    </pe:layoutPane>
+                    
+                </pe:layout>
+            </pe:layoutPane>
+             
+        </pe:layout>
      </h:body>
 </html>

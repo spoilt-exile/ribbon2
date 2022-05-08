@@ -26,6 +26,8 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.primefaces.event.NodeSelectEvent;
+import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DefaultTreeNode;
 import org.primefaces.model.TreeNode;
 import org.slf4j.Logger;
@@ -51,14 +53,17 @@ public class MainHandler implements Serializable {
     @Inject
     private transient GatewayService gatewayService;
     
-    private TreeNode<DirectoryModel> root;
+    private TreeNode<DirectoryModel> directoryTree;
     
-    private TreeNode<DirectoryModel> selected;
+    private TreeNode<DirectoryModel> selectedDirectory;
     
     private List<MessageModel> messages;
     
+    private MessageModel selectedMessage;
+    
+    @PostConstruct
     public void buildTree() {
-        root = new DefaultTreeNode(new DirectoryModel());
+        directoryTree = new DefaultTreeNode(new DirectoryModel());
         
         Map<String, TreeNode<DirectoryModel>> pathMap = new HashMap<>();
         
@@ -74,7 +79,7 @@ public class MainHandler implements Serializable {
                 LOGGER.info("Processing directory {} with parent {}", current.getFullName(), parentName);
                 if (parentName.isEmpty()) {
                     LOGGER.info("Adding {} directory to ROOT", current.getFullName());
-                    TreeNode<DirectoryModel> insertedToRoot = new DefaultTreeNode(current, root);
+                    TreeNode<DirectoryModel> insertedToRoot = new DefaultTreeNode(current, directoryTree);
                     pathMap.put(current.getFullName(), insertedToRoot);
                     insertedToRoot.setExpanded(true);
                 } else {
@@ -94,30 +99,43 @@ public class MainHandler implements Serializable {
         }
     }
     
-    @PostConstruct
-    public void loadMessages() {
+    
+    public void onDirSelected(NodeSelectEvent e) {
+        selectedDirectory = e.getTreeNode();
+        selectedMessage = null;
+        LOGGER.info("Directory {} selected", selectedDirectory.getData().getFullName());
         try {
-            MessagePage page = gatewayService.getMessageRestClient().getMessages(session.getJwtKey(), "System.Test");
+            MessagePage page = gatewayService.getMessageRestClient().getMessages(session.getJwtKey(), selectedDirectory.getData().getFullName());
             messages = page.getContent();
         } catch (Exception ex) {
             LOGGER.error("Error on messages loading", ex);
         }
     }
-
-    public TreeNode<DirectoryModel> getRoot() {
-        return root;
+    
+    public void onMessageSelected(SelectEvent e) {
+        MessageModel selectedModel = (MessageModel) e.getObject();
+        LOGGER.info("Message {} selected", selectedModel.getUid());
+        try {
+            selectedMessage = gatewayService.getMessageRestClient().getMessageByUid(session.getJwtKey(), selectedModel.getUid(), selectedDirectory.getData().getFullName());
+        } catch (Exception ex) {
+            LOGGER.error("Error on message loading", ex);
+        }
     }
 
-    public void setRoot(TreeNode<DirectoryModel> root) {
-        this.root = root;
+    public TreeNode<DirectoryModel> getDirectoryTree() {
+        return directoryTree;
     }
 
-    public TreeNode<DirectoryModel> getSelected() {
-        return selected;
+    public void setDirectoryTree(TreeNode<DirectoryModel> directoryTree) {
+        this.directoryTree = directoryTree;
     }
 
-    public void setSelected(TreeNode<DirectoryModel> selected) {
-        this.selected = selected;
+    public TreeNode<DirectoryModel> getSelectedDirectory() {
+        return selectedDirectory;
+    }
+
+    public void setSelectedDirectory(TreeNode<DirectoryModel> selectedDirectory) {
+        this.selectedDirectory = selectedDirectory;
     }
 
     public List<MessageModel> getMessages() {
@@ -126,6 +144,14 @@ public class MainHandler implements Serializable {
 
     public void setMessages(List<MessageModel> messages) {
         this.messages = messages;
+    }
+
+    public MessageModel getSelectedMessage() {
+        return selectedMessage;
+    }
+
+    public void setSelectedMessage(MessageModel selectedMessage) {
+        this.selectedMessage = selectedMessage;
     }
 
 }
