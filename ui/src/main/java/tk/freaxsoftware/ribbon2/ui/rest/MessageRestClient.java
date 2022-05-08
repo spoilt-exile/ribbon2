@@ -27,6 +27,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
 import spark.utils.IOUtils;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
+import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import static tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.PARAM_PAGE;
 import static tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.PARAM_SIZE;
 import tk.freaxsoftware.ribbon2.core.data.response.MessagePage;
@@ -63,6 +64,24 @@ public class MessageRestClient {
         HttpResponse response = clientBuilder.build().execute(request);
         if (response.getStatusLine().getStatusCode() == 200) {
             return gson.fromJson(IOUtils.toString(response.getEntity().getContent()), MessagePage.class);
+        } else {
+            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Messages request failed with status: " + response.getStatusLine().toString());
+        }
+    }
+    
+    /**
+     * Get full message (with content) by uid.
+     * @param jwtKey raw JWT key;
+     * @param uid message uid;
+     * @param directory directory for loading message from;
+     * @return message model with content;
+     */
+    public MessageModel getMessageByUid(String jwtKey, String uid, String directory) throws URISyntaxException, IOException {
+        HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/" + uid + "/dir/" + directory).build());
+        request.addHeader("x-ribbon2-auth", jwtKey);
+        HttpResponse response = clientBuilder.build().execute(request);
+        if (response.getStatusLine().getStatusCode() == 200) {
+            return gson.fromJson(IOUtils.toString(response.getEntity().getContent()), MessageModel.class);
         } else {
             throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Messages request failed with status: " + response.getStatusLine().toString());
         }
