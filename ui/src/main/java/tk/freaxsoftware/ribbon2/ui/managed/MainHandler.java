@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
-import tk.freaxsoftware.ribbon2.core.data.response.MessagePage;
+import tk.freaxsoftware.ribbon2.ui.data.MessageLazyPage;
 
 /**
  * Builds tree of system directories and provide access to select one of it.
@@ -57,7 +57,7 @@ public class MainHandler implements Serializable {
     
     private TreeNode<DirectoryModel> selectedDirectory;
     
-    private List<MessageModel> messages;
+    private MessageLazyPage messagePage;
     
     private MessageModel selectedMessage;
     
@@ -104,12 +104,7 @@ public class MainHandler implements Serializable {
         selectedDirectory = e.getTreeNode();
         selectedMessage = null;
         LOGGER.info("Directory {} selected", selectedDirectory.getData().getFullName());
-        try {
-            MessagePage page = gatewayService.getMessageRestClient().getMessages(session.getJwtKey(), selectedDirectory.getData().getFullName());
-            messages = page.getContent();
-        } catch (Exception ex) {
-            LOGGER.error("Error on messages loading", ex);
-        }
+        messagePage = new MessageLazyPage(gatewayService, selectedDirectory.getData().getFullName(), session.getJwtKey());
     }
     
     public void onMessageSelected(SelectEvent e) {
@@ -138,12 +133,12 @@ public class MainHandler implements Serializable {
         this.selectedDirectory = selectedDirectory;
     }
 
-    public List<MessageModel> getMessages() {
-        return messages;
+    public MessageLazyPage getMessagePage() {
+        return messagePage;
     }
 
-    public void setMessages(List<MessageModel> messages) {
-        this.messages = messages;
+    public void setMessagePage(MessageLazyPage messagePage) {
+        this.messagePage = messagePage;
     }
 
     public MessageModel getSelectedMessage() {

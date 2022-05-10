@@ -58,8 +58,10 @@ public class MessageRestClient {
      * @throws URISyntaxException
      * @throws IOException 
      */
-    public MessagePage getMessages(String jwtKey, String directory) throws URISyntaxException, IOException {
-        HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/" + directory).addParameter(PARAM_PAGE, "0").addParameter(PARAM_SIZE, "30").build());
+    public MessagePage getMessages(String jwtKey, String directory, int pageSize, int page) throws URISyntaxException, IOException {
+        HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/" + directory)
+                .addParameter(PARAM_PAGE, String.valueOf(page))
+                .addParameter(PARAM_SIZE, String.valueOf(pageSize)).build());
         request.addHeader("x-ribbon2-auth", jwtKey);
         HttpResponse response = clientBuilder.build().execute(request);
         if (response.getStatusLine().getStatusCode() == 200) {
