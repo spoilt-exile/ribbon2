@@ -27,9 +27,16 @@
             <pe:layoutPane position="center" header="Messages" resizable="true">
                 <pe:layout stateful="true">
                     <!-- Message list section -->
-                    <pe:layoutPane position="center" header="Notes" styleContent="padding: 0px; border-top: 0px;" size="50%">
+                    <pe:layoutPane position="center" header="Notes" styleContent="padding: 0px; border-top: 0px;" size="50%" resizable="true">
                         <h:form id="currentMessagePage">
-                            <p:dataTable var="message" selectionMode="single" value="#{mainHandler.messages}" rowKey="#{message.id}" resizableColumns="true" emptyMessage="No messages.">
+                            <p:dataTable var="message" selectionMode="single" 
+                                         paginator="true" rows="15" lazy="true"
+                                         paginatorPosition="bottom"
+                                         paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}" 
+                                         rowsPerPageTemplate="15,30"
+                                         value="#{mainHandler.messagePage}" rowKey="#{message.id}" 
+                                         scrollable="true" scrollHeight="500"
+                                         resizableColumns="true" emptyMessage="No messages.">
                                 <p:ajax event="rowSelect" update=":currentMessage" listener="#{mainHandler.onMessageSelected}"/>
                                 <p:column>
                                     <f:facet name="header">
@@ -65,8 +72,11 @@
                     <!-- Message content section -->
                     <pe:layoutPane position="south" resizable="true">
                         <h:form id="currentMessage">
-                            <!-- #{mainHandler.selectedMessage.content} -->
-                            <h:outputText value="#{mainHandler.selectedMessage.content}" escape="false"/>
+                            <p:scrollPanel style="width:auto;height:auto">
+                            <p>
+                                #{mainHandler.selectedMessage.content}
+                            </p>
+                            </p:scrollPanel>
                         </h:form>
                     </pe:layoutPane>
                     
