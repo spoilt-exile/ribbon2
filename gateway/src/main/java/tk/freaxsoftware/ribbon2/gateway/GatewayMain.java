@@ -19,14 +19,16 @@
 package tk.freaxsoftware.ribbon2.gateway;
 
 import com.google.gson.Gson;
+import io.javalin.Javalin;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spark.Spark;
-import spark.utils.IOUtils;
 import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
+import tk.freaxsoftware.extras.bus.bridge.http.util.GsonMapper;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.config.PropertyConfigProcessor;
 import tk.freaxsoftware.ribbon2.core.exception.CoreError;
@@ -40,6 +42,7 @@ import tk.freaxsoftware.ribbon2.gateway.routes.UserRoutes;
 import tk.freaxsoftware.extras.bus.exceptions.NoSubscriptionMessageException;
 import tk.freaxsoftware.ribbon2.gateway.io.IOService;
 import tk.freaxsoftware.ribbon2.gateway.io.routes.IORoutes;
+import tk.freaxsoftware.ribbon2.gateway.routes.AuthRoutes;
 
 /**
  * Main class for API gateway.
@@ -69,34 +72,37 @@ public class GatewayMain {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
-        LOGGER.info("\n{}", IOUtils.toString(GatewayMain.class.getClassLoader().getResourceAsStream("header")));
-        config = gson.fromJson(IOUtils.toString(GatewayMain.class.getClassLoader().getResourceAsStream("appconfig.json")), ApplicationConfig.class);
+        LOGGER.info("\n{}", IOUtils.toString(GatewayMain.class.getClassLoader().getResourceAsStream("header"), Charset.defaultCharset()));
+        config = gson.fromJson(IOUtils.toString(GatewayMain.class.getClassLoader().getResourceAsStream("appconfig.json"), Charset.defaultCharset()), ApplicationConfig.class);
         PropertyConfigProcessor.process(config.getDb());
         LOGGER.info("Gateway started, config: {}", config);
+        Javalin app = Javalin.create(javalinConfig -> {
+            javalinConfig.jsonMapper(new GsonMapper());
+        }).start(config.getHttp().getPort());
         Init.init(config);
-        UserRoutes.init();
-        GroupRoutes.init();
-        DirectoryRoutes.init();
-        MessageRoutes.init();
+        AuthRoutes.init(app, config.getHttp());
+        UserRoutes.init(app);
+        GroupRoutes.init(app);
+        DirectoryRoutes.init(app);
+        MessageRoutes.init(app);
         
         IOService ioService = new IOService();
         AnnotationUtil.subscribeReceiverInstance(ioService);
-        IORoutes.init(ioService);
+        IORoutes.init(app, ioService);
         
-        Spark.exception(CoreException.class, (ex, req, res) -> {
+        app.exception(CoreException.class, (ex, ctx) -> {
             LOGGER.error("Error occurred:", ex);
-            res.status(ex.getCode().getHttpCode());
-            res.type("application/json");
-            res.body(gson.toJson(new CoreError(ex)));
+            ctx.status(ex.getCode().getHttpCode());
+            ctx.json(new CoreError(ex));
         });
         
-        Spark.exception(NoSubscriptionMessageException.class, (rex, req, res) -> {
-            LOGGER.error("Call error occurred:", rex);
+        app.exception(NoSubscriptionMessageException.class, (ex, ctx) -> {
+            LOGGER.error("Call error occurred:", ex);
             CoreError error = new CoreError();
             error.setCode(RibbonErrorCodes.CALL_ERROR);
-            error.setMessage(rex.getMessage());
-            res.status(RibbonErrorCodes.CALL_ERROR.getHttpCode());
-            res.body(gson.toJson(error));
+            error.setMessage(ex.getMessage());
+            ctx.status(RibbonErrorCodes.CALL_ERROR.getHttpCode());
+            ctx.json(error);
         });
     }
 }

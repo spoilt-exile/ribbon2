@@ -19,13 +19,10 @@
 package tk.freaxsoftware.ribbon2.gateway.routes;
 
 import com.google.gson.reflect.TypeToken;
+import io.javalin.Javalin;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static spark.Spark.delete;
-import static spark.Spark.post;
-import static spark.Spark.put;
-import static spark.Spark.get;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
@@ -48,9 +45,9 @@ public class DirectoryRoutes {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(DirectoryRoutes.class);
     
-    public static void init() {
-        post("/api/directory", (req, res) -> {
-            DirectoryModel model = GatewayMain.gson.fromJson(req.body(), DirectoryModel.class);
+    public static void init(Javalin app) {
+        app.post("/api/directory", ctx -> {
+            DirectoryModel model = GatewayMain.gson.fromJson(ctx.body(), DirectoryModel.class);
             LOGGER.info("Request to create directory {}", model.getFullName());
             DirectoryModel saved = MessageBus.fireCall(DirectoryModel.CALL_CREATE_DIRECTORY, model, MessageOptions.Builder.newInstance()
                     .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
@@ -58,12 +55,11 @@ public class DirectoryRoutes {
                     .deliveryCall().build(), DirectoryModel.class);
             model.setId(saved.getId());
             model.setName(saved.getName());
-            res.type("application/json");
-            return model;
-        }, GatewayMain.gson::toJson);
+            ctx.json(model);
+        });
         
-        put("/api/directory", (req, res) -> {
-            DirectoryModel model = GatewayMain.gson.fromJson(req.body(), DirectoryModel.class);
+        app.put("/api/directory", ctx -> {
+            DirectoryModel model = GatewayMain.gson.fromJson(ctx.body(), DirectoryModel.class);
             LOGGER.info("Request to update directory {}", model.getFullName());
             DirectoryModel saved = MessageBus.fireCall(DirectoryModel.CALL_UPDATE_DIRECTORY, model, MessageOptions.Builder.newInstance()
                     .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
@@ -72,69 +68,64 @@ public class DirectoryRoutes {
             model.setId(saved.getId());
             model.setName(saved.getName());
             model.setDescription(saved.getDescription());
-            res.type("application/json");
-            return model;
-        }, GatewayMain.gson::toJson);
+            ctx.json(model);
+        });
         
-        delete("/api/directory/:path", (req, res) -> {
-            LOGGER.info("Request to delete directory {}", req.params("path"));
-            Boolean deleted = MessageBus.fireCall(DirectoryModel.CALL_DELETE_DIRECTORY, req.params("path"), MessageOptions.Builder.newInstance()
+        app.delete("/api/directory/{path}", ctx -> {
+            LOGGER.info("Request to delete directory {}", ctx.pathParam("path"));
+            Boolean deleted = MessageBus.fireCall(DirectoryModel.CALL_DELETE_DIRECTORY, ctx.pathParam("path"), MessageOptions.Builder.newInstance()
                     .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
                     .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
                     .deliveryCall().build(), Boolean.class);
             if (deleted != null && deleted) {
-                res.status(200);
+                ctx.status(200);
             } else {
-                res.status(404);
+                ctx.status(404);
             }
-            return "";
         });
         
-        post("/api/directory/access/:path", (req, res) -> {
-            Set<DirectoryAccessModel> entries = GatewayMain.gson.fromJson(req.body(), new TypeToken<Set<DirectoryAccessModel>>(){}.getType());
-            String path = req.params("path");
+        app.post("/api/directory/access/{path}", ctx -> {
+            Set<DirectoryAccessModel> entries = GatewayMain.gson.fromJson(ctx.body(), new TypeToken<Set<DirectoryAccessModel>>(){}.getType());
+            String path = ctx.pathParam("path");
             DirectoryEditAccessRequest request = new DirectoryEditAccessRequest(path, entries);
             LOGGER.info("Request to edit directory access {}", request.getDirectoryPath());
             Boolean saved = MessageBus.fireCall(DirectoryEditAccessRequest.CALL_EDIT_DIR_ACCESS, request, MessageOptions.Builder.newInstance()
                     .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
                     .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
                     .deliveryCall().build(), Boolean.class);
-            return saved;
-        }, GatewayMain.gson::toJson);
+            ctx.json(saved);
+        });
         
-        get("/api/directory/access/permission/all", (req, res) -> {
+        app.get("/api/directory/access/permission/all", ctx -> {
             LOGGER.info("Request to get all access permissions {}");
             DirectoryPermissionTaggedHolder permissionHolder = MessageBus.fireCall(DirectoryPermissionTaggedModel.CALL_GET_PERMISSIONS, null, MessageOptions.Builder.newInstance()
                     .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
                     .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
                     .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
                     .deliveryCall().build(), DirectoryPermissionTaggedHolder.class);
-            res.type("application/json");
-            return permissionHolder.getPermissions();
-        }, GatewayMain.gson::toJson);
+            ctx.json(permissionHolder.getPermissions());
+        });
         
-        get("/api/directory", (req, res) -> {
-            PaginationRequest request = PaginationRequest.ofRequest(req.queryMap());
+        app.get("/api/directory", ctx -> {
+            PaginationRequest request = PaginationRequest.ofRequest(ctx.queryParamMap());
             LOGGER.info("Request to get all directories {}", request);
             DirectoryPage page = MessageBus.fireCall(DirectoryModel.CALL_GET_DIRECTORY_ALL, request, MessageOptions.Builder.newInstance()
                     .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
                     .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
                     .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
                     .deliveryCall().build(), DirectoryPage.class);
-            res.type("application/json");
-            return page;
-        }, GatewayMain.gson::toJson);
+            ctx.json(page);
+        });
         
-        get("/api/directory/:path", (req, res) -> {
-            LOGGER.info("Request to get directory {}", req.params("path"));
-            DirectoryModel directory = MessageBus.fireCall(DirectoryModel.CALL_GET_DIRECTORY_BY_PATH, req.params("path"), MessageOptions.Builder.newInstance()
+        app.get("/api/directory/{path}", ctx -> {
+            LOGGER.info("Request to get directory {}", ctx.pathParam("path"));
+            DirectoryModel directory = MessageBus.fireCall(DirectoryModel.CALL_GET_DIRECTORY_BY_PATH, ctx.pathParam("path"), MessageOptions.Builder.newInstance()
                     .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
                     .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
                     .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
                     .deliveryCall().build(), DirectoryModel.class);
-            res.type("application/json");
-            return directory;
-        }, GatewayMain.gson::toJson);
+            ctx.json(directory);
+        });
     }
     
 }

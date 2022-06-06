@@ -19,17 +19,13 @@
 package tk.freaxsoftware.ribbon2.gateway.routes;
 
 import io.ebean.DB;
+import io.javalin.Javalin;
 import io.jsonwebtoken.Claims;
-import java.net.HttpURLConnection;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spark.QueryParamsMap;
-import spark.Spark;
-import static spark.Spark.before;
-import static spark.Spark.get;
-import static spark.Spark.post;
-import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
+import tk.freaxsoftware.ribbon2.core.exception.CoreException;
+import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
 import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.converters.UserConverter;
@@ -45,43 +41,41 @@ public class AuthRoutes {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(AuthRoutes.class);
     
-    public static void init(ApplicationConfig.HttpConfig httpConfig) {
-        before("/api/*", (request, response) -> {
+    public static void init(Javalin app, ApplicationConfig.HttpConfig httpConfig) {
+        app.before("/api/*", ctx -> {
             UserEntity loginedUser = null;
-            if (request.headers().contains(httpConfig.getAuthTokenName())) {
+            if (ctx.headerMap().containsKey(httpConfig.getAuthTokenName())) {
                 try {
-                    Claims userClaims = JWTTokenService.getInstance().decryptToken(request.headers(httpConfig.getAuthTokenName()));
+                    Claims userClaims = JWTTokenService.getInstance().decryptToken(ctx.headerMap().get(httpConfig.getAuthTokenName()));
                     loginedUser = DB.getDefault().find(UserEntity.class).where().eq("login", userClaims.getId()).findOne();
                 } catch (Exception ex) {
                     LOGGER.error("Unable to finish JWT auth", ex);
                 }
             }
             if (loginedUser == null) {
-                Spark.halt(HttpURLConnection.HTTP_FORBIDDEN);
+                throw new CoreException(RibbonErrorCodes.ACCESS_DENIED, "Access denied");
             } else if (loginedUser != null && loginedUser.getEnabled()) {
                 UserContext.setUser(loginedUser);
             }
         });
         
-        post("/auth", (request, response) -> {
-            QueryParamsMap map = request.queryMap();
-            UserEntity loginedUser = DB.getDefault().find(UserEntity.class).where().eq("login", map.value("login")).findOne();
+        app.post("/auth", ctx -> {
+            UserEntity loginedUser = DB.getDefault().find(UserEntity.class).where().eq("login", ctx.queryParam("login")).findOne();
             if (loginedUser != null 
                     && loginedUser.getEnabled()
-                    && Objects.equals(SHAHash.hashPassword(map.value("password")), loginedUser.getPassword())) {
+                    && Objects.equals(SHAHash.hashPassword(ctx.queryParam("password")), loginedUser.getPassword())) {
                 LOGGER.debug("Proceed JWT auth: " + loginedUser.getLogin());
                 JWTTokenService tokenService = JWTTokenService.getInstance();
                 String token = tokenService.encryptToken(loginedUser);
-                return token;
+                ctx.result(token);
             } else {
-                Spark.halt(HttpURLConnection.HTTP_FORBIDDEN);
+                throw new CoreException(RibbonErrorCodes.ACCESS_DENIED, "Access denied");
             }
-            return null;
         });
         
-        get("/api/account", (request, response) -> {
-            return new UserConverter().convert(UserContext.getUser());
-        }, GatewayMain.gson::toJson);
+        app.get("/api/account", ctx -> {
+            ctx.json(new UserConverter().convert(UserContext.getUser()));
+        });
     }
     
 }

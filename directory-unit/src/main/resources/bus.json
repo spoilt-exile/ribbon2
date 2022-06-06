@@ -4,13 +4,11 @@
         "threadCount": 8
     },
     "bridgeServer": {
-        "nested": false,
-        "httpPort": 9101,
-        "sparkThreadPoolMaxSize": 16
+        "httpPort": 9101
     },
     "bridgeClient": {
         "address": "127.0.0.1",
-        "port": 9000,
+        "port": 8000,
         "heartbeatRate": 30,
         "tag": "directory",
         "crossConnectionsSends": [

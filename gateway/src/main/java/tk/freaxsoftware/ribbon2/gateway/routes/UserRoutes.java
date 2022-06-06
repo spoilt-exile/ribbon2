@@ -19,13 +19,10 @@
 package tk.freaxsoftware.ribbon2.gateway.routes;
 
 import io.ebean.DB;
+import io.javalin.Javalin;
+import liquibase.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static spark.Spark.delete;
-import static spark.Spark.post;
-import static spark.Spark.put;
-import static spark.Spark.get;
-import spark.utils.StringUtils;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
@@ -51,10 +48,10 @@ public class UserRoutes {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(UserRoutes.class);
     
-    public static void init() {
-        post("/api/user", (req, res) -> {
+    public static void init(Javalin app) {
+        app.post("/api/user", ctx -> {
             isAdmin();
-            UserWithPassword user = GatewayMain.gson.fromJson(req.body(), UserWithPassword.class);
+            UserWithPassword user = GatewayMain.gson.fromJson(ctx.body(), UserWithPassword.class);
             LOGGER.info("Request to create User");
             user.setId(null);
             UserEntity newUser = new UserWithPasswordConverter().convert(user);
@@ -62,13 +59,12 @@ public class UserRoutes {
             UserModel savedUser = new UserConverter().convert(newUser);
             MessageBus.fire(UserModel.NOTIFICATION_USER_CREATED, savedUser, 
                     MessageOptions.Builder.newInstance().deliveryNotification(5).build());
-            res.type("application/json");
-            return savedUser;
-        }, GatewayMain.gson::toJson);
+            ctx.json(savedUser);
+        });
         
-        put("/api/user", (req, res) -> {
+        app.put("/api/user", ctx -> {
             isAdmin();
-            UserWithPassword user = GatewayMain.gson.fromJson(req.body(), UserWithPassword.class);
+            UserWithPassword user = GatewayMain.gson.fromJson(ctx.body(), UserWithPassword.class);
             UserEntity updateUser = DB.getDefault().find(UserEntity.class).where().idEq(user.getId()).findOne();
             LOGGER.info("Request to update User: {}", user.getId());
             if (updateUser != null) {
@@ -86,48 +82,44 @@ public class UserRoutes {
                 UserModel savedUser = new UserConverter().convert(updateUser);
                 MessageBus.fire(UserModel.NOTIFICATION_USER_UPDATED, savedUser, 
                         MessageOptions.Builder.newInstance().deliveryNotification(5).build());
-                res.type("application/json");
-                return savedUser;
+                ctx.json(savedUser);
             } else {
                 throw new CoreException(RibbonErrorCodes.USER_NOT_FOUND, 
                         String.format("Unable to find User with id %d", user.getId()));
             }
-        }, GatewayMain.gson::toJson);
+        });
         
-        delete("/api/user/:id", (req, res) -> {
+        app.delete("/api/user/{id}", ctx -> {
             isAdmin();
-            UserEntity entity = DB.getDefault().find(UserEntity.class).where().idEq(Long.parseLong(req.params("id"))).findOne();
-            LOGGER.info("Request to delete User: {}", req.params("id"));
+            UserEntity entity = DB.getDefault().find(UserEntity.class).where().idEq(Long.parseLong(ctx.pathParam("id"))).findOne();
+            LOGGER.info("Request to delete User: {}", ctx.pathParam("id"));
             if (entity != null) {
                 DB.getDefault().delete(entity);
                 MessageBus.fire(UserModel.NOTIFICATION_USER_DELETED, new UserConverter().convert(entity), 
                         MessageOptions.Builder.newInstance().deliveryNotification(5).build());
             } else {
                 throw new CoreException(RibbonErrorCodes.USER_NOT_FOUND, 
-                        String.format("Unable to find User with id %s", req.params("id")));
+                        String.format("Unable to find User with id %s", ctx.pathParam("id")));
             }
-            return "";
         });
         
-        get("/api/user", (req, res) -> {
+        app.get("/api/user", ctx -> {
             isAdmin();
-            PaginationRequest request = PaginationRequest.ofRequest(req.queryMap());
+            PaginationRequest request = PaginationRequest.ofRequest(ctx.queryParamMap());
             LOGGER.info("Request to get all users {}", request);
-            res.type("application/json");
-            return new DefaultPage(DBUtils.findPaginatedEntity(request, UserEntity.class), new UserConverter());
-        }, GatewayMain.gson::toJson);
+            ctx.json(new DefaultPage(DBUtils.findPaginatedEntity(request, UserEntity.class), new UserConverter()));
+        });
         
-        get("/api/user/:id", (req, res) -> {
+        app.get("/api/user/{id}", ctx -> {
             isAdmin();
-            LOGGER.info("Request to get User: {}", req.params("id"));
-            UserEntity entity = DB.getDefault().find(UserEntity.class).where().idEq(Long.parseLong(req.params("id"))).findOne();
+            LOGGER.info("Request to get User: {}", ctx.pathParam("id"));
+            UserEntity entity = DB.getDefault().find(UserEntity.class).where().idEq(Long.parseLong(ctx.pathParam("id"))).findOne();
             if (entity == null) {
                 throw new CoreException(RibbonErrorCodes.USER_NOT_FOUND, 
-                        String.format("Unable to find User with id %s", req.params("id")));
+                        String.format("Unable to find User with id %s", ctx.pathParam("id")));
             }
-            res.type("application/json");
-            return new UserConverter().convert(entity);
-        }, GatewayMain.gson::toJson);
+            ctx.json(new UserConverter().convert(entity));
+        });
     }
     
 }

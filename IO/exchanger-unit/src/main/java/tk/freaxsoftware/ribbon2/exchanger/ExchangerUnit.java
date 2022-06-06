@@ -20,11 +20,12 @@ package tk.freaxsoftware.ribbon2.exchanger;
 
 import com.google.gson.Gson;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spark.utils.IOUtils;
 import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
@@ -68,8 +69,8 @@ public class ExchangerUnit {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
-        LOGGER.info("\n{}", IOUtils.toString(ExchangerUnit.class.getClassLoader().getResourceAsStream("header")));
-        config = gson.fromJson(IOUtils.toString(ExchangerUnitConfig.class.getClassLoader().getResourceAsStream("exchangerconfig.json")), ExchangerUnitConfig.class);
+        LOGGER.info("\n{}", IOUtils.toString(ExchangerUnit.class.getClassLoader().getResourceAsStream("header"), Charset.defaultCharset()));
+        config = gson.fromJson(IOUtils.toString(ExchangerUnitConfig.class.getClassLoader().getResourceAsStream("exchangerconfig.json"), Charset.defaultCharset()), ExchangerUnitConfig.class);
         processConfig(config);
         LOGGER.info("Exchanger started, config: {}", config);
         
