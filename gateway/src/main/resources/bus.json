@@ -4,7 +4,7 @@
         "threadCount": 8
     },
     "bridgeServer": {
-        "nested": true,
+        "httpPort": 8000,
         "heartbeatRate": 30,
         "crossConnections": true
     },

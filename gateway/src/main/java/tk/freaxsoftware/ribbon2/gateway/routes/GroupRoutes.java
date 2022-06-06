@@ -19,12 +19,9 @@
 package tk.freaxsoftware.ribbon2.gateway.routes;
 
 import io.ebean.DB;
+import io.javalin.Javalin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static spark.Spark.delete;
-import static spark.Spark.get;
-import static spark.Spark.post;
-import static spark.Spark.put;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.GroupModel;
@@ -46,10 +43,10 @@ public class GroupRoutes {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(GroupRoutes.class);
     
-    public static void init() {
-        post("/api/group", (req, res) -> {
+    public static void init(Javalin app) {
+        app.post("/api/group", ctx -> {
             isAdmin();
-            GroupModel group = GatewayMain.gson.fromJson(req.body(), GroupModel.class);
+            GroupModel group = GatewayMain.gson.fromJson(ctx.body(), GroupModel.class);
             LOGGER.info("Request to create Group");
             group.setId(null);
             GroupEntity newGroup = new GroupConverter().convertBack(group);
@@ -57,57 +54,52 @@ public class GroupRoutes {
             GroupModel savedGroup = new GroupConverter().convert(newGroup);
             MessageBus.fire(GroupModel.NOTIFICATION_GROUP_CREATED, savedGroup, 
                     MessageOptions.Builder.newInstance().deliveryNotification(5).build());
-            res.type("application/json");
-            return savedGroup;
-        }, GatewayMain.gson::toJson);
+            ctx.json(savedGroup);
+        });
         
-        put("/api/group", (req, res) -> {
+        app.put("/api/group", ctx -> {
             isAdmin();
-            GroupModel group = GatewayMain.gson.fromJson(req.body(), GroupModel.class);
+            GroupModel group = GatewayMain.gson.fromJson(ctx.body(), GroupModel.class);
             LOGGER.info("Request to update Group: {}", group.getId());
             GroupEntity updateGroup = new GroupConverter().convertBack(group);
             updateGroup.update();
             GroupModel savedGroup = new GroupConverter().convert(updateGroup);
             MessageBus.fire(GroupModel.NOTIFICATION_GROUP_UPDATED, savedGroup, 
                     MessageOptions.Builder.newInstance().deliveryNotification(5).build());
-            res.type("application/json");
-            return savedGroup;
-        }, GatewayMain.gson::toJson);
+            ctx.json(savedGroup);
+        });
         
-        delete("/api/group/:id", (req, res) -> {
+        app.delete("/api/group/{id}", ctx -> {
             isAdmin();
-            LOGGER.info("Request to delete Group: {}", req.params("id"));
-            GroupEntity entity = DB.getDefault().find(GroupEntity.class).where().idEq(Long.parseLong(req.params("id"))).findOne();
+            LOGGER.info("Request to delete Group: {}", ctx.pathParam("id"));
+            GroupEntity entity = DB.getDefault().find(GroupEntity.class).where().idEq(Long.parseLong(ctx.pathParam("id"))).findOne();
             if (entity != null) {
                 DB.getDefault().delete(entity);
                 MessageBus.fire(GroupModel.NOTIFICATION_GROUP_DELETED, new GroupConverter().convert(entity), 
                         MessageOptions.Builder.newInstance().deliveryNotification(5).build());
             } else {
                 throw new CoreException(RibbonErrorCodes.GROUP_NOT_FOUND, 
-                        String.format("Unable to find Group with id %s", req.params("id")));
+                        String.format("Unable to find Group with id %s", ctx.pathParam("id")));
             }
-            return "";
         });
         
-        get("/api/group", (req, res) -> {
+        app.get("/api/group", ctx -> {
             isAdmin();
-            PaginationRequest request = PaginationRequest.ofRequest(req.queryMap());
+            PaginationRequest request = PaginationRequest.ofRequest(ctx.queryParamMap());
             LOGGER.info("Request to get all groups {}", request);
-            res.type("application/json");
-            return new DefaultPage(DBUtils.findPaginatedEntity(request, GroupEntity.class), new GroupConverter());
-        }, GatewayMain.gson::toJson);
+            ctx.json(new DefaultPage(DBUtils.findPaginatedEntity(request, GroupEntity.class), new GroupConverter()));
+        });
         
-        get("/api/group/:id", (req, res) -> {
+        app.get("/api/group/{id}", ctx -> {
             isAdmin();
-            LOGGER.info("Request to get Group: {}", req.params("id"));
-            GroupEntity entity = DB.getDefault().find(GroupEntity.class).where().idEq(Long.parseLong(req.params("id"))).findOne();
+            LOGGER.info("Request to get Group: {}", ctx.pathParam("id"));
+            GroupEntity entity = DB.getDefault().find(GroupEntity.class).where().idEq(Long.parseLong(ctx.pathParam("id"))).findOne();
             if (entity == null) {
                 throw new CoreException(RibbonErrorCodes.USER_NOT_FOUND, 
-                        String.format("Unable to find Group with id %s", req.params("id")));
+                        String.format("Unable to find Group with id %s", ctx.pathParam("id")));
             }
-            res.type("application/json");
-            return new GroupConverter().convert(entity);
-        }, GatewayMain.gson::toJson);
+            ctx.json(new GroupConverter().convert(entity));
+        });
     }
     
 }

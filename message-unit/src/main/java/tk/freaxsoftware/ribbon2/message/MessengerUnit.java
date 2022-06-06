@@ -20,11 +20,12 @@ package tk.freaxsoftware.ribbon2.message;
 
 import com.google.gson.Gson;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spark.utils.IOUtils;
 import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.config.PropertyConfigProcessor;
@@ -67,8 +68,8 @@ public class MessengerUnit {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
-        LOGGER.info("\n{}", IOUtils.toString(MessengerUnit.class.getClassLoader().getResourceAsStream("header")));
-        config = gson.fromJson(IOUtils.toString(MessengerUnit.class.getClassLoader().getResourceAsStream("messageconfig.json")), MessengerUnitConfig.class);
+        LOGGER.info("\n{}", IOUtils.toString(MessengerUnit.class.getClassLoader().getResourceAsStream("header")), Charset.defaultCharset());
+        config = gson.fromJson(IOUtils.toString(MessengerUnit.class.getClassLoader().getResourceAsStream("messageconfig.json"), Charset.defaultCharset()), MessengerUnitConfig.class);
         PropertyConfigProcessor.process(config.getDb());
         LOGGER.info("Messenger started, config: {}", config);
 

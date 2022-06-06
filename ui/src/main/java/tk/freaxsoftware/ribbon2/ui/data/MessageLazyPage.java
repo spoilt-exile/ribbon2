@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.primefaces.model.FilterMeta;
 import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortMeta;
@@ -56,7 +57,6 @@ public class MessageLazyPage extends LazyDataModel<MessageModel>{
      * @param jwtKey raw JWT key;
      */
     public MessageLazyPage(GatewayService gatewayService, String directory, String jwtKey) {
-        //super(new MessageConverter());
         this.gatewayService = gatewayService;
         this.directory = directory;
         this.jwtKey = jwtKey;
@@ -65,7 +65,10 @@ public class MessageLazyPage extends LazyDataModel<MessageModel>{
     @Override
     public MessageModel getRowData(String rowKey) {
         if (currentPage != null) {
-            return currentPage.getContent().stream().filter(m -> Objects.equals(rowKey, m.getId().toString())).findFirst().get();
+            Optional<MessageModel> message = currentPage.getContent().stream().filter(m -> Objects.equals(rowKey, m.getId().toString())).findFirst();
+            if (message.isPresent()) {
+                return message.get();
+            }
         }
         return null;
     }

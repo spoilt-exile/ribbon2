@@ -36,7 +36,6 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spark.Spark;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.exceptions.ExceptionServices;
@@ -46,7 +45,6 @@ import tk.freaxsoftware.ribbon2.core.exception.RibbonMessageExceptionCallback;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
 import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
-import tk.freaxsoftware.ribbon2.gateway.routes.AuthRoutes;
 
 /**
  * Main init of the gateway.
@@ -72,9 +70,6 @@ public class Init {
         LOGGER.info("Init Ebean...");
         initDb(config.getDb());
         
-        LOGGER.info("Init Spark...");
-        initHttp(config.getHttp());
-        
         LOGGER.info("Init MessagBus...");
         MessageBus.init();
         ExceptionServices.registerCallback(new RibbonMessageExceptionCallback());
@@ -93,11 +88,6 @@ public class Init {
             });
 
         }
-    }
-    
-    private static void initHttp(ApplicationConfig.HttpConfig httpConfig) {
-        Spark.port(httpConfig.getPort());
-        AuthRoutes.init(httpConfig);
     }
     
     private static void initLiquibase(DbConfig dbConfig) throws SQLException, LiquibaseException {

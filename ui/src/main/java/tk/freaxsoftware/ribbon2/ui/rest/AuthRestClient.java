@@ -21,12 +21,13 @@ package tk.freaxsoftware.ribbon2.ui.rest;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
-import spark.utils.IOUtils;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
@@ -60,7 +61,7 @@ public class AuthRestClient {
         HttpPost request = new HttpPost(new URIBuilder(baseUrl + "/auth").addParameter("login", login).addParameter("password", password).build());
         HttpResponse response = clientBuilder.build().execute(request);
         if (response.getStatusLine().getStatusCode() == 200) {
-            return IOUtils.toString(response.getEntity().getContent());
+            return IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
         } else {
             throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Auth request failed with status: " + response.getStatusLine().toString());
         }
@@ -78,7 +79,7 @@ public class AuthRestClient {
         request.addHeader("x-ribbon2-auth", jwtKey);
         HttpResponse response = clientBuilder.build().execute(request);
         if (response.getStatusLine().getStatusCode() == 200) {
-            return gson.fromJson(IOUtils.toString(response.getEntity().getContent()), UserModel.class);
+            return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), UserModel.class);
         } else {
             throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Auth request failed with status: " + response.getStatusLine().toString());
         }

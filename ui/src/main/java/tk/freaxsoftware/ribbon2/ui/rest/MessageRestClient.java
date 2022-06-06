@@ -21,11 +21,12 @@ package tk.freaxsoftware.ribbon2.ui.rest;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
-import spark.utils.IOUtils;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import static tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.PARAM_PAGE;
@@ -65,7 +66,7 @@ public class MessageRestClient {
         request.addHeader("x-ribbon2-auth", jwtKey);
         HttpResponse response = clientBuilder.build().execute(request);
         if (response.getStatusLine().getStatusCode() == 200) {
-            return gson.fromJson(IOUtils.toString(response.getEntity().getContent()), MessagePage.class);
+            return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), MessagePage.class);
         } else {
             throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Messages request failed with status: " + response.getStatusLine().toString());
         }
@@ -83,7 +84,7 @@ public class MessageRestClient {
         request.addHeader("x-ribbon2-auth", jwtKey);
         HttpResponse response = clientBuilder.build().execute(request);
         if (response.getStatusLine().getStatusCode() == 200) {
-            return gson.fromJson(IOUtils.toString(response.getEntity().getContent()), MessageModel.class);
+            return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), MessageModel.class);
         } else {
             throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Messages request failed with status: " + response.getStatusLine().toString());
         }

@@ -18,7 +18,8 @@
  */
 package tk.freaxsoftware.ribbon2.core.data.request;
 
-import spark.QueryParamsMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Pagination request for page of entities.
@@ -86,12 +87,12 @@ public class PaginationRequest {
         ASC, DESC;
     }
     
-    public static PaginationRequest ofRequest(QueryParamsMap queryParams) {
+    public static PaginationRequest ofRequest(Map<String, List<String>> queryParams) {
         PaginationRequest request = new PaginationRequest();
-        request.setPage(queryParams.hasKey(PARAM_PAGE) ? queryParams.get(PARAM_PAGE).integerValue() : DEFAULT_PAGE);
-        request.setSize(queryParams.hasKey(PARAM_SIZE) ? queryParams.get(PARAM_SIZE).integerValue() : DEFAULT_SIZE);
-        request.setOrderBy(queryParams.hasKey(PARAM_ORDER_BY) ? queryParams.get(PARAM_ORDER_BY).value() : DEFAULT_ORDER_BY);
-        request.setDirection(queryParams.hasKey(PARAM_DIRECTION) ? Order.valueOf(queryParams.get(PARAM_DIRECTION).value()) : DEFAULT_DIRECTION);
+        request.setPage(queryParams.containsKey(PARAM_PAGE) ? Integer.parseInt(queryParams.get(PARAM_PAGE).get(0)) : DEFAULT_PAGE);
+        request.setSize(queryParams.containsKey(PARAM_SIZE) ? Integer.parseInt(queryParams.get(PARAM_SIZE).get(0)) : DEFAULT_SIZE);
+        request.setOrderBy(queryParams.containsKey(PARAM_ORDER_BY) ? queryParams.get(PARAM_ORDER_BY).get(0) : DEFAULT_ORDER_BY);
+        request.setDirection(queryParams.containsKey(PARAM_DIRECTION) ? Order.valueOf(queryParams.get(PARAM_DIRECTION).get(0)) : DEFAULT_DIRECTION);
         return request;
     }
 

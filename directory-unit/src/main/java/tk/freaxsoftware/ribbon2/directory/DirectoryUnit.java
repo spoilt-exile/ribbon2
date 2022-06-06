@@ -20,11 +20,12 @@ package tk.freaxsoftware.ribbon2.directory;
 
 import com.google.gson.Gson;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spark.utils.IOUtils;
+import org.apache.commons.io.IOUtils;
 import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.config.PropertyConfigProcessor;
@@ -68,8 +69,8 @@ public class DirectoryUnit {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
-        LOGGER.info("\n{}", IOUtils.toString(DirectoryUnit.class.getClassLoader().getResourceAsStream("header")));
-        config = gson.fromJson(IOUtils.toString(DirectoryUnit.class.getClassLoader().getResourceAsStream("dirconfig.json")), DirectoryUnitConfig.class);
+        LOGGER.info("\n{}", IOUtils.toString(DirectoryUnit.class.getClassLoader().getResourceAsStream("header"), Charset.defaultCharset()));
+        config = gson.fromJson(IOUtils.toString(DirectoryUnit.class.getClassLoader().getResourceAsStream("dirconfig.json"), Charset.defaultCharset()), DirectoryUnitConfig.class);
         PropertyConfigProcessor.process(config.getDb());
         LOGGER.info("Directory started, config: {}", config);
         
