@@ -19,6 +19,7 @@
 package tk.freaxsoftware.ribbon2.core.data.messagestorage;
 
 import io.ebean.DB;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import tk.freaxsoftware.extras.bus.MessageHolder;
@@ -72,6 +73,14 @@ public class DBMessageStorage implements MessageStorage {
         return messages.stream().map(ms -> converter.convertBack(ms)).collect(Collectors.toSet());
     }
 
+    @Override
+    public Optional<MessageHolder> getMessageById(String id) {
+        DbMessage message = DB.find(DbMessage.class).setDisableLazyLoading(true).where()
+                .eq("uuid", id)
+                .findOne();
+        return Optional.ofNullable(message != null ? converter.convertBack(message) : null);
+    }
+    
     @Override
     public void removeMessage(String id) {
         DB.find(DbMessage.class).where().eq("uuid", id).delete();

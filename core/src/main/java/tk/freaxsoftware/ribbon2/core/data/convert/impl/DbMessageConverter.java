@@ -22,6 +22,8 @@ import com.google.gson.Gson;
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.ResponseHolder;
+import tk.freaxsoftware.extras.bus.bridge.http.LocalHttpCons;
+import tk.freaxsoftware.extras.bus.bridge.http.TypeResolver;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.data.convert.TwoWayConverter;
 import tk.freaxsoftware.ribbon2.core.data.messagestorage.DbMessage;
@@ -33,6 +35,8 @@ import tk.freaxsoftware.ribbon2.core.data.messagestorage.DbMessage;
 public class DbMessageConverter implements TwoWayConverter<MessageHolder, DbMessage> {
     
     public static final String DB_ID_HEADER = "Trans.DbId";
+    
+    private static final String REGISTERED_TYPE_PREFIX = "$TYPE:";
     
     private Gson gson = GsonUtils.getGson();
 
@@ -49,22 +53,27 @@ public class DbMessageConverter implements TwoWayConverter<MessageHolder, DbMess
         holder.setTopic(destination.getTopic());
         holder.setOptions(destination.getOptions());
         holder.setRedeliveryCounter(destination.getRedeliveryCounter());
-        holder.setContent(getByClass(destination.getContent(), 
+        holder.setContent(parseContnet(destination.getContent(), 
                 destination.getContentClass()));
         holder.setResponse(new ResponseHolder());
         holder.getResponse().setHeaders(destination.getResponseHeaders());
-        holder.getResponse().setContent(getByClass(destination.getResponse(), 
+        holder.getResponse().setContent(parseContnet(destination.getResponse(), 
                 destination.getResponseClass()));
         return holder;
     }
     
-    private Object getByClass(String json, String className) {
+    private Object parseContnet(String json, String className) {
         if (json != null && className != null) {
-            try {
-                Class classz = Class.forName(className);
-                return gson.fromJson(json, classz);
-            } catch (ClassNotFoundException ex) {
-                ex.printStackTrace();
+            if (className.startsWith(REGISTERED_TYPE_PREFIX)) {
+                String regTypeName = className.substring(REGISTERED_TYPE_PREFIX.length());
+                return gson.fromJson(json, TypeResolver.resolveType(regTypeName).getType());
+            } else {
+                try {
+                    Class classz = Class.forName(className);
+                    return gson.fromJson(json, classz);
+                } catch (ClassNotFoundException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
         return null;
@@ -95,15 +104,19 @@ public class DbMessageConverter implements TwoWayConverter<MessageHolder, DbMess
         message.setHeaders(source.getHeaders());
         Object content = source.getContent();
         if (content != null) {
-            message.setContentClass(content.getClass().getCanonicalName());
+            message.setContentClass(message.getHeaders().containsKey(LocalHttpCons.L_HTTP_NODE_REGISTERED_TYPE_HEADER) 
+                    ? REGISTERED_TYPE_PREFIX + message.getHeaders().get(LocalHttpCons.L_HTTP_NODE_REGISTERED_TYPE_HEADER)
+                    : content.getClass().getCanonicalName());
             message.setContent(gson.toJson(content));
         }
+        message.setResponseHeaders(source.getResponse().getHeaders());
         Object responseContent = source.getResponse().getContent();
         if (responseContent != null) {
-            message.setResponseClass(responseContent.getClass().getCanonicalName());
+            message.setResponseClass(message.getResponseHeaders().containsKey(LocalHttpCons.L_HTTP_NODE_REGISTERED_TYPE_HEADER) 
+                    ? REGISTERED_TYPE_PREFIX + message.getHeaders().get(LocalHttpCons.L_HTTP_NODE_REGISTERED_TYPE_HEADER)
+                    : responseContent.getClass().getCanonicalName());
             message.setResponse(gson.toJson(responseContent));
         }
-        message.setResponseHeaders(source.getResponse().getHeaders());
         return message;
     }
     
