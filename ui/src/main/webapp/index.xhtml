@@ -11,13 +11,12 @@
      <h:body>
         
         <pe:layout fullPage="true">
-            
             <!-- Directory tree section -->
             <pe:layoutPane position="west" header="Directories" resizable="true">
                 <h:form>
                     <p:tree value="#{mainHandler.directoryTree}" var="node" style="border: none;" selectionMode="single">
                         <p:ajax event="select" listener="#{mainHandler.onDirSelected}" update=":currentMessagePage, :currentMessage"/>
-                        <p:treeNode>
+                        <p:treeNode icon="pi pi-folder">
                             <h:outputText value="#{node.name}" />
                         </p:treeNode>
                     </p:tree>
@@ -28,7 +27,7 @@
                 
                 <!-- Message list section -->
                 <pe:layoutPane position="center" header="Notes" styleContent="padding: 0px; border-top: 0px;" size="50%" resizable="true">
-                    <h:form id="currentMessagePage">
+                    <h:form id="currentMessagePage" style="height: 100%">
                         <p:dataTable var="message" selectionMode="single" 
                                      paginator="true" rows="15" lazy="true"
                                      paginatorPosition="bottom"
@@ -36,7 +35,7 @@
                                      rowsPerPageTemplate="15,30"
                                      value="#{mainHandler.messagePage}" rowKey="#{message.id}" 
                                      scrollable="true" style="height: auto"
-                                     
+                                     scrollHeight="100%"
                                      resizableColumns="true" emptyMessage="No messages.">
                             <p:ajax event="rowSelect" update=":currentMessage" listener="#{mainHandler.onMessageSelected}"/>
                             <p:column>
@@ -73,7 +72,7 @@
                 <!-- Message content section -->
                 <pe:layoutPane position="south" resizable="true">
                     <h:form id="currentMessage">
-                        <p:scrollPanel style="width:auto;height:auto">
+                        <p:scrollPanel style="width:auto; height:auto; white-space: pre-wrap;">
                         <p>
                             #{mainHandler.selectedMessage.content}
                         </p>
