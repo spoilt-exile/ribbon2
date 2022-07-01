@@ -20,7 +20,6 @@ package tk.freaxsoftware.ribbon2.ui.managed;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
@@ -149,4 +148,10 @@ public class MainHandler implements Serializable {
         this.selectedMessage = selectedMessage;
     }
 
+    public String renderSelectedMessage() {
+        if (selectedMessage != null) {
+            return this.selectedMessage.getContent().replaceAll("\\n", "<br/>");
+        }
+        return null;
+    }
 }
