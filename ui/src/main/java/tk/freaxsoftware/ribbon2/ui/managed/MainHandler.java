@@ -147,11 +147,4 @@ public class MainHandler implements Serializable {
     public void setSelectedMessage(MessageModel selectedMessage) {
         this.selectedMessage = selectedMessage;
     }
-
-    public String renderSelectedMessage() {
-        if (selectedMessage != null) {
-            return this.selectedMessage.getContent().replaceAll("\\n", "<br/>");
-        }
-        return null;
-    }
 }
