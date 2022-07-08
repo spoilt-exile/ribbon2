@@ -99,4 +99,10 @@ public class Login {
         }
     }
     
+    public String logout() {
+        LOGGER.info("Performing log out of {}", session.getLogin());
+        FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
+        return "login.xhtml?faces-redirect=true";
+    }
+    
 }
