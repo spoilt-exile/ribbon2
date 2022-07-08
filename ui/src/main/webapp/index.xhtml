@@ -1,18 +1,33 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
-    xmlns:h="http://java.sun.com/jsf/html"
-    xmlns:f="http://java.sun.com/jsf/core"
-    xmlns:p="http://primefaces.org/ui"
-    xmlns:pe="http://primefaces.org/ui/extensions">
- 
-     <h:head>
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+
+    <h:head>
         <title>Ribbon2 Main page</title>
-     </h:head>
- 
-     <h:body>
-        
+    </h:head>
+
+    <h:body>
         <pe:layout fullPage="true">
+            
+            <!-- Menu bar -->
+            <pe:layoutPane position="north">
+                <h:form id="menubar">
+                    <p:menubar>
+                        <p:menuitem value="New message" icon="pi pi-fw pi-plus" url="message-editor.xhtml"/>
+                        <p:menuitem value="Properties" icon="pi pi-fw pi-info-circle" disabled="#{mainHandler.selectedMessage == null}" onclick="PF('prop-diag').show()"/>
+
+                        <f:facet name="options">
+                            Hello, #{UserSession.login}
+                            <p:commandButton value="Logout" icon="pi pi-fw pi-sign-out" styleClass="ui-button-info" action="#{login.logout()}"/>
+                        </f:facet>
+                    </p:menubar>
+                </h:form>
+            </pe:layoutPane>
+            
             <!-- Directory tree section -->
-            <pe:layoutPane position="west" header="Directories" resizable="true">
+            <pe:layoutPane position="west" resizable="true">
                 <h:form>
                     <p:tree value="#{mainHandler.directoryTree}" var="node" style="border: none;" selectionMode="single">
                         <p:ajax event="select" listener="#{mainHandler.onDirSelected}" update=":currentMessagePage, :currentMessage"/>
@@ -22,11 +37,11 @@
                     </p:tree>
                 </h:form>
             </pe:layoutPane>
-            
-            <pe:layoutPane position="center" header="Messages" resizable="true">
-                
+
+            <pe:layoutPane position="center">
+
                 <!-- Message list section -->
-                <pe:layoutPane position="center" header="Notes" styleContent="padding: 0px; border-top: 0px;" size="50%" resizable="true">
+                <pe:layoutPane position="center" styleContent="padding: 0px; border-top: 0px;" size="50%" resizable="true">
                     <h:form id="currentMessagePage" style="height: 100%">
                         <p:dataTable var="message" selectionMode="single" 
                                      paginator="true" rows="15" lazy="true"
@@ -37,7 +52,7 @@
                                      scrollable="true" style="height: auto"
                                      scrollHeight="100%"
                                      resizableColumns="true" emptyMessage="No messages.">
-                            <p:ajax event="rowSelect" update=":currentMessage" listener="#{mainHandler.onMessageSelected}"/>
+                            <p:ajax event="rowSelect" update=":currentMessage, :menubar" listener="#{mainHandler.onMessageSelected}"/>
                             <p:column>
                                 <f:facet name="header">
                                     <h:outputText value="Id" />
@@ -72,16 +87,53 @@
                 <!-- Message content section -->
                 <pe:layoutPane position="south" resizable="true">
                     <h:form id="currentMessage">
+                        <h5>#{mainHandler.selectedMessage.header}</h5><br/>
                         <p:scrollPanel style="width:auto; height:auto; white-space: pre-wrap;">
-                        <p>
-                            #{mainHandler.selectedMessage.content}
-                        </p>
+                            <p>
+                                #{mainHandler.selectedMessage.content}
+                            </p>
                         </p:scrollPanel>
+                        
+                        <p:dialog header="Properties" widgetVar="prop-diag" minHeight="800" minWidth="900" showEffect="fade">
+                            <p:scrollPanel>
+                                <h3>Parent UID:</h3>
+                                #{mainHandler.selectedMessage.parentUid}<br/>
+                                <h3>Directories:</h3>
+                                <div class="p-d-flex p-ai-center p-flex-wrap">
+                                    <p:repeat value="#{mainHandler.selectedMessage.directories}" var="dir">
+                                        <p:chip label="#{dir}" styleClass="p-mr-2"/>
+                                    </p:repeat>
+                                </div>
+                                <h3>Tags:</h3>
+                                <div class="p-d-flex p-ai-center p-flex-wrap">
+                                    <p:repeat value="#{mainHandler.selectedMessage.tags}" var="tag">
+                                        <p:chip label="#{tag}" styleClass="p-mr-2"/>
+                                    </p:repeat>
+                                </div>
+                                <br/>
+                                <p:dataTable value="#{mainHandler.selectedMessage.properties}" var="property" 
+                                             lazy="true" scrollable="true" scrollWidth="800">
+                                    <p:column headerText="UID" style="min-width: 200px; width: auto;">
+                                        <h:outputText value="#{property.uid}" />
+                                    </p:column>
+                                    <p:column headerText="Type" style="min-width: 100px; width: auto;">
+                                        <h:outputText value="#{property.type}" />
+                                    </p:column>
+                                    <p:column headerText="Created by" style="min-width: 100px; width: auto;">
+                                        <h:outputText value="#{property.createdBy}" />
+                                    </p:column>
+                                    <p:column headerText="Created" style="min-width: 200px; width: auto;">
+                                        <h:outputText value="#{property.created}" />
+                                    </p:column>
+                                    <p:column headerText="Content" style="min-width: 200px; width: auto;">
+                                        <h:outputText value="#{property.content}" />
+                                    </p:column>
+                                </p:dataTable>
+                            </p:scrollPanel>
+                        </p:dialog>
                     </h:form>
                 </pe:layoutPane>
-                    
             </pe:layoutPane>
-             
         </pe:layout>
-     </h:body>
+    </h:body>
 </html>
