@@ -29,6 +29,7 @@ import org.apache.commons.io.IOUtils;
 import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.config.PropertyConfigProcessor;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.directory.config.DirectoryUnitConfig;
 import tk.freaxsoftware.ribbon2.directory.facade.DirectoryAccessFacade;
 import tk.freaxsoftware.ribbon2.directory.facade.DirectoryFacade;
@@ -75,6 +76,8 @@ public class DirectoryUnit {
         LOGGER.info("Directory started, config: {}", config);
         
         Init.init(config);
+        
+        DirectoryModel.registerListType();
         
         AnnotationUtil.subscribeReceiverInstance(new PermissionFacade(new PermissionService()));
         AnnotationUtil.subscribeReceiverInstance(new DirectoryFacade(new DirectoryService(new DirectoryRepository(), 

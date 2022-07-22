@@ -18,6 +18,10 @@
  */
 package tk.freaxsoftware.ribbon2.directory.service;
 
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -238,5 +242,49 @@ public class AuthService {
             chunks[i] = currentPath;
         }
         return chunks;
+    }
+    
+    /**
+     * Get list of directories which accessable by specified permission by current user.
+     * @param userLogin user login;
+     * @param permissionName permission name to check;
+     * @return list of the directories which specified user can access by permission.
+     */
+    public List<Directory> getDirectoriesByPermission(String userLogin, String permissionName) {
+        UserEntity user = userRespository.findByLogin(userLogin);
+        if (user == null) {
+            throw new CoreException(USER_NOT_FOUND, "Can't find user " + userLogin);
+        }
+        Permission permissionEntry = permissionRepository.findByKey(permissionName);
+        if (permissionEntry == null) {
+            throw new CoreException(PERMISSION_NOT_FOUND, "Can't find permission " + permissionName);
+        }
+        Set<Directory> allDirectories = directoryRepository.findAllDirectories();
+        Map<String, Boolean> checkResultMap = checkDirectoryAccessBatch(allDirectories, user, permissionEntry);
+        return allDirectories.stream().filter(dir -> isNestingAccessDir(dir, checkResultMap, permissionEntry)).collect(Collectors.toList());
+    }
+    
+    private Map<String, Boolean> checkDirectoryAccessBatch(Set<Directory> directories, UserEntity user, Permission permission) {
+        Map<String, Boolean> checkMap = new HashMap();
+        for (Directory dir: directories) {
+            if (Objects.equals(user.getLogin(), ROOT_LOGIN)) {
+                checkMap.put(dir.getFullName(), true);
+            } else if (dir.getAccessEntries() != null) {
+                checkMap.put(dir.getFullName(), checkAccessAgainstDirectoryAccess(dir, permission, user));
+            }
+        }
+        return checkMap;
+    }
+    
+    private boolean isNestingAccessDir(Directory dir, Map<String, Boolean> accessMap, Permission permission) {
+        if (accessMap.containsKey(dir.getFullName())) {
+            return accessMap.get(dir.getFullName());
+        } else {
+            Optional<String> parentAccessDirName = accessMap.entrySet().stream()
+                    .map(entry -> entry.getKey())
+                    .filter(dirName -> dir.getFullName().startsWith(dirName))
+                    .max(Comparator.comparingInt(String::length));
+            return parentAccessDirName.isPresent() ? accessMap.get(parentAccessDirName.get()) : permission.getDefaultValue();
+        }
     }
 }

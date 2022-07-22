@@ -20,6 +20,7 @@ package tk.freaxsoftware.ribbon2.gateway.routes;
 
 import com.google.gson.reflect.TypeToken;
 import io.javalin.Javalin;
+import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,6 +118,17 @@ public class DirectoryRoutes {
             ctx.json(page);
         });
         
+        app.get("/api/directory/permission/{permission}", ctx -> {
+            String permission = ctx.pathParam("permission");
+            LOGGER.info("Request to get directories by permission {}", permission);
+            List<DirectoryModel> page = MessageBus.fireCall(DirectoryModel.CALL_GET_DIRECTORY_BY_PERMISSION, permission, MessageOptions.Builder.newInstance()
+                    .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
+                    .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                    .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                    .deliveryCall().build(), List.class);
+            ctx.json(page);
+        });
+        
         app.get("/api/directory/{path}", ctx -> {
             LOGGER.info("Request to get directory {}", ctx.pathParam("path"));
             DirectoryModel directory = MessageBus.fireCall(DirectoryModel.CALL_GET_DIRECTORY_BY_PATH, ctx.pathParam("path"), MessageOptions.Builder.newInstance()
@@ -126,6 +138,7 @@ public class DirectoryRoutes {
                     .deliveryCall().build(), DirectoryModel.class);
             ctx.json(directory);
         });
+        DirectoryModel.registerListType();
     }
     
 }

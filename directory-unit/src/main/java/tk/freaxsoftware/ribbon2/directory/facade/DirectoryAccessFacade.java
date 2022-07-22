@@ -18,12 +18,18 @@
  */
 package tk.freaxsoftware.ribbon2.directory.facade;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.ResponseHolder;
 import tk.freaxsoftware.extras.bus.annotation.Receive;
+import tk.freaxsoftware.extras.bus.bridge.http.LocalHttpCons;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryEditAccessRequest;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryCheckAccessRequest;
 import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
+import tk.freaxsoftware.ribbon2.directory.entity.Directory;
+import tk.freaxsoftware.ribbon2.directory.entity.converters.DirectoryConverter;
 import tk.freaxsoftware.ribbon2.directory.service.AuthService;
 
 /**
@@ -31,6 +37,8 @@ import tk.freaxsoftware.ribbon2.directory.service.AuthService;
  * @author Stanislav Nepochatov
  */
 public class DirectoryAccessFacade {
+    
+    private final DirectoryConverter converter = new DirectoryConverter();
     
     private final AuthService authService;
 
@@ -53,6 +61,16 @@ public class DirectoryAccessFacade {
         Boolean result = authService.editDirAccess(request, userLogin);
         editCall.setResponse(new ResponseHolder());
         editCall.getResponse().setContent(result);
+    }
+    
+    @Receive(DirectoryModel.CALL_GET_DIRECTORY_BY_PERMISSION)
+    public void getDirectoriesByPermission(MessageHolder<String> permissionMessage) {
+        String permission = permissionMessage.getContent();
+        String userLogin = MessageUtils.getAuthFromHeader(permissionMessage);
+        permissionMessage.setResponse(new ResponseHolder());
+        permissionMessage.getResponse().getHeaders().put(LocalHttpCons.L_HTTP_NODE_REGISTERED_TYPE_HEADER, DirectoryModel.DIRECTORY_LIST_TYPE_NAME);
+        List<Directory> directories = authService.getDirectoriesByPermission(userLogin, permission);
+        permissionMessage.getResponse().setContent(directories.stream().map(dir -> converter.convertBack(dir)).collect(Collectors.toList()));
     }
     
 }

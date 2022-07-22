@@ -101,4 +101,12 @@ public class DirectoryRepository {
         return DBUtils.findPaginatedEntity(request, Directory.class);
     }
     
+    /**
+     * Finds all directories.
+     * @return set of directories;
+     */
+    public Set<Directory> findAllDirectories() {
+        return DB.getDefault().find(Directory.class).setDisableLazyLoading(true).order().asc("fullName").findSet();
+    }
+    
 }
