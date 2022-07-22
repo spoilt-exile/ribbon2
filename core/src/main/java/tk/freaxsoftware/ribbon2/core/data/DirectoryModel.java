@@ -19,7 +19,10 @@
 
 package tk.freaxsoftware.ribbon2.core.data;
 
+import com.google.gson.reflect.TypeToken;
 import java.io.Serializable;
+import java.util.List;
+import tk.freaxsoftware.extras.bus.bridge.http.TypeResolver;
 
 /**
  * Message directory data class.
@@ -31,6 +34,7 @@ public class DirectoryModel implements Serializable {
     public final static String CALL_UPDATE_DIRECTORY = "Ribbon.Global.UpdateDirectory";
     public final static String CALL_DELETE_DIRECTORY = "Ribbon.Global.DeleteDirectory";
     public final static String CALL_GET_DIRECTORY_ALL = "Ribbon.Global.GetDirectoryAll";
+    public final static String CALL_GET_DIRECTORY_BY_PERMISSION = "Ribbon.Global.GetDirectoryByPermission";
     public final static String CALL_GET_DIRECTORY_BY_PATH = "Ribbon.Global.GetDirectoryByPath";
     
     public final static String NOTIFICATION_DIRECTORY_CREATED = "Ribbon.Global.Notification.DirectoryCreated";
@@ -40,6 +44,9 @@ public class DirectoryModel implements Serializable {
     public final static String PERMISSION_CAN_CREATE_DIRECTORY = "canCreateDir";
     public final static String PERMISSION_CAN_UPDATE_DIRECTORY = "canUpdateDir";
     public final static String PERMISSION_CAN_DELETE_DIRECTORY = "canDeleteDir";
+    
+    public final static String DIRECTORY_LIST_TYPE_NAME = "DirectoryList";
+    public final static TypeToken DIRECTORY_LIST_TYPE_TOKEN = new TypeToken<List<DirectoryModel>>() {};
     
     /**
      * Id of directory.
@@ -95,5 +102,9 @@ public class DirectoryModel implements Serializable {
     
     public String parentName() {
         return getName().equals(getFullName()) ? "" : getFullName().substring(0, getFullName().length() - getName().length() - 1);
+    }
+    
+    public static void registerListType() {
+        TypeResolver.register(DIRECTORY_LIST_TYPE_NAME, DIRECTORY_LIST_TYPE_TOKEN);
     }
 }
