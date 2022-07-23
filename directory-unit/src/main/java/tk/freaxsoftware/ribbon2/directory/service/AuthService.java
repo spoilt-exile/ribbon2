@@ -20,7 +20,6 @@ package tk.freaxsoftware.ribbon2.directory.service;
 
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -122,7 +121,7 @@ public class AuthService {
                 case USER:
                     if (Objects.equals(accessEntry.getName(), user.getLogin())) {
                         if (accessEntry.getPermissions().getOrDefault(permission.getKey(), false)) {
-                            LOGGER.info("Granted for user {}", accessEntry.getName());
+                            LOGGER.info("Granted for user {} to directory {}", accessEntry.getName(), directory.getFullName());
                             return true;
                         } else {
                             isForbidden = accessEntry.getPermissions().containsKey(permission.getKey());
@@ -132,7 +131,7 @@ public class AuthService {
                 case GROUP:
                     if (groups.contains(accessEntry.getName())) {
                         if (accessEntry.getPermissions().getOrDefault(permission.getKey(), false)) {
-                            LOGGER.info("Granted for group {}", accessEntry.getName());
+                            LOGGER.info("Granted for group {} to directory {}", accessEntry.getName(), directory.getFullName());
                             return true;
                         } else {
                             isForbidden = accessEntry.getPermissions().containsKey(permission.getKey());
@@ -251,6 +250,7 @@ public class AuthService {
      * @return list of the directories which specified user can access by permission.
      */
     public List<Directory> getDirectoriesByPermission(String userLogin, String permissionName) {
+        LOGGER.info("Get all directories accessable by user {} with permission {}", userLogin, permissionName);
         UserEntity user = userRespository.findByLogin(userLogin);
         if (user == null) {
             throw new CoreException(USER_NOT_FOUND, "Can't find user " + userLogin);

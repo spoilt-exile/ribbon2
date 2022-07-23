@@ -19,8 +19,10 @@
 package tk.freaxsoftware.ribbon2.directory.service;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -64,7 +66,7 @@ public class AuthServiceUnitTest {
     }
 
     @Test
-    public void grantByUser() {
+    public void shouldCheckDirAccessGrantByUser() {
         Mockito.when(userRespository.findByLogin("test")).thenReturn(new UserEntity(null, "test", Collections.EMPTY_SET));
         Mockito.when(permissionRepository.findByKey("canCreateMessage")).thenReturn(new Permission(null, "canCreateMessage", false, null, null));
         Mockito.when(directoryRepository.findDirByPathsReverse(new String[]{"System", "System.Test"}))
@@ -75,7 +77,7 @@ public class AuthServiceUnitTest {
     }
 
     @Test
-    public void grantByGroup() {
+    public void shouldCheckDirAccessGrantByGroup() {
         Mockito.when(userRespository.findByLogin("test")).thenReturn(new UserEntity(null, "test", Set.of(new GroupEntity(null, "users"))));
         Mockito.when(permissionRepository.findByKey("canCreateMessage")).thenReturn(new Permission(null, "canCreateMessage", false, null, null));
         Mockito.when(directoryRepository.findDirByPathsReverse(new String[]{"System", "System.Test"}))
@@ -86,7 +88,7 @@ public class AuthServiceUnitTest {
     }
     
     @Test
-    public void grantBySpecifiedAll() {
+    public void shouldCheckDirAccessGrantBySpecifiedAll() {
         Mockito.when(userRespository.findByLogin("test")).thenReturn(new UserEntity(null, "test", Set.of(new GroupEntity(null, "users"))));
         Mockito.when(permissionRepository.findByKey("canReadMessage")).thenReturn(new Permission(null, "canReadMessage", false, null, null));
         Mockito.when(directoryRepository.findDirByPathsReverse(new String[]{"System", "System.Test"}))
@@ -97,7 +99,7 @@ public class AuthServiceUnitTest {
     }
     
     @Test
-    public void grantByDefaultAll() {
+    public void shouldCheckDirAccessGrantByDefaultAll() {
         Mockito.when(userRespository.findByLogin("test")).thenReturn(new UserEntity(null, "test", Set.of(new GroupEntity(null, "users"))));
         Mockito.when(permissionRepository.findByKey("canReadMessage")).thenReturn(new Permission(null, "canReadMessage", true, null, null));
         Mockito.when(directoryRepository.findDirByPathsReverse(new String[]{"System", "System.Test"}))
@@ -107,7 +109,7 @@ public class AuthServiceUnitTest {
     }
     
     @Test
-    public void grantByOneGroupFromMultiple() {
+    public void shouldCheckDirAccessGrantByOneGroupFromMultiple() {
         Mockito.when(userRespository.findByLogin("test")).thenReturn(new UserEntity(null, "test", Set.of(new GroupEntity(null, "users"), new GroupEntity(null, "editors"))));
         Mockito.when(permissionRepository.findByKey("canCreateMessage")).thenReturn(new Permission(null, "canCreateMessage", false, null, null));
         Mockito.when(directoryRepository.findDirByPathsReverse(new String[]{"System", "System.Test"}))
@@ -123,7 +125,7 @@ public class AuthServiceUnitTest {
     }
     
     @Test
-    public void grantByUpperDirectory() {
+    public void shouldCheckDirAccessGrantByUpperDirectory() {
         Mockito.when(userRespository.findByLogin("test")).thenReturn(new UserEntity(null, "test", Collections.EMPTY_SET));
         Mockito.when(permissionRepository.findByKey("canCreateMessage")).thenReturn(new Permission(null, "canCreateMessage", false, null, null));
         Mockito.when(directoryRepository.findDirByPathsReverse(new String[]{"Root", "Root.System", "Root.System.Test"}))
@@ -137,7 +139,7 @@ public class AuthServiceUnitTest {
     }
     
     @Test
-    public void forbiddenOverridingDefaultAll() {
+    public void shouldFailCheckDirAccessForbiddenOverridingDefaultAll() {
         Mockito.when(userRespository.findByLogin("test")).thenReturn(new UserEntity(null, "test", Set.of(new GroupEntity(null, "users"))));
         Mockito.when(permissionRepository.findByKey("canReadMessage")).thenReturn(new Permission(null, "canReadMessage", true, null, null));
         Mockito.when(directoryRepository.findDirByPathsReverse(new String[]{"System", "System.Test"}))
@@ -147,13 +149,50 @@ public class AuthServiceUnitTest {
     }
 
     @Test(expected = CoreException.class)
-    public void absentUserTest() {
+    public void shouldFailCheckDirAccessAbsentUser() {
         authService.checkDirAccess("test", "System.Test", "canCreateMessage");
     }
 
     @Test(expected = CoreException.class)
-    public void absentPermissionTest() {
+    public void shouldFailCheckDirAccessAbsentPermission() {
         Mockito.when(userRespository.findByLogin("test")).thenReturn(new UserEntity(null, "test", null));
         authService.checkDirAccess("test", "System.Test", "canCreatePost");
+    }
+    
+    @Test
+    public void shouldGetDirectoriesByPermission() {
+        Mockito.when(userRespository.findByLogin("test")).thenReturn(new UserEntity(null, "test", Set.of(new GroupEntity(null, "users"))));
+        Mockito.when(permissionRepository.findByKey("canReadMessage")).thenReturn(new Permission(null, "canReadMessage", true, null, null));
+        
+        Directory testRoot = new Directory(null, "Test", "Test", null, Set.of(new DirectoryAccessModel("users", DirectoryAccessModel.Type.GROUP, Map.of("canReadMessage", false))));
+        Directory testGroupAccess = new Directory(null, "GroupAccess", "Test.GroupAccess", null, Set.of(new DirectoryAccessModel("users", DirectoryAccessModel.Type.GROUP, Map.of("canReadMessage", true))));
+        Directory testUserAccess = new Directory(null, "UserAccess", "Test.UserAccess", null, Set.of(new DirectoryAccessModel("test", DirectoryAccessModel.Type.USER, Map.of("canReadMessage", true))));
+        Directory testAllAccess = new Directory(null, "AllAccess", "Test.AllAccess", null, Set.of(new DirectoryAccessModel(null, DirectoryAccessModel.Type.ALL, Map.of("canReadMessage", true))));
+        Directory testNotAccessable = new Directory(null, "NotAccessable", "Test.NotAccessable", null, null);
+        Directory defaultRoot = new Directory(null, "Default", "Default", null, null);
+        Directory defaultAccessable = new Directory(null, "Accessable", "Default.Accessable", null, null);
+        
+        Mockito.when(directoryRepository.findAllDirectories()).thenReturn(Set.of(testRoot, testGroupAccess, testUserAccess, testAllAccess, testNotAccessable, defaultRoot, defaultAccessable));
+        List<Directory> accessDirs = authService.getDirectoriesByPermission("test", "canReadMessage");
+        Assert.assertFalse(accessDirs.isEmpty());
+        Set<String> accessDirNames = accessDirs.stream().map(dir -> dir.getFullName()).collect(Collectors.toSet());
+        Assert.assertTrue(accessDirNames.contains("Test.GroupAccess"));
+        Assert.assertTrue(accessDirNames.contains("Test.UserAccess"));
+        Assert.assertTrue(accessDirNames.contains("Test.AllAccess"));
+        Assert.assertTrue(accessDirNames.contains("Default"));
+        Assert.assertTrue(accessDirNames.contains("Default.Accessable"));
+        Assert.assertFalse(accessDirNames.contains("Test"));
+        Assert.assertFalse(accessDirNames.contains("Test.NotAccessable"));
+    }
+    
+    @Test(expected = CoreException.class)
+    public void shouldFailGetDirectoriesByPermissionAbsentUser() {
+        authService.getDirectoriesByPermission("test", "canReadMessage");
+    }
+
+    @Test(expected = CoreException.class)
+    public void shouldFailGetDirectoriesByPermissionAbsentPermission() {
+        Mockito.when(userRespository.findByLogin("test")).thenReturn(new UserEntity(null, "test", null));
+        authService.getDirectoriesByPermission("test", "canReadMessage");
     }
 }
