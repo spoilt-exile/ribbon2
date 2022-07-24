@@ -195,4 +195,36 @@ public class AuthServiceUnitTest {
         Mockito.when(userRespository.findByLogin("test")).thenReturn(new UserEntity(null, "test", null));
         authService.getDirectoriesByPermission("test", "canReadMessage");
     }
+    
+    @Test
+    public void shouldGetCurrentPermissions() {
+        Mockito.when(userRespository.findByLogin("test")).thenReturn(new UserEntity(null, "test", Set.of(new GroupEntity(null, "users"))));
+        Permission canReadMessage = new Permission(null, "canReadMessage", true, null, null);
+        Permission canDeleteMessage = new Permission(null, "canDeleteMessage", false, null, null);
+        Permission canCreateMessage = new Permission(null, "canCreateMessage", false, null, null);
+        Permission canUpdateMessage = new Permission(null, "canUpdateMessage", false, null, null);
+        
+        Mockito.when(permissionRepository.findAllPermissions()).thenReturn(Set.of(canReadMessage, canDeleteMessage, canCreateMessage, canUpdateMessage));
+        
+        Set<Permission> accessPermissions = authService.getCurrentPermissions("test", "Test.Edit");
+        Assert.assertFalse(accessPermissions.isEmpty());
+        Set<String> accessPermNames = accessPermissions.stream().map(perm -> perm.getKey()).collect(Collectors.toSet());
+        Assert.assertTrue(accessPermNames.contains("canReadMessage"));
+        
+        Directory testRoot = new Directory(null, "Test", "Test", null, 
+                Set.of(new DirectoryAccessModel("users", DirectoryAccessModel.Type.GROUP, 
+                        Map.of("canReadMessage", true, "canCreateMessage", true, "canUpdateMessage", true, "canDeleteMessage", false))));
+        Directory testEdit = new Directory(null, "Edit", "Test.Edit", null, null);
+        
+        Mockito.when(directoryRepository.findDirByPathsReverse(new String[]{"Test", "Test.Edit"}))
+                .thenReturn(Set.of(testEdit, testRoot));
+        
+        Set<Permission> accessPermissions2 = authService.getCurrentPermissions("test", "Test.Edit");
+        Assert.assertFalse(accessPermissions2.isEmpty());
+        Set<String> accessPermNames2 = accessPermissions2.stream().map(perm -> perm.getKey()).collect(Collectors.toSet());
+        Assert.assertTrue(accessPermNames2.contains("canReadMessage"));
+        Assert.assertTrue(accessPermNames2.contains("canCreateMessage"));
+        Assert.assertTrue(accessPermNames2.contains("canUpdateMessage"));
+        
+    }
 }

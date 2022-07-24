@@ -20,6 +20,7 @@ package tk.freaxsoftware.ribbon2.directory.service;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -286,5 +287,28 @@ public class AuthService {
                     .max(Comparator.comparingInt(String::length));
             return parentAccessDirName.isPresent() ? accessMap.get(parentAccessDirName.get()) : permission.getDefaultValue();
         }
+    }
+    
+    /**
+     * Get set of permission which current user can use on specified directory.
+     * @param userLogin user login;
+     * @param dirPath path to directory;
+     * @return set of permissions or empty;
+     */
+    public Set<Permission> getCurrentPermissions(String userLogin, String dirPath) {
+        UserEntity user = userRespository.findByLogin(userLogin);
+        if (user == null) {
+            throw new CoreException(USER_NOT_FOUND, "Can't find user " + userLogin);
+        }
+        Optional<Directory> accessDirectoryOpt = getDirectoryWithAccess(dirPath);
+        Set<Permission> permissions = permissionRepository.findAllPermissions();
+        Set<Permission> result = new HashSet();
+        for (Permission permission: permissions) {
+            Boolean checkResult = accessDirectoryOpt.isPresent() ? checkAccessAgainstDirectoryAccess(accessDirectoryOpt.get(), permission, user) : permission.getDefaultValue();
+            if (checkResult || Objects.equals(user.getLogin(), ROOT_LOGIN)) {
+                result.add(permission);
+            }
+        }
+        return result;
     }
 }

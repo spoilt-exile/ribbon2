@@ -25,6 +25,7 @@ package tk.freaxsoftware.ribbon2.core.data;
 public class DirectoryPermissionTaggedModel extends DirectoryPermissionModel {
     
     public static final String CALL_GET_PERMISSIONS = "Ribbon.Global.GetPermissions";
+    public static final String CALL_GET_CURRENT_PERMISSIONS = "Ribbon.Global.GetCurrentPermissions";
     
     private String tag;
 

@@ -34,6 +34,10 @@ public class PermissionRepository {
                 .stream().map(p -> p.getKey()).collect(Collectors.toSet());
     }
     
+    public Set<Permission> findAllPermissions() {
+        return DB.getDefault().find(Permission.class).findSet();
+    }
+    
     public Permission findByKey(String key) {
         return DB.getDefault().find(Permission.class).where().eq("key", key).findOne();
     }
