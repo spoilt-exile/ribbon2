@@ -129,6 +129,17 @@ public class DirectoryRoutes {
             ctx.json(page);
         });
         
+        app.get("/api/directory/access/permission/current/{path}", ctx -> {
+            String dirPath = ctx.pathParam("path");
+            LOGGER.info("Request to get permission which can be used by current user on directory {}");
+            Set<String> permissions = MessageBus.fireCall(DirectoryPermissionTaggedModel.CALL_GET_CURRENT_PERMISSIONS, dirPath, MessageOptions.Builder.newInstance()
+                    .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
+                    .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                    .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                    .deliveryCall().build(), Set.class);
+            ctx.json(permissions);
+        });
+        
         app.get("/api/directory/{path}", ctx -> {
             LOGGER.info("Request to get directory {}", ctx.pathParam("path"));
             DirectoryModel directory = MessageBus.fireCall(DirectoryModel.CALL_GET_DIRECTORY_BY_PATH, ctx.pathParam("path"), MessageOptions.Builder.newInstance()

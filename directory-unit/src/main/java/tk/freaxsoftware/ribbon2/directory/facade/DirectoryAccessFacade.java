@@ -25,6 +25,7 @@ import tk.freaxsoftware.extras.bus.ResponseHolder;
 import tk.freaxsoftware.extras.bus.annotation.Receive;
 import tk.freaxsoftware.extras.bus.bridge.http.LocalHttpCons;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionTaggedModel;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryEditAccessRequest;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryCheckAccessRequest;
 import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
@@ -73,4 +74,10 @@ public class DirectoryAccessFacade {
         permissionMessage.getResponse().setContent(directories.stream().map(dir -> converter.convertBack(dir)).collect(Collectors.toList()));
     }
     
+    @Receive(DirectoryPermissionTaggedModel.CALL_GET_CURRENT_PERMISSIONS)
+    public void getCurrentPermissions(MessageHolder<String> holder) {
+        String dirPath = holder.getContent();
+        String userLogin = MessageUtils.getAuthFromHeader(holder);
+        holder.getResponse().setContent(authService.getCurrentPermissions(userLogin, dirPath).stream().map(perm -> perm.getKey()).collect(Collectors.toSet()));
+    }
 }
