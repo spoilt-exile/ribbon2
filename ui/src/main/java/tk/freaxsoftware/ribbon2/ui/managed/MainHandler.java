@@ -21,6 +21,7 @@ package tk.freaxsoftware.ribbon2.ui.managed;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
@@ -50,11 +51,16 @@ public class MainHandler implements Serializable {
     private UserSession session;
     
     @Inject
+    private MessageEditor editor;
+    
+    @Inject
     private transient GatewayService gatewayService;
     
     private TreeNode<DirectoryModel> directoryTree;
     
     private TreeNode<DirectoryModel> selectedDirectory;
+    
+    private Set<String> selectedDirectoryPermissions;
     
     private MessageLazyPage messagePage;
     
@@ -103,7 +109,14 @@ public class MainHandler implements Serializable {
         selectedDirectory = e.getTreeNode();
         selectedMessage = null;
         LOGGER.info("Directory {} selected", selectedDirectory.getData().getFullName());
-        messagePage = new MessageLazyPage(gatewayService, selectedDirectory.getData().getFullName(), session.getJwtKey());
+        try {
+            selectedDirectoryPermissions = gatewayService.getDirectoryRestClient()
+                    .getDirectoriesPermissions(session.getJwtKey(), selectedDirectory.getData().getFullName());
+            messagePage = new MessageLazyPage(gatewayService, selectedDirectory.getData().getFullName(), session.getJwtKey());
+        } catch (Exception ex) {
+            LOGGER.error("Error on message loading", ex);
+        }
+
     }
     
     public void onMessageSelected(SelectEvent e) {
@@ -114,6 +127,27 @@ public class MainHandler implements Serializable {
         } catch (Exception ex) {
             LOGGER.error("Error on message loading", ex);
         }
+    }
+    
+    public boolean canCreateMessage() {
+        return checkPermission("canCreateMessage");
+    }
+    
+    public boolean canUpdateMessage() {
+        return selectedMessage != null && checkPermission("canUpdateMessage");
+    }
+    
+    public boolean canDeleteMessage() {
+        return selectedMessage != null && checkPermission("canDeleteMessage");
+    }
+    
+    private boolean checkPermission(String permissionCode) {
+        return selectedDirectoryPermissions != null && selectedDirectoryPermissions.contains(permissionCode);
+    }
+    
+    public String createMessage() {
+        editor.initCreate();
+        return "message-editor.xhtml?faces-redirect=true";
     }
 
     public TreeNode<DirectoryModel> getDirectoryTree() {
