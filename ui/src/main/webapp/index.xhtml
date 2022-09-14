@@ -15,7 +15,9 @@
             <pe:layoutPane position="north">
                 <h:form id="menubar">
                     <p:menubar>
-                        <p:menuitem value="New message" icon="pi pi-fw pi-plus" url="message-editor.xhtml"/>
+                        <p:menuitem value="New message" icon="pi pi-fw pi-file" disabled="#{!mainHandler.canCreateMessage()}" action="#{mainHandler.createMessage()}"/>
+                        <p:menuitem value="Edit message" icon="pi pi-fw pi-pencil" disabled="#{!mainHandler.canUpdateMessage()}" url="message-editor.xhtml"/>
+                        <p:menuitem value="Delete message" icon="pi pi-fw pi-minus-circle" disabled="#{!mainHandler.canDeleteMessage()}"/>
                         <p:menuitem value="Properties" icon="pi pi-fw pi-info-circle" disabled="#{mainHandler.selectedMessage == null}" onclick="PF('prop-diag').show()"/>
 
                         <f:facet name="options">
@@ -30,7 +32,7 @@
             <pe:layoutPane position="west" resizable="true">
                 <h:form>
                     <p:tree value="#{mainHandler.directoryTree}" var="node" style="border: none;" selectionMode="single">
-                        <p:ajax event="select" listener="#{mainHandler.onDirSelected}" update=":currentMessagePage, :currentMessage"/>
+                        <p:ajax event="select" listener="#{mainHandler.onDirSelected}" update=":currentMessagePage, :currentMessage, :menubar"/>
                         <p:treeNode icon="pi pi-folder">
                             <h:outputText value="#{node.name}" />
                         </p:treeNode>

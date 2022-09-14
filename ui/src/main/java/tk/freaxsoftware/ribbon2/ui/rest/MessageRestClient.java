@@ -25,7 +25,9 @@ import java.nio.charset.Charset;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
@@ -90,4 +92,23 @@ public class MessageRestClient {
         }
     }
     
+    /**
+     * Create new message.
+     * @param jwtKey raw JWT key;
+     * @param message message model;
+     * @return fully saved message;
+     * @throws URISyntaxException
+     * @throws IOException 
+     */
+    public MessageModel createMessage(String jwtKey, MessageModel message) throws URISyntaxException, IOException {
+        HttpPost request = new HttpPost(baseUrl);
+        request.addHeader("x-ribbon2-auth", jwtKey);
+        request.setEntity(new StringEntity(gson.toJson(message)));
+        HttpResponse response = clientBuilder.build().execute(request);
+        if (response.getStatusLine().getStatusCode() == 200) {
+            return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), MessageModel.class);
+        } else {
+            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Create message request failed with status: " + response.getStatusLine().toString());
+        }
+    }
 }
