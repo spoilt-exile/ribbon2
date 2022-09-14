@@ -87,7 +87,7 @@ public class MessageEditor implements Serializable {
         } catch (Exception ex) {
             LOGGER.error("Unable to create message", ex);
         }
-        return "index.xhtml?faces-redirect=true";
+        return "/index.xhtml?faces-redirect=true";
     }
 
     public String getHeader() {
