@@ -10,15 +10,15 @@
     <h:body>
         <h:form id="message-editor">
             <h5>Header</h5>
-            <p:inputText value="#{editor.header}"/>
+            <p:inputText value="#{editor.header}" required="true" requiredMessage="Header required"/>
             
             <h5>Tags</h5>
             <p:chips unique="true" value="#{editor.tags}" addOnPaste="true" separator=","/>
             
             <h5>Directories</h5>
-            <p:pickList id="directories" value="#{editor.directories}" var="directories" itemLabel="#{directories}" itemValue="#{directories}"/>
+            <p:pickList id="directories" value="#{editor.directories}" var="directories" itemLabel="#{directories}" itemValue="#{directories}" required="true" requiredMessage="Select at least one directory"/>
             
-            <p:inputTextarea autoResize="true" value="#{editor.content}"/>
+            <p:inputTextarea autoResize="true" value="#{editor.content}" required="true" requiredMessage="Content required"/>
             
             <p:commandButton value="Save" ajax="false" action="#{editor.save()}" />
         </h:form>
