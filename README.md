@@ -1,12 +1,13 @@
 Ribbon2 is concept of news message system for journalism and news agencies. It based on older Ribbon system but with complete new tech stack. System now built around micro-service architecture.
 
-Current version: **2.1**
+Current version: **3.0**
 
 ### List of units
  - `gateway` - REST api facade for units and also holder or user/group data;
  - `directory-unit` - unit for holding tree of directories and permission data;
  - `message-unit` - unit for holding messages;
  - `exchanger-unit` - unit for launcing IO modules;
+ - `ui` - experimental web UI unit;
 
 ### Key features
  - Docker support;
@@ -18,9 +19,10 @@ Current version: **2.1**
  - Open API;
 
 ### Planned features
- - Async API for critical API;
+ - Basic UI;
+ - Async API for critical operations;
 
 ### Tech stack
-System based on Spark Java (REST API provider), MessageBus 5.2 and Ebean.
+System based on Javalin (REST API provider), MessageBus 5.3, Ebean and JSF with Primefaces.
 
 Source code of Ribbon2 system distributed under terms of the GNU LGPLv3 license.
