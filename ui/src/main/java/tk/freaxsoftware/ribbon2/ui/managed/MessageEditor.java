@@ -50,6 +50,10 @@ public class MessageEditor implements Serializable {
     
     private String content;
     
+    private MessageModel message;
+    
+    private List<String> forbiddenDirs;
+    
     private Modes mode;
     
     @Inject
@@ -71,10 +75,41 @@ public class MessageEditor implements Serializable {
         } catch (Exception ex) {
             LOGGER.error("Unable to init available directories", ex);
         }
-        
+    }
+    
+    public void initUpdate(MessageModel toUpdate) {
+        header = toUpdate.getHeader();
+        tags = new ArrayList();
+        tags.addAll(toUpdate.getTags());
+        mode = Modes.UPDATE;
+        message = toUpdate;
+        content = message.getContent();
+        try {
+            Set<DirectoryModel> availableDirectories = gatewayService.getDirectoryRestClient().getDirectoriesByPermission(session.getJwtKey(), "canCreateMessage");
+            List<String> availDirNames = availableDirectories.stream().map(dir -> dir.getFullName()).collect(Collectors.toList());
+            Set<String> messageDirNames = message.getDirectories();
+            List<String> selectedDirNames = new ArrayList();
+            forbiddenDirs = new ArrayList();
+            messageDirNames.forEach(mDir -> {
+                if (availDirNames.contains(mDir)) {
+                    selectedDirNames.add(mDir);
+                } else {
+                    forbiddenDirs.add(mDir);
+                }
+            });
+            availDirNames.removeIf(dir -> selectedDirNames.contains(dir));
+            LOGGER.info("Dirs available for {}: {} and selected {}", session.getLogin(), availDirNames, selectedDirNames);
+            directories = new DualListModel(availDirNames, selectedDirNames);
+        } catch (Exception ex) {
+            LOGGER.error("Unable to init available directories", ex);
+        }
     }
     
     public String save() {
+        return this.mode == Modes.CREATE ? create() : update();
+    }
+    
+    public String create() {
         LOGGER.info("Creating message {}", header);
         MessageModel model = new MessageModel();
         model.setHeader(header);
@@ -83,9 +118,24 @@ public class MessageEditor implements Serializable {
         model.setContent(content);
         try {
             MessageModel saved = gatewayService.getMessageRestClient().createMessage(session.getJwtKey(), model);
-            LOGGER.info("Saved {} message", saved.getUid());
+            LOGGER.info("Created {} message", saved.getUid());
         } catch (Exception ex) {
             LOGGER.error("Unable to create message", ex);
+        }
+        return "/index.xhtml?faces-redirect=true";
+    }
+    
+    public String update() {
+        LOGGER.info("Updating message {} id {}", header, message.getId());
+        message.setHeader(header);
+        message.setTags(tags.stream().collect(Collectors.toSet()));
+        message.setDirectories(directories.getTarget().stream().collect(Collectors.toSet()));
+        message.setContent(content);
+        try {
+            MessageModel saved = gatewayService.getMessageRestClient().updateMessage(session.getJwtKey(), message);
+            LOGGER.info("Updated {} message", saved.getUid());
+        } catch (Exception ex) {
+            LOGGER.error("Unable to update message", ex);
         }
         return "/index.xhtml?faces-redirect=true";
     }

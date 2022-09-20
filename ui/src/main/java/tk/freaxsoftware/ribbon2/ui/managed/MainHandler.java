@@ -149,6 +149,11 @@ public class MainHandler implements Serializable {
         editor.initCreate();
         return "pages/message-editor.xhtml?faces-redirect=true";
     }
+    
+    public String updateMessage() {
+        editor.initUpdate(selectedMessage);
+        return "pages/message-editor.xhtml?faces-redirect=true";
+    }
 
     public TreeNode<DirectoryModel> getDirectoryTree() {
         return directoryTree;
