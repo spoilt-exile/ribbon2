@@ -17,7 +17,7 @@
                     <p:menubar>
                         <p:menuitem value="New message" icon="pi pi-fw pi-file" disabled="#{!mainHandler.canCreateMessage()}" action="#{mainHandler.createMessage()}"/>
                         <p:menuitem value="Edit message" icon="pi pi-fw pi-pencil" disabled="#{!mainHandler.canUpdateMessage()}" action="#{mainHandler.updateMessage()}"/>
-                        <p:menuitem value="Delete message" icon="pi pi-fw pi-minus-circle" disabled="#{!mainHandler.canDeleteMessage()}" action="#{mainHandler.deleteMessage()}">
+                        <p:menuitem value="Delete message" icon="pi pi-fw pi-minus-circle" disabled="#{!mainHandler.canDeleteMessage()}" action="#{mainHandler.deleteMessage()}" update=":currentMessagePage, :currentMessage, :menubar">
                             <p:confirm header="Delete message" message="Do you want to delete this message?" icon="pi pi-minus-circle"/>
                         </p:menuitem>
                         <p:menuitem value="Properties" icon="pi pi-fw pi-info-circle" disabled="#{mainHandler.selectedMessage == null}" onclick="PF('prop-diag').show()"/>
