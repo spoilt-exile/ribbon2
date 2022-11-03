@@ -20,6 +20,7 @@ package tk.freaxsoftware.ribbon2.ui.managed;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
+import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
+import tk.freaxsoftware.ribbon2.core.data.MessagePropertyTagged;
 
 /**
  * Holds logic and data to create new or edit existing message;
@@ -46,7 +49,15 @@ public class MessageEditor implements Serializable {
     
     private List<String> tags;
     
-    private DualListModel<String> directories;
+    private DualListModel<String> directories = new DualListModel(new ArrayList(), new ArrayList());
+    
+    private Set<MessagePropertyModel> existingProperties = new HashSet();
+    
+    private Set<MessagePropertyModel> newProperties = new HashSet();
+    
+    private MessagePropertyModel selectedProperty;
+    
+    private Set<String> allowedPropertyTypes = new HashSet();
     
     private String content;
     
@@ -67,6 +78,8 @@ public class MessageEditor implements Serializable {
         tags = new ArrayList();
         content = "";
         mode = Modes.CREATE;
+        initPropertyTypes();
+        newProperties = new HashSet();
         try {
             Set<DirectoryModel> availableDirectories = gatewayService.getDirectoryRestClient().getDirectoriesByPermission(session.getJwtKey(), "canCreateMessage");
             List<String> availDirNames = availableDirectories.stream().map(dir -> dir.getFullName()).collect(Collectors.toList());
@@ -84,6 +97,9 @@ public class MessageEditor implements Serializable {
         mode = Modes.UPDATE;
         message = toUpdate;
         content = message.getContent();
+        existingProperties = message.getProperties();
+        newProperties = new HashSet();
+        initPropertyTypes();
         try {
             Set<DirectoryModel> availableDirectories = gatewayService.getDirectoryRestClient().getDirectoriesByPermission(session.getJwtKey(), "canCreateMessage");
             List<String> availDirNames = availableDirectories.stream().map(dir -> dir.getFullName()).collect(Collectors.toList());
@@ -105,6 +121,15 @@ public class MessageEditor implements Serializable {
         }
     }
     
+    private void initPropertyTypes() {
+        try {
+            Set<MessagePropertyTagged> propertyTypes = gatewayService.getMessageRestClient().getAllPropertyTypes(session.getJwtKey());
+            allowedPropertyTypes = propertyTypes.stream().map(pt -> pt.getType()).collect(Collectors.toSet());
+        } catch (Exception ex) {
+            LOGGER.error("Unable to init available property types", ex);
+        }
+    }
+    
     public String save() {
         return this.mode == Modes.CREATE ? create() : update();
     }
@@ -116,6 +141,7 @@ public class MessageEditor implements Serializable {
         model.setTags(tags.stream().collect(Collectors.toSet()));
         model.setDirectories(directories.getTarget().stream().collect(Collectors.toSet()));
         model.setContent(content);
+        model.setProperties(newProperties);
         try {
             MessageModel saved = gatewayService.getMessageRestClient().createMessage(session.getJwtKey(), model);
             LOGGER.info("Created {} message", saved.getUid());
@@ -131,6 +157,11 @@ public class MessageEditor implements Serializable {
         message.setTags(tags.stream().collect(Collectors.toSet()));
         message.setDirectories(directories.getTarget().stream().collect(Collectors.toSet()));
         message.setContent(content);
+        if (message.getProperties() != null) {
+            message.getProperties().addAll(newProperties);
+        } else {
+            message.setProperties(newProperties);
+        }
         try {
             MessageModel saved = gatewayService.getMessageRestClient().updateMessage(session.getJwtKey(), message);
             LOGGER.info("Updated {} message", saved.getUid());
@@ -138,6 +169,16 @@ public class MessageEditor implements Serializable {
             LOGGER.error("Unable to update message", ex);
         }
         return "/index.xhtml?faces-redirect=true";
+    }
+    
+    public void addNewProperty() {
+        newProperties.add(new MessagePropertyModel());
+    }
+    
+    public void removeNewProperty() {
+        if (selectedProperty != null) {
+            newProperties.remove(selectedProperty);
+        }
     }
 
     public String getHeader() {
@@ -162,6 +203,38 @@ public class MessageEditor implements Serializable {
 
     public void setDirectories(DualListModel<String> directories) {
         this.directories = directories;
+    }
+
+    public Set<MessagePropertyModel> getExistingProperties() {
+        return existingProperties;
+    }
+
+    public void setExistingProperties(Set<MessagePropertyModel> existingProperties) {
+        this.existingProperties = existingProperties;
+    }
+
+    public Set<MessagePropertyModel> getNewProperties() {
+        return newProperties;
+    }
+
+    public void setNewProperties(Set<MessagePropertyModel> newProperties) {
+        this.newProperties = newProperties;
+    }
+
+    public MessagePropertyModel getSelectedProperty() {
+        return selectedProperty;
+    }
+
+    public void setSelectedProperty(MessagePropertyModel selectedProperty) {
+        this.selectedProperty = selectedProperty;
+    }
+
+    public Set<String> getAllowedPropertyTypes() {
+        return allowedPropertyTypes;
+    }
+
+    public void setAllowedPropertyTypes(Set<String> allowedPropertyTypes) {
+        this.allowedPropertyTypes = allowedPropertyTypes;
     }
 
     public String getContent() {

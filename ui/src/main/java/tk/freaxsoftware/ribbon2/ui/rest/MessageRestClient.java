@@ -19,9 +19,11 @@
 package tk.freaxsoftware.ribbon2.ui.rest;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -32,6 +34,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
+import tk.freaxsoftware.ribbon2.core.data.MessagePropertyTagged;
 import static tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.PARAM_PAGE;
 import static tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.PARAM_SIZE;
 import tk.freaxsoftware.ribbon2.core.data.response.MessagePage;
@@ -130,6 +133,22 @@ public class MessageRestClient {
             return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), MessageModel.class);
         } else {
             throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Update message request failed with status: " + response.getStatusLine().toString());
+        }
+    }
+    
+    /**
+     * Get all registered property types.
+     * @param jwtKey raw JWT key;
+     * @return list of property types with tags;
+     */
+    public Set<MessagePropertyTagged> getAllPropertyTypes(String jwtKey) throws URISyntaxException, IOException {
+        HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/property/all").build());
+        request.addHeader("x-ribbon2-auth", jwtKey);
+        HttpResponse response = clientBuilder.build().execute(request);
+        if (response.getStatusLine().getStatusCode() == 200) {
+            return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), new TypeToken<Set<MessagePropertyTagged>>(){}.getType());
+        } else {
+            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Messages request failed with status: " + response.getStatusLine().toString());
         }
     }
 }
