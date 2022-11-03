@@ -154,6 +154,16 @@ public class MainHandler implements Serializable {
         editor.initUpdate(selectedMessage);
         return "pages/message-editor.xhtml?faces-redirect=true";
     }
+    
+    public void deleteMessage() {
+        LOGGER.info("Delete message {}", selectedMessage.getUid());
+        try {
+            gatewayService.getMessageRestClient().deleteMessage(session.getJwtKey(), selectedMessage.getUid());
+            selectedMessage = null;
+        } catch (Exception ex) {
+            LOGGER.error("Error on message deletion", ex);
+        }
+    }
 
     public TreeNode<DirectoryModel> getDirectoryTree() {
         return directoryTree;

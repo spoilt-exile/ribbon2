@@ -26,6 +26,7 @@ import java.nio.charset.Charset;
 import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -136,6 +137,15 @@ public class MessageRestClient {
         }
     }
     
+    public void deleteMessage(String jwtKey, String messageUid) throws URISyntaxException, IOException {
+        HttpDelete request = new HttpDelete(baseUrl + "/" + messageUid);
+        request.addHeader("x-ribbon2-auth", jwtKey);
+        HttpResponse response = clientBuilder.build().execute(request);
+        if (response.getStatusLine().getStatusCode() != 200) {
+            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Delete message request failed with status: " + response.getStatusLine().toString());
+        }
+    }
+    
     /**
      * Get all registered property types.
      * @param jwtKey raw JWT key;
@@ -148,7 +158,7 @@ public class MessageRestClient {
         if (response.getStatusLine().getStatusCode() == 200) {
             return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), new TypeToken<Set<MessagePropertyTagged>>(){}.getType());
         } else {
-            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Messages request failed with status: " + response.getStatusLine().toString());
+            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Property types request failed with status: " + response.getStatusLine().toString());
         }
     }
 }
