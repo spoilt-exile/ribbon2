@@ -24,6 +24,7 @@
 
                         <f:facet name="options">
                             Hello, #{UserSession.login}
+                            <p:button value="ADMIN" icon="pi pi-fw pi-cog" styleClass="ui-button-danger" rendered="#{UserSession.isAdmin}" outcome="admin-pages/menu.xhtml"/>
                             <p:commandButton value="Logout" icon="pi pi-fw pi-sign-out" styleClass="ui-button-info" action="#{login.logout()}"/>
                         </f:facet>
                     </p:menubar>

@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+    
+    <h:head>
+        <title>Ribbon2 Admin menu</title>
+    </h:head>
+    
+    <h:body>
+        <h:form id="menu">
+            <p:menu>
+                <p:submenu label="Users and groups">
+                    <p:menuitem value="Users" icon="pi pi-user"/>
+                    <p:menuitem value="Groups" icon="pi pi-users"/>
+                </p:submenu>
+                <p:submenu label="Directories">
+                    <p:menuitem value="Directories" icon="pi pi-folder"/>
+                </p:submenu>
+                <p:submenu label="IO Config">
+                    <p:menuitem value="Import" icon="pi pi-download"/>
+                    <p:menuitem value="Export" icon="pi pi-upload"/>
+                </p:submenu>
+            </p:menu>
+        </h:form>
+    </h:body>
+</html>
