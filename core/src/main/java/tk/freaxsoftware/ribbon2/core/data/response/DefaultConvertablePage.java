@@ -1,7 +1,7 @@
 /*
  * This file is part of Ribbon2 news message system.
  * 
- * Copyright (C) 2020-2022 Freax Software
+ * Copyright (C) 2022 Freax Software
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,29 +20,26 @@ package tk.freaxsoftware.ribbon2.core.data.response;
 
 import io.ebean.PagedList;
 import java.util.List;
+import java.util.stream.Collectors;
+import tk.freaxsoftware.ribbon2.core.data.convert.Converter;
 
 /**
- * Default page implementation.
+ * Default page implementation with built-in conversion of entity.
  * @author Stanislav Nepochatov
  */
-public class DefaultPage<T> implements Page<T> {
+public class DefaultConvertablePage<T, C> implements Page<C> {
     
-    private List<T> content;
+    private List<C> content;
     
     private long totalCount;
-
-    public DefaultPage(List<T> content, long totalCount) {
-        this.content = content;
-        this.totalCount = totalCount;
-    }
     
-    public DefaultPage(PagedList<T> pagedList) {
-        this.content = pagedList.getList();
-        this.totalCount = pagedList.getTotalCount();
+    public DefaultConvertablePage(PagedList<T> pagedList, Converter<T, C> converter) {
+        content = pagedList.getList().stream().map(r -> converter.convert(r)).collect(Collectors.toList());
+        totalCount = pagedList.getTotalCount();
     }
 
     @Override
-    public List<T> getContent() {
+    public List<C> getContent() {
         return content;
     }
 

@@ -22,7 +22,7 @@ import io.ebean.DB;
 import java.util.Set;
 import liquibase.util.StringUtils;
 import tk.freaxsoftware.ribbon2.core.data.convert.Converter;
-import tk.freaxsoftware.ribbon2.gateway.data.UserWithPassword;
+import tk.freaxsoftware.ribbon2.core.data.UserWithPassword;
 import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
 import tk.freaxsoftware.ribbon2.gateway.utils.SHAHash;

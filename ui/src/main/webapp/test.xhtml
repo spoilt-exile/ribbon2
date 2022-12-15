@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+    <h:head>
+        <title>ADMIN SETTINGS</title>
+    </h:head>
+    <h:body>
+        <style>
+            .iframe-menu {
+                height: 100%;
+                width: 100%;
+                border-width: 0px;
+            }
+        </style>
+        <pe:layout fullPage="true">
+            <pe:layoutPane position="west" resizable="false">
+                <h:form id="menu">
+                    <p:menu>
+                        <p:submenu label="Users and groups">
+                            <p:menuitem value="Users" icon="pi pi-user" outcome="adm-users.xhtml" target="MENUITEM"/>
+                            <p:menuitem value="Groups" icon="pi pi-users" outcome="adm-groups.xhtml" target="MENUITEM"/>
+                        </p:submenu>
+                        <p:submenu label="Directories">
+                            <p:menuitem value="Directories" icon="pi pi-folder"/>
+                        </p:submenu>
+                        <p:submenu label="IO Config">
+                            <p:menuitem value="Import" icon="pi pi-download"/>
+                            <p:menuitem value="Export" icon="pi pi-upload"/>
+                        </p:submenu>
+                    </p:menu>
+                </h:form>
+            </pe:layoutPane>
+            
+            <pe:layoutPane position="center" minWidth="75" resizable="false">
+                <iframe class="iframe-menu" name="MENUITEM" src="adm-users.xhtml"/>
+            </pe:layoutPane>
+        </pe:layout>
+    </h:body>
+</html>
+

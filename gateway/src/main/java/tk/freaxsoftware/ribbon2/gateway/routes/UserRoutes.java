@@ -27,12 +27,12 @@ import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
-import tk.freaxsoftware.ribbon2.core.data.response.DefaultPage;
+import tk.freaxsoftware.ribbon2.core.data.response.DefaultConvertablePage;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 import tk.freaxsoftware.ribbon2.core.utils.DBUtils;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
-import tk.freaxsoftware.ribbon2.gateway.data.UserWithPassword;
+import tk.freaxsoftware.ribbon2.core.data.UserWithPassword;
 import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.converters.UserConverter;
@@ -107,7 +107,7 @@ public class UserRoutes {
             isAdmin();
             PaginationRequest request = PaginationRequest.ofRequest(ctx.queryParamMap());
             LOGGER.info("Request to get all users {}", request);
-            ctx.json(new DefaultPage(DBUtils.findPaginatedEntity(request, UserEntity.class), new UserConverter()));
+            ctx.json(new DefaultConvertablePage(DBUtils.findPaginatedEntity(request, UserEntity.class), new UserConverter()));
         });
         
         app.get("/api/user/{id}", ctx -> {
