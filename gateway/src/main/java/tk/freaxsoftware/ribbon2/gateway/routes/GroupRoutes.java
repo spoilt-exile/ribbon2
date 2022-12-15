@@ -26,7 +26,7 @@ import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.GroupModel;
 import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
-import tk.freaxsoftware.ribbon2.core.data.response.DefaultPage;
+import tk.freaxsoftware.ribbon2.core.data.response.DefaultConvertablePage;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 import tk.freaxsoftware.ribbon2.core.utils.DBUtils;
@@ -87,7 +87,7 @@ public class GroupRoutes {
             isAdmin();
             PaginationRequest request = PaginationRequest.ofRequest(ctx.queryParamMap());
             LOGGER.info("Request to get all groups {}", request);
-            ctx.json(new DefaultPage(DBUtils.findPaginatedEntity(request, GroupEntity.class), new GroupConverter()));
+            ctx.json(new DefaultConvertablePage(DBUtils.findPaginatedEntity(request, GroupEntity.class), new GroupConverter()));
         });
         
         app.get("/api/group/{id}", ctx -> {

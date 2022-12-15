@@ -23,6 +23,7 @@ import javax.inject.Singleton;
 import tk.freaxsoftware.ribbon2.ui.rest.AuthRestClient;
 import tk.freaxsoftware.ribbon2.ui.rest.DirectoryRestClient;
 import tk.freaxsoftware.ribbon2.ui.rest.MessageRestClient;
+import tk.freaxsoftware.ribbon2.ui.rest.UserRestClient;
 
 /**
  * Gateway REST service.
@@ -32,9 +33,12 @@ import tk.freaxsoftware.ribbon2.ui.rest.MessageRestClient;
 @Singleton
 public class GatewayService {
     
-    private final AuthRestClient authRestClient = new AuthRestClient("http://127.0.0.1:9000");
-    private final DirectoryRestClient directoryRestClient = new DirectoryRestClient("http://127.0.0.1:9000");
-    private final MessageRestClient messageRestClient = new MessageRestClient("http://127.0.0.1:9000");
+    private final static String BASE_URL = "http://127.0.0.1:9000";
+    
+    private final AuthRestClient authRestClient = new AuthRestClient(BASE_URL);
+    private final DirectoryRestClient directoryRestClient = new DirectoryRestClient(BASE_URL);
+    private final MessageRestClient messageRestClient = new MessageRestClient(BASE_URL);
+    private final UserRestClient userRestClient = new UserRestClient(BASE_URL);
 
     public AuthRestClient getAuthRestClient() {
         return authRestClient;
@@ -47,5 +51,8 @@ public class GatewayService {
     public MessageRestClient getMessageRestClient() {
         return messageRestClient;
     }
-    
+
+    public UserRestClient getUserRestClient() {
+        return userRestClient;
+    }
 }

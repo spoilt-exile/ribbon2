@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package tk.freaxsoftware.ribbon2.gateway.data;
+package tk.freaxsoftware.ribbon2.core.data;
 
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 
