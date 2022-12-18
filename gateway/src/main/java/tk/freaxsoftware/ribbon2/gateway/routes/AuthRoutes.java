@@ -20,10 +20,19 @@ package tk.freaxsoftware.ribbon2.gateway.routes;
 
 import io.ebean.DB;
 import io.javalin.Javalin;
+import io.javalin.http.Context;
+import io.javalin.openapi.HttpMethod;
+import io.javalin.openapi.OpenApi;
+import io.javalin.openapi.OpenApiContent;
+import io.javalin.openapi.OpenApiParam;
+import io.javalin.openapi.OpenApiResponse;
+import io.javalin.openapi.OpenApiSecurity;
 import io.jsonwebtoken.Claims;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tk.freaxsoftware.ribbon2.core.data.UserModel;
+import tk.freaxsoftware.ribbon2.core.exception.CoreError;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
@@ -58,24 +67,52 @@ public class AuthRoutes {
                 UserContext.setUser(loginedUser);
             }
         });
-        
-        app.post("/auth", ctx -> {
-            UserEntity loginedUser = DB.getDefault().find(UserEntity.class).where().eq("login", ctx.queryParam("login")).findOne();
-            if (loginedUser != null 
-                    && loginedUser.getEnabled()
-                    && Objects.equals(SHAHash.hashPassword(ctx.queryParam("password")), loginedUser.getPassword())) {
-                LOGGER.debug("Proceed JWT auth: " + loginedUser.getLogin());
-                JWTTokenService tokenService = JWTTokenService.getInstance();
-                String token = tokenService.encryptToken(loginedUser);
-                ctx.result(token);
-            } else {
-                throw new CoreException(RibbonErrorCodes.ACCESS_DENIED, "Access denied");
-            }
-        });
-        
-        app.get("/api/account", ctx -> {
-            ctx.json(new UserConverter().convert(UserContext.getUser()));
-        });
     }
     
+    @OpenApi(
+        summary = "Perform authentication",
+        operationId = "auth",
+        path = "/auth",
+        methods = HttpMethod.POST,
+        tags = {"Auth"},
+        queryParams = {
+            @OpenApiParam(name = "login", required = true),
+            @OpenApiParam(name = "password", required = true)
+        },
+        responses = {
+            @OpenApiResponse(status = "200", content = {@OpenApiContent(from = String.class)}),
+            @OpenApiResponse(status = "401", content = {@OpenApiContent(from = CoreError.class)})
+        }
+    )
+    public static void auth(Context ctx) {
+        UserEntity loginedUser = DB.getDefault().find(UserEntity.class).where().eq("login", ctx.queryParam("login")).findOne();
+        if (loginedUser != null 
+                && loginedUser.getEnabled()
+                && Objects.equals(SHAHash.hashPassword(ctx.queryParam("password")), loginedUser.getPassword())) {
+            LOGGER.debug("Proceed JWT auth: " + loginedUser.getLogin());
+            JWTTokenService tokenService = JWTTokenService.getInstance();
+            String token = tokenService.encryptToken(loginedUser);
+            ctx.result(token);
+        } else {
+            throw new CoreException(RibbonErrorCodes.ACCESS_DENIED, "Access denied");
+        }
+    }
+    
+    @OpenApi(
+        summary = "Get current account",
+        operationId = "account",
+        path = "/api/account",
+        methods = HttpMethod.GET,
+        tags = {"Auth"},
+        security = {
+            @OpenApiSecurity(name = "ribbonToken")
+        },
+        responses = {
+            @OpenApiResponse(status = "200", content = {@OpenApiContent(from = UserModel.class)}),
+            @OpenApiResponse(status = "401", content = {@OpenApiContent(from = CoreError.class)})
+        }
+    )
+    public static void account(Context ctx) {
+        ctx.json(new UserConverter().convert(UserContext.getUser()));
+    }
 }

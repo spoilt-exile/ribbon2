@@ -29,14 +29,18 @@ import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
 import tk.freaxsoftware.ribbon2.io.core.ModuleRegistration;
 
 /**
- * Service for handling IO modules messages.
+ * Service for handling IO modules messages (singleton).
  * @author Stanislav Nepochatov
  */
 public class IOService {
     
+    private static IOService instance;
+    
     private final static Logger LOGGER = LoggerFactory.getLogger(IOService.class);
     
     private final List<ModuleRegistration> registrations = new CopyOnWriteArrayList<>();
+    
+    private IOService() {}
     
     @Receive(IOLocalIds.IO_REGISTER_TOPIC)
     public void registerModule(MessageHolder<ModuleRegistration> registrationHolder) {
@@ -58,5 +62,12 @@ public class IOService {
             }
         }
         return registration;
+    }
+    
+    public static IOService getInstance() {
+        if (instance == null) {
+            instance = new IOService();
+        }
+        return instance;
     }
 }
