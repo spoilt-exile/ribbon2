@@ -163,6 +163,23 @@ public class AuthService {
     }
     
     /**
+     * Get directory access entries.
+     * @param path directory full path;
+     * @param userLogin login of current user;
+     * @return set of directory access model;
+     */
+    public Set<DirectoryAccessModel> getDirAccess(String path, String userLogin) {
+        if (!checkDirAccess(userLogin, path, DirectoryEditAccessRequest.PERMISSION_CAN_EDIT_DIR_ACCESS)) {
+            throw new CoreException(ACCESS_DENIED, "User doesn't have sufficient permission");
+        }
+        Directory finded = directoryRepository.findDirectoryByPath(path);
+        if (finded == null) {
+            throw new CoreException(DIRECTORY_NOT_FOUND, "Can't find directory " + path);
+        }
+        return finded.getAccessEntries();
+    }
+    
+    /**
      * Edits directory access if user has permission to it.
      * @param request request to edit access;
      * @param userLogin login of current user;

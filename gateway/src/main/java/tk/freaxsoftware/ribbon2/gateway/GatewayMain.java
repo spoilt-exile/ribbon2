@@ -51,6 +51,7 @@ import tk.freaxsoftware.ribbon2.gateway.routes.GroupRoutes;
 import tk.freaxsoftware.ribbon2.gateway.routes.MessageRoutes;
 import tk.freaxsoftware.ribbon2.gateway.routes.UserRoutes;
 import tk.freaxsoftware.extras.bus.exceptions.NoSubscriptionMessageException;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.gateway.io.IOService;
 import tk.freaxsoftware.ribbon2.gateway.io.routes.IORoutes;
@@ -139,6 +140,7 @@ public class GatewayMain {
                         delete(DirectoryRoutes::deleteDirectory);
                     }); 
                     path("/access/{path}", () -> {
+                        get(DirectoryRoutes::getDirectoryAccess);
                         post(DirectoryRoutes::editDirectoryAccess);
                     });
                     path("/access/permission/all", () -> {
@@ -216,5 +218,6 @@ public class GatewayMain {
     
     private static void registerTypes() {
         DirectoryModel.registerListType();
+        DirectoryAccessModel.registerSetType();;
     }
 }

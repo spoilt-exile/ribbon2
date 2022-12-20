@@ -198,6 +198,34 @@ public class DirectoryRoutes {
     }
     
     @OpenApi(
+        summary = "Get directory access by path",
+        operationId = "getDirectoryAccess",
+        path = "/api/directory/access/{path}",
+        methods = HttpMethod.GET,
+        tags = {"Directory"},
+        security = {
+            @OpenApiSecurity(name = "ribbonToken")
+        },
+        pathParams = {
+            @OpenApiParam(name = "path", required = true, type = String.class)
+        },
+        responses = {
+            @OpenApiResponse(status = "200", content = {@OpenApiContent(from = DirectoryAccessModel[].class)}),
+            @OpenApiResponse(status = "401", content = {@OpenApiContent(from = CoreError.class)})
+        }
+    )
+    public static void getDirectoryAccess(Context ctx) throws Exception {
+        String path = ctx.pathParam("path");
+        LOGGER.info("Request to get directory access {}", path);
+        Set<DirectoryAccessModel> access = MessageBus.fireCall(DirectoryAccessModel.CALL_GET_DIR_ACCESS, path, MessageOptions.Builder.newInstance()
+                .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
+                .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                .deliveryCall().build(), Set.class);
+        ctx.json(access);
+    }
+    
+    @OpenApi(
         summary = "Edit directory access by path",
         operationId = "editDirectoryAccess",
         path = "/api/directory/access/{path}",

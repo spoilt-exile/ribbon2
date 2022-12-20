@@ -19,11 +19,13 @@
 package tk.freaxsoftware.ribbon2.directory.facade;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.ResponseHolder;
 import tk.freaxsoftware.extras.bus.annotation.Receive;
 import tk.freaxsoftware.extras.bus.bridge.http.LocalHttpCons;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionTaggedModel;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryEditAccessRequest;
@@ -53,6 +55,16 @@ public class DirectoryAccessFacade {
         Boolean result = authService.checkDirectoryAccess(request.getUser(), request.getDirectories(), request.getPermission());
         checkCall.setResponse(new ResponseHolder());
         checkCall.getResponse().setContent(result);
+    }
+    
+    @Receive(DirectoryAccessModel.CALL_GET_DIR_ACCESS)
+    public void getDirectoryAccess(MessageHolder<String> getCall) {
+        String userLogin = MessageUtils.getAuthFromHeader(getCall);
+        String path = getCall.getContent();
+        Set<DirectoryAccessModel> access = authService.getDirAccess(path, userLogin);
+        getCall.setResponse(new ResponseHolder());
+        getCall.getResponse().getHeaders().put(LocalHttpCons.L_HTTP_NODE_REGISTERED_TYPE_HEADER, DirectoryAccessModel.DIRECTORY_ACCESS_MODEL_SET_TYPE_NAME);
+        getCall.getResponse().setContent(access);
     }
     
     @Receive(DirectoryEditAccessRequest.CALL_EDIT_DIR_ACCESS)
