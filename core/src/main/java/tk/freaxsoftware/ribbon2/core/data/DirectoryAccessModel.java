@@ -18,13 +18,21 @@
  */
 package tk.freaxsoftware.ribbon2.core.data;
 
+import com.google.gson.reflect.TypeToken;
 import java.util.Map;
+import java.util.Set;
+import tk.freaxsoftware.extras.bus.bridge.http.TypeResolver;
 
 /**
  * Directory access config entry model.
  * @author Stanislav Nepochatov
  */
 public class DirectoryAccessModel {
+    
+    public static final String CALL_GET_DIR_ACCESS = "Ribbon.Global.GetDirectoryAccess";
+    
+    public final static String DIRECTORY_ACCESS_MODEL_SET_TYPE_NAME = "DirectoryAccessModelSet";
+    public final static TypeToken DIRECTORY_ACCESS_MODEL_SET_TYPE_TOKEN = new TypeToken<Set<DirectoryAccessModel>>() {};
     
     private String name;
     private Type type;
@@ -68,4 +76,7 @@ public class DirectoryAccessModel {
         GROUP;
     }
     
+    public static void registerSetType() {
+        TypeResolver.register(DIRECTORY_ACCESS_MODEL_SET_TYPE_NAME, DIRECTORY_ACCESS_MODEL_SET_TYPE_TOKEN);
+    }
 }
