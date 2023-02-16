@@ -1,5 +1,12 @@
 version: '3'
 services:
+    
+    ribbon2-ui:
+        image: freax/ribbon2-ui:3.0
+        environment:
+            - GATEWAY_URL=http://ribbon2-gateway:9000
+        ports:
+            - 8080:8080
 
     ribbon2-gateway:
         image: freax/ribbon2-gateway:2.1
@@ -82,8 +89,8 @@ services:
             - ./pg-multiple-db:/docker-entrypoint-initdb.d
         healthcheck:
             test: ["CMD-SHELL", "pg_isready -U postgres"]
-            interval: 5s
-            timeout: 5s
+            interval: 10s
+            timeout: 10s
             retries: 5
             
     ribbon2-phppgadmin:
