@@ -32,8 +32,7 @@ import tk.freaxsoftware.ribbon2.message.entity.Message;
 public class MessageRepository {
     
     public Message findByUid(String uid) {
-        return DB.getDefault().find(Message.class).setDisableLazyLoading(true)
-                .where().eq("uid", uid).findOne();
+        return DB.getDefault().find(Message.class).where().eq("uid", uid).findOne();
     }
     
     public Message save(Message message) {
