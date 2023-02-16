@@ -20,6 +20,8 @@ package tk.freaxsoftware.ribbon2.ui.managed;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.ui.rest.AuthRestClient;
 import tk.freaxsoftware.ribbon2.ui.rest.DirectoryRestClient;
 import tk.freaxsoftware.ribbon2.ui.rest.MessageRestClient;
@@ -33,12 +35,26 @@ import tk.freaxsoftware.ribbon2.ui.rest.UserRestClient;
 @Singleton
 public class GatewayService {
     
-    private final static String BASE_URL = "http://127.0.0.1:9000";
+    private final static Logger LOGGER = LoggerFactory.getLogger(GatewayService.class);
     
-    private final AuthRestClient authRestClient = new AuthRestClient(BASE_URL);
-    private final DirectoryRestClient directoryRestClient = new DirectoryRestClient(BASE_URL);
-    private final MessageRestClient messageRestClient = new MessageRestClient(BASE_URL);
-    private final UserRestClient userRestClient = new UserRestClient(BASE_URL);
+    private final static String DEFAULT_BASE_URL = "http://127.0.0.1:9000";
+    private final static String GATEWAY_URL_PARAM = "GATEWAY_URL";
+    
+    private final AuthRestClient authRestClient;
+    private final DirectoryRestClient directoryRestClient;
+    private final MessageRestClient messageRestClient;
+    private final UserRestClient userRestClient;
+
+    public GatewayService() {
+        String baseUrl = System.getenv().containsKey(GATEWAY_URL_PARAM) 
+                ? System.getenv(GATEWAY_URL_PARAM) 
+                : DEFAULT_BASE_URL;
+        LOGGER.info("Creating Ribbon2 Gateway clients to connect: {}", baseUrl);
+        authRestClient = new AuthRestClient(baseUrl);
+        directoryRestClient = new DirectoryRestClient(baseUrl);
+        messageRestClient = new MessageRestClient(baseUrl);
+        userRestClient = new UserRestClient(baseUrl);
+    }
 
     public AuthRestClient getAuthRestClient() {
         return authRestClient;
