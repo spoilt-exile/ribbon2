@@ -31,6 +31,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
@@ -108,7 +109,7 @@ public class MessageRestClient {
     public MessageModel createMessage(String jwtKey, MessageModel message) throws URISyntaxException, IOException {
         HttpPost request = new HttpPost(baseUrl);
         request.addHeader("x-ribbon2-auth", jwtKey);
-        request.setEntity(new StringEntity(gson.toJson(message)));
+        request.setEntity(new StringEntity(gson.toJson(message), ContentType.APPLICATION_JSON));
         HttpResponse response = clientBuilder.build().execute(request);
         if (response.getStatusLine().getStatusCode() == 200) {
             return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), MessageModel.class);
@@ -128,7 +129,7 @@ public class MessageRestClient {
     public MessageModel updateMessage(String jwtKey, MessageModel message) throws URISyntaxException, IOException {
         HttpPut request = new HttpPut(baseUrl);
         request.addHeader("x-ribbon2-auth", jwtKey);
-        request.setEntity(new StringEntity(gson.toJson(message)));
+        request.setEntity(new StringEntity(gson.toJson(message), ContentType.APPLICATION_JSON));
         HttpResponse response = clientBuilder.build().execute(request);
         if (response.getStatusLine().getStatusCode() == 200) {
             return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), MessageModel.class);
