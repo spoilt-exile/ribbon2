@@ -29,6 +29,7 @@ import io.javalin.openapi.OpenApiSecurity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,13 +105,16 @@ public class IORoutes {
     }
     
     @OpenApi(
-        summary = "Get IO schemes",
-        operationId = "getSchemes",
+        summary = "Get IO schemes by directory",
+        operationId = "getExportSchemesByDirectory",
         path = "/api/io/export/scheme/{dirName}",
         methods = HttpMethod.GET,
         tags = {"IO"},
         security = {
             @OpenApiSecurity(name = "ribbonToken")
+        },
+        pathParams = {
+            @OpenApiParam(name = "dirName", required = true)
         },
         responses = {
             @OpenApiResponse(status = "200", content = {@OpenApiContent(from = IOModuleScheme[].class)}),
@@ -118,7 +122,19 @@ public class IORoutes {
         }
     )
     public static void getExportSchemesByDirectory(Context ctx) {
-        
+        isAdmin();
+        String dirName = ctx.pathParam("dirName");
+        LOGGER.info("Request to get export IO schemes by directory {}", dirName);
+        Set<String> exportSchemes = IOService.getInstance().getExportDirectories().get(dirName);
+        List<IOModuleScheme> dirExportSchemes = new ArrayList<>();
+        if (exportSchemes != null && !exportSchemes.isEmpty()) {
+            List<IOModuleScheme> moduleSchemes = new ArrayList<>();
+            IOService.getInstance().getRegistrations().forEach(reg -> {
+                moduleSchemes.addAll(IOModuleScheme.ofModuleRegistration(reg));
+            });
+            moduleSchemes.stream().filter(mod -> exportSchemes.contains(mod.getScheme())).forEach(modScheme -> dirExportSchemes.add(modScheme));
+        }
+        ctx.json(dirExportSchemes);
     }
     
     @OpenApi(
