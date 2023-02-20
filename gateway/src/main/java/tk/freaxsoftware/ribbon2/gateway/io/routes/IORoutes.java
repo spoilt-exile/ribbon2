@@ -247,6 +247,44 @@ public class IORoutes {
         }
     }
     
+    @OpenApi(
+        summary = "Dismiss export scheme from directory",
+        operationId = "dismissExportScheme",
+        path = "/api/io/export/scheme/{protocol}/{name}/dismiss/{dir}",
+        methods = HttpMethod.DELETE,
+        tags = {"IO"},
+        security = {
+            @OpenApiSecurity(name = "ribbonToken")
+        },
+        pathParams = {
+            @OpenApiParam(name = "protocol", required = true),
+            @OpenApiParam(name = "name", required = true),
+            @OpenApiParam(name = "dir", required = true)
+        },
+        responses = {
+            @OpenApiResponse(status = "200", content = {@OpenApiContent(from = Void.class)}),
+            @OpenApiResponse(status = "401", content = {@OpenApiContent(from = CoreError.class)})
+        }
+    )
+    public static void dismissExportScheme(Context ctx) throws Exception {
+        isAdmin();
+        String dir = ctx.pathParam("dir");
+        String protocol = ctx.pathParam("protocol");
+        String name = ctx.pathParam("name");
+        LOGGER.info("Request to dismiss directory {} from export scheme {} by protocol {}", dir, name, protocol);
+        Boolean assigned = MessageBus.fireCall(String.format("%s.%s", IOLocalIds.IO_SCHEME_EXPORT_DISMISS_TOPIC, 
+            protocol), dir, MessageOptions.Builder.newInstance()
+                .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                .header(IOLocalIds.IO_SCHEME_NAME_HEADER, name)
+                .deliveryCall().build(), Boolean.class);
+        if (assigned != null && assigned) {
+            ctx.status(200);
+        } else {
+            ctx.status(400);
+        }
+    }
+    
     public static void isAdmin() {
         for (GroupEntity group: UserContext.getUser().getGroups()) {
             if (Objects.equals(group.getName(), GroupEntity.ADMIN_GROUP)) {

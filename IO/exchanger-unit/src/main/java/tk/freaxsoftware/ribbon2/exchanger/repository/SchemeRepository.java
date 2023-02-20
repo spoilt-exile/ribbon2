@@ -52,4 +52,8 @@ public class SchemeRepository {
     public List<Scheme> findByExportDir(Set<String> moduleIds, Set<String> exportDirSet) {
         return DB.find(Scheme.class).where().in("moduleId", moduleIds).and().arrayContains("exportList", exportDirSet.toArray(new String[exportDirSet.size()])).findList();
     }
+    
+    public List<Scheme> findAll() {
+        return DB.find(Scheme.class).findList();
+    }
 }

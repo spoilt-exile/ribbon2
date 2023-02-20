@@ -18,6 +18,10 @@
  */
 package tk.freaxsoftware.ribbon2.io.core;
 
+import com.google.gson.reflect.TypeToken;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * IO modules local messages topics.
  * @author Stanislav Nepochatov
@@ -33,6 +37,21 @@ public class IOLocalIds {
      * Topic for registering any IO module on gateway.
      */
     public final static String IO_REGISTER_TOPIC = "Ribbon.IO.Register";
+    
+    /**
+     * Topic for sending list of export directories on gateway.
+     */
+    public final static String IO_REGISTER_EXPORT_DIRS = "Ribbon.IO.RegisterExportDirectories";
+    
+    /**
+     * Type name for export directories.
+     */
+    public final static String IO_REGISTER_EXPORT_DIRS_TYPE_NAME = "ExportDirsMap";
+    
+    /**
+     * Type token for export directories.
+     */
+    public final static TypeToken IO_REGISTER_EXPORT_DIRS_TYPE_TOKEN = new TypeToken<Map<String, Set<String>>>() {};
     
     /**
      * Scheme create/update topic.
@@ -53,6 +72,11 @@ public class IOLocalIds {
      * Scheme export assign topic.
      */
     public final static String IO_SCHEME_EXPORT_ASSIGN_TOPIC = "Ribbon.IO.ExportSchemeAssign";
+    
+    /**
+     * Scheme export dismiss topic.
+     */
+    public final static String IO_SCHEME_EXPORT_DISMISS_TOPIC = "Ribbon.IO.ExportSchemeDismiss";
     
     /**
      * Header for scheme name.

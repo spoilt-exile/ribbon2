@@ -191,6 +191,9 @@ public class GatewayMain {
                     path("/export/scheme/{protocol}/{name}/assign/{dir}", () -> {
                         post(IORoutes::assignExportScheme);
                     });
+                    path("/export/scheme/{protocol}/{name}/dismiss/{dir}", () -> {
+                        delete(IORoutes::dismissExportScheme);
+                    });
                 });
             });
         }).start(config.getHttp().getPort());
