@@ -26,11 +26,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
+import tk.freaxsoftware.extras.bus.bridge.http.LocalHttpCons;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
@@ -97,10 +99,36 @@ public class ExportEngine extends IOEngine<Exporter>{
                 String dirName = (String) holder.getContent();
                 holder.getResponse().setContent(assignSchemeToExport(schemeName, dirName, username));
             });
+            MessageBus.addSubscription(registration.schemeExportDismissTopic(), (holder) -> {
+                String username = MessageUtils.getAuthFromHeader(holder);
+                String schemeName = (String) holder.getHeaders().get(IOLocalIds.IO_SCHEME_NAME_HEADER);
+                String dirName = (String) holder.getContent();
+                holder.getResponse().setContent(dismissSchemeFromExport(schemeName, dirName, username));
+            });
             moduleMap.put(wrapper.getModuleData().protocol(), wrapper);
         }
+        sendExportDirectoriesRegistration();
         MessageBus.addSubscription(MessageModel.NOTIFICATION_MESSAGE_CREATED, 
                 holder -> processExportMessage((MessageModel) holder.getContent()));
+    }
+    
+    private void sendExportDirectoriesRegistration() {
+        List<Scheme> schemes = schemeRepository.findAll();
+        Set<String> moduleIds = modules.stream().map(md -> md.getModuleData().id()).collect(Collectors.toSet());
+        Map<String, Set<String>> exportDirMap = new HashMap();
+        Set<String> dirNames = schemes.stream().flatMap(sch -> sch.getExportList().stream()).collect(Collectors.toSet());
+        for (String dirName: dirNames) {
+            Set<String> dirSchemes = schemes.stream()
+                    .filter(sch -> sch.getExportList().contains(dirName) && moduleIds.contains(sch.getModuleId()))
+                    .map(dirSchema -> dirSchema.getName())
+                    .collect(Collectors.toSet());
+            exportDirMap.put(dirName, dirSchemes);
+        }
+        MessageBus.fire(IOLocalIds.IO_REGISTER_EXPORT_DIRS, exportDirMap, 
+                MessageOptions.Builder.newInstance()
+                        .header(LocalHttpCons.L_HTTP_NODE_REGISTERED_TYPE_HEADER, IOLocalIds.IO_REGISTER_EXPORT_DIRS_TYPE_NAME)
+                        .deliveryNotification()
+                        .async().pointToPoint().build());
     }
     
     private void processExportMessage(MessageModel message) {
@@ -151,6 +179,15 @@ public class ExportEngine extends IOEngine<Exporter>{
     
     private Boolean assignSchemeToExport(String name, String dirName, String username) {
         LOGGER.warn("Assign directory {} to export by scheme {}", dirName, name);
+        return innerSchemeExportListProcess(name, dirName, username, (exportList) -> exportList.add(dirName));
+    }
+    
+    private Boolean dismissSchemeFromExport(String name, String dirName, String username) {
+        LOGGER.warn("Dismiss directory {} from export by scheme {}", dirName, name);
+        return innerSchemeExportListProcess(name, dirName, username, (exportList) -> exportList.remove(dirName));
+    }
+    
+    private Boolean innerSchemeExportListProcess(String name, String dirName, String username, Consumer<Set<String>> op) {
         checkDirectoryAccess(username, ImmutableSet.of(dirName), PERMISSION_CAN_ASSIGN_EXPORT);
         Scheme scheme = schemeRepository.findByName(name);
         if (scheme == null) {
@@ -165,7 +202,7 @@ public class ExportEngine extends IOEngine<Exporter>{
         if (scheme.getExportList() == null) {
             scheme.setExportList(new HashSet<>());
         }
-        scheme.getExportList().add(dirName);
+        op.accept(scheme.getExportList());
         scheme.save();
         return true;
     }

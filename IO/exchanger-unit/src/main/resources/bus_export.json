@@ -10,7 +10,7 @@
     },
     "bridgeClient": {
         "address": "127.0.0.1",
-        "port": 9000,
+        "port": 8000,
         "heartbeatRate": 30,
         "tag": "exchanger-export",
         "crossConnectionsSends": [
@@ -26,7 +26,8 @@
             "Ribbon.Global.Notification.MessageCreated"
         ],
         "additionalSubscriptions": [
-            "Ribbon.IO.Register"
+            "Ribbon.IO.Register",
+            "Ribbon.IO.RegisterExportDirectories"
         ]
     },
     "storage": {

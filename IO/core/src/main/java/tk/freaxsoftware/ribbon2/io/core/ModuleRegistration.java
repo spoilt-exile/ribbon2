@@ -107,4 +107,9 @@ public class ModuleRegistration {
         return String.format("%s.%s", IOLocalIds.IO_SCHEME_EXPORT_ASSIGN_TOPIC, 
                 protocol);
     }
+    
+    public String schemeExportDismissTopic() {
+        return String.format("%s.%s", IOLocalIds.IO_SCHEME_EXPORT_DISMISS_TOPIC, 
+                protocol);
+    }
 }
