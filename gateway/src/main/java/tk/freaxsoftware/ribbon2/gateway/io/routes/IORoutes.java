@@ -104,6 +104,24 @@ public class IORoutes {
     }
     
     @OpenApi(
+        summary = "Get IO schemes",
+        operationId = "getSchemes",
+        path = "/api/io/export/scheme/{dirName}",
+        methods = HttpMethod.GET,
+        tags = {"IO"},
+        security = {
+            @OpenApiSecurity(name = "ribbonToken")
+        },
+        responses = {
+            @OpenApiResponse(status = "200", content = {@OpenApiContent(from = IOModuleScheme[].class)}),
+            @OpenApiResponse(status = "401", content = {@OpenApiContent(from = CoreError.class)})
+        }
+    )
+    public static void getExportSchemesByDirectory(Context ctx) {
+        
+    }
+    
+    @OpenApi(
         summary = "Get full IO scheme",
         operationId = "getScheme",
         path = "/api/io/scheme/{type}/{protocol}/{name}",
@@ -204,6 +222,7 @@ public class IORoutes {
             if (reg != null) {
                 reg.getSchemes().remove(name);
             }
+            IOService.getInstance().removeSchemeFromExports(name);
         } else {
             ctx.status(404);
         };
@@ -241,6 +260,7 @@ public class IORoutes {
                 .header(IOLocalIds.IO_SCHEME_NAME_HEADER, name)
                 .deliveryCall().build(), Boolean.class);
         if (assigned != null && assigned) {
+            IOService.getInstance().assignSchemeToExports(dir, name);
             ctx.status(200);
         } else {
             ctx.status(400);
@@ -279,6 +299,7 @@ public class IORoutes {
                 .header(IOLocalIds.IO_SCHEME_NAME_HEADER, name)
                 .deliveryCall().build(), Boolean.class);
         if (assigned != null && assigned) {
+            IOService.getInstance().dismuissSchemeFromExports(dir, name);
             ctx.status(200);
         } else {
             ctx.status(400);
