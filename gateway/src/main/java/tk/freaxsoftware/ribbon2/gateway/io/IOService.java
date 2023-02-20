@@ -74,6 +74,10 @@ public class IOService {
     public List<ModuleRegistration> getRegistrations() {
         return registrations;
     }
+
+    public Map<String, Set<String>> getExportDirectories() {
+        return exportDirectories;
+    }
     
     public ModuleRegistration getById(String id) {
         ModuleRegistration registration = null;
@@ -84,6 +88,23 @@ public class IOService {
             }
         }
         return registration;
+    }
+    
+    public void removeSchemeFromExports(String schemeName) {
+        exportDirectories.forEach((dirName, exports) -> exports.remove(schemeName));
+    }
+    
+    public void assignSchemeToExports(String dirName, String schemeName) {
+        if (!exportDirectories.containsKey(dirName)) {
+            exportDirectories.put(dirName, new CopyOnWriteArraySet());
+        }
+        exportDirectories.get(dirName).add(schemeName);
+    }
+    
+    public void dismuissSchemeFromExports(String dirName, String schemeName) {
+        if (exportDirectories.containsKey(dirName)) {
+            exportDirectories.get(dirName).remove(schemeName);
+        }
     }
     
     public static IOService getInstance() {
