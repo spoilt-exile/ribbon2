@@ -53,8 +53,12 @@ public class EnvironmentOverrider {
                 .filter(entry -> isVariableAvailable(entry.getVariable()))
                 .collect(Collectors.toSet());
         filteredSet.forEach(en -> {
-            LOGGER.info("Overriding param {} by environment", en.variable);
-            en.getAction().process(config, System.getenv(en.getVariable()));
+            try {
+                en.getAction().process(config, System.getenv(en.getVariable()));
+                LOGGER.info("Overriding param {} by environment", en.getVariable());
+            } catch (Exception ex) {
+                LOGGER.error("Unable to override param {} by value {}", en.getVariable(), System.getenv(en.getVariable()));
+            }
         });
     }
     
