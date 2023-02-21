@@ -28,7 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
-import tk.freaxsoftware.ribbon2.core.config.PropertyConfigProcessor;
+import tk.freaxsoftware.ribbon2.core.config.DbConfig;
+import tk.freaxsoftware.ribbon2.core.config.EnvironmentOverrider;
 import tk.freaxsoftware.ribbon2.message.config.MessengerUnitConfig;
 import tk.freaxsoftware.ribbon2.message.entity.converters.DirectoryConverter;
 import tk.freaxsoftware.ribbon2.message.facade.DirectoryFacade;
@@ -70,7 +71,7 @@ public class MessengerUnit {
     public static void main(String[] args) throws IOException {
         LOGGER.info("\n{}", IOUtils.toString(MessengerUnit.class.getClassLoader().getResourceAsStream("header")), Charset.defaultCharset());
         config = gson.fromJson(IOUtils.toString(MessengerUnit.class.getClassLoader().getResourceAsStream("messageconfig.json"), Charset.defaultCharset()), MessengerUnitConfig.class);
-        PropertyConfigProcessor.process(config.getDb());
+        processConfig(config);
         LOGGER.info("Messenger started, config: {}", config);
 
         Init.init(config);
@@ -78,6 +79,22 @@ public class MessengerUnit {
         AnnotationUtil.subscribeReceiverInstance(new PropertyTypeFacade(new PropertyTypeService(new PropertyTypeRepository())));
         AnnotationUtil.subscribeReceiverInstance(new DirectoryFacade(new DirectoryRepository(), new DirectoryConverter()));
         AnnotationUtil.subscribeReceiverInstance(new MessageFacade(new MessageService(new DirectoryRepository(), new MessageRepository(), new PropertyTypeRepository())));
+    }
+    
+    private static void processConfig(MessengerUnitConfig config) {
+        EnvironmentOverrider overrider = new EnvironmentOverrider();
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_JDBC_URL", 
+                DbConfig.class, (conf, property) -> conf.setJdbcUrl(property)));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_USERNAME", 
+                DbConfig.class, (conf, property) -> conf.setUsername(property)));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_PASSWORD", 
+                DbConfig.class, (conf, property) -> conf.setPassword(property)));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<MessengerUnitConfig.MessengerConfig>("MESSENGER_ENABLE_PERMISSION_CACHIMG", 
+                MessengerUnitConfig.MessengerConfig.class, (conf, property) -> conf.setEnablePermissionCaching(Boolean.valueOf(property))));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<MessengerUnitConfig.MessengerConfig>("MESSENGER_PERMISSION_CACHE_EXPIRY", 
+                MessengerUnitConfig.MessengerConfig.class, (conf, property) -> conf.setPermissionCacheExpiry(Integer.valueOf(property))));
+        overrider.processConfig(config.getDb());
+        overrider.processConfig(config.getMessenger());
     }
 
 }

@@ -22,12 +22,16 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides mechanism to override any config value by environment variable.
  * @author Stanislav Nepochatov
  */
 public class EnvironmentOverrider {
+    
+    private final static Logger LOGGER = LoggerFactory.getLogger(EnvironmentOverrider.class);
     
     private Set<OverrideEntry> entries = new HashSet<>();
     
@@ -48,7 +52,10 @@ public class EnvironmentOverrider {
                 .filter(entry -> Objects.equals(config.getClass(), entry.getConfigClass()))
                 .filter(entry -> isVariableAvailable(entry.getVariable()))
                 .collect(Collectors.toSet());
-        filteredSet.forEach(en -> en.getAction().process(config, System.getenv(en.getVariable())));
+        filteredSet.forEach(en -> {
+            LOGGER.info("Overriding param {} by environment", en.variable);
+            en.getAction().process(config, System.getenv(en.getVariable()));
+        });
     }
     
     private static Boolean isVariableAvailable(String property) {
