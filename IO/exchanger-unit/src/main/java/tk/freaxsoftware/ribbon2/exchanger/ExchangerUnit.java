@@ -99,6 +99,10 @@ public class ExchangerUnit {
                 ExchangerUnitConfig.ExchangerConfig.class, (conf, property) -> conf.setType(ModuleType.valueOf(property))));
         overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ExchangerConfig>("EXCHANGER_CLASS", 
                 ExchangerUnitConfig.ExchangerConfig.class, (conf, property) -> conf.setModuleClass(property)));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ExchangerConfig>("EXCHANGER_ENABLE_PERMISSION_CACHIMG", 
+                ExchangerUnitConfig.ExchangerConfig.class, (conf, property) -> conf.setEnablePermissionCaching(Boolean.valueOf(property))));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ExchangerConfig>("EXCHANGER_PERMISSION_CACHE_EXPIRY", 
+                ExchangerUnitConfig.ExchangerConfig.class, (conf, property) -> conf.setPermissionCacheExpiry(Integer.valueOf(property))));
         overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_JDBC_URL", 
                 DbConfig.class, (conf, property) -> conf.setJdbcUrl(property)));
         overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_USERNAME", 
