@@ -28,7 +28,8 @@ import org.slf4j.LoggerFactory;
 import org.apache.commons.io.IOUtils;
 import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
-import tk.freaxsoftware.ribbon2.core.config.PropertyConfigProcessor;
+import tk.freaxsoftware.ribbon2.core.config.DbConfig;
+import tk.freaxsoftware.ribbon2.core.config.EnvironmentOverrider;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.directory.config.DirectoryUnitConfig;
 import tk.freaxsoftware.ribbon2.directory.facade.DirectoryAccessFacade;
@@ -72,7 +73,7 @@ public class DirectoryUnit {
     public static void main(String[] args) throws IOException {
         LOGGER.info("\n{}", IOUtils.toString(DirectoryUnit.class.getClassLoader().getResourceAsStream("header"), Charset.defaultCharset()));
         config = gson.fromJson(IOUtils.toString(DirectoryUnit.class.getClassLoader().getResourceAsStream("dirconfig.json"), Charset.defaultCharset()), DirectoryUnitConfig.class);
-        PropertyConfigProcessor.process(config.getDb());
+        processConfig(config);
         LOGGER.info("Directory started, config: {}", config);
         
         Init.init(config);
@@ -85,5 +86,20 @@ public class DirectoryUnit {
         AnnotationUtil.subscribeReceiverInstance(new UserGroupFacade(new UserRepository(), new GroupRepository()));
         AnnotationUtil.subscribeReceiverInstance(new DirectoryAccessFacade(new AuthService(new DirectoryRepository(), 
                 new UserRepository(), new GroupRepository(), new PermissionRepository())));
+    }
+    
+    private static void processConfig(DirectoryUnitConfig config) {
+        EnvironmentOverrider overrider = new EnvironmentOverrider();
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_JDBC_URL", 
+                DbConfig.class, (conf, property) -> conf.setJdbcUrl(property)));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_USERNAME", 
+                DbConfig.class, (conf, property) -> conf.setUsername(property)));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_PASSWORD", 
+                DbConfig.class, (conf, property) -> conf.setPassword(property)));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DirectoryUnitConfig.DirectoryConfig>("DIRECTORY_CREATE_DIRS", 
+                DirectoryUnitConfig.DirectoryConfig.class, (conf, property) -> conf.setCreateDirs(property.split("$"))));
+        
+        overrider.processConfig(config.getDb());
+        overrider.processConfig(config.getDirectory());
     }
 }

@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonMapper;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
-import tk.freaxsoftware.ribbon2.core.config.PropertyConfigProcessor;
 import tk.freaxsoftware.ribbon2.core.exception.CoreError;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
@@ -51,6 +50,8 @@ import tk.freaxsoftware.ribbon2.gateway.routes.GroupRoutes;
 import tk.freaxsoftware.ribbon2.gateway.routes.MessageRoutes;
 import tk.freaxsoftware.ribbon2.gateway.routes.UserRoutes;
 import tk.freaxsoftware.extras.bus.exceptions.NoSubscriptionMessageException;
+import tk.freaxsoftware.ribbon2.core.config.DbConfig;
+import tk.freaxsoftware.ribbon2.core.config.EnvironmentOverrider;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.gateway.io.IOService;
@@ -87,7 +88,7 @@ public class GatewayMain {
     public static void main(String[] args) throws IOException {
         LOGGER.info("\n{}", IOUtils.toString(GatewayMain.class.getClassLoader().getResourceAsStream("header"), Charset.defaultCharset()));
         config = gson.fromJson(IOUtils.toString(GatewayMain.class.getClassLoader().getResourceAsStream("appconfig.json"), Charset.defaultCharset()), ApplicationConfig.class);
-        PropertyConfigProcessor.process(config.getDb());
+        processConfig(config);
         LOGGER.info("Gateway started, config: {}", config);
         Javalin app = Javalin.create(javalinConfig -> {
             OpenApiConfiguration openApiConfiguration = new OpenApiConfiguration();
@@ -220,6 +221,32 @@ public class GatewayMain {
             ctx.json(error);
         });
         registerTypes();
+    }
+    
+    private static void processConfig(ApplicationConfig config) {
+        EnvironmentOverrider overrider = new EnvironmentOverrider();
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_JDBC_URL", 
+                DbConfig.class, (conf, property) -> conf.setJdbcUrl(property)));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_USERNAME", 
+                DbConfig.class, (conf, property) -> conf.setUsername(property)));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_PASSWORD", 
+                DbConfig.class, (conf, property) -> conf.setPassword(property)));
+        
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ApplicationConfig.HttpConfig>("HTTP_PORT", 
+                ApplicationConfig.HttpConfig.class, (conf, property) -> conf.setPort(Integer.valueOf(property))));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ApplicationConfig.HttpConfig>("HTTP_URL", 
+                ApplicationConfig.HttpConfig.class, (conf, property) -> conf.setUrl(property)));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ApplicationConfig.HttpConfig>("HTTP_AUTH_TYPE", 
+                ApplicationConfig.HttpConfig.class, (conf, property) -> conf.setAuthType(ApplicationConfig.HttpConfig.AuthType.valueOf(property))));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ApplicationConfig.HttpConfig>("HTTP_AUTH_TOKEN_NAME", 
+                ApplicationConfig.HttpConfig.class, (conf, property) -> conf.setAuthTokenName(property)));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ApplicationConfig.HttpConfig>("HTTP_AUTH_TOKEN_SECRET", 
+                ApplicationConfig.HttpConfig.class, (conf, property) -> conf.setAuthTokenSecret(property)));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ApplicationConfig.HttpConfig>("HTTP_AUTH_TOKEN_VALID_DAYS", 
+                ApplicationConfig.HttpConfig.class, (conf, property) -> conf.setAuthTokenValidDays(Integer.valueOf(property))));
+        
+        overrider.processConfig(config.getDb());
+        overrider.processConfig(config.getHttp());
     }
     
     private static void registerTypes() {

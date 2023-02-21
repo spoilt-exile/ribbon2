@@ -18,7 +18,6 @@
  */
 package tk.freaxsoftware.ribbon2.directory.config;
 
-import java.util.Map;
 import java.util.Set;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionModel;
