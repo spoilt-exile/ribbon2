@@ -19,6 +19,7 @@
 package tk.freaxsoftware.ribbon2.exchanger.engine;
 
 import com.google.common.collect.ImmutableSet;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +44,10 @@ import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME
 import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
 import tk.freaxsoftware.ribbon2.exchanger.converters.SchemeConverter;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Directory;
+import tk.freaxsoftware.ribbon2.exchanger.entity.ExportMessage;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Scheme;
 import tk.freaxsoftware.ribbon2.exchanger.repository.DirectoryRepository;
+import tk.freaxsoftware.ribbon2.exchanger.repository.ExportMessageRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.RegisterRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.SchemeRepository;
 import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
@@ -70,18 +74,21 @@ public class ExportEngine extends IOEngine<Exporter>{
     
     private final DirectoryRepository directoryRepository;
     
+    private final ExportMessageRepository exportMessageRepository;
+    
     private final ExecutorService executorService = Executors.newFixedThreadPool(10);
     
     private final Map<String, ModuleWrapper<Exporter>> moduleMap = new HashMap();
     
     public ExportEngine(String[] classes, SchemeRepository schemeRepository, 
             SchemeConverter schemeConverter, RegisterRepository registerRepository,
-            DirectoryRepository directoryRepository) {
+            DirectoryRepository directoryRepository, ExportMessageRepository exportMessageRepository) {
         super(ModuleType.EXPORT, classes);
         this.schemeRepository = schemeRepository;
         this.schemeConverter = schemeConverter;
         this.registerRepository = registerRepository;
         this.directoryRepository = directoryRepository;
+        this.exportMessageRepository = exportMessageRepository;
     }
 
     @Override
@@ -140,8 +147,9 @@ public class ExportEngine extends IOEngine<Exporter>{
                 Set<String> dirIntersect = new HashSet<>(scheme.getExportList());
                 dirIntersect.retainAll(message.getDirectories());
                 for (String exportDir: dirIntersect) {
-                    ExportTask task = new ExportTask(moduleMap.get(scheme.getProtocol()).getModuleInstance(), message, schemeConverter.convert(scheme), registerRepository, exportDir);
-                    executorService.submit(task);
+                    //ExportTask task = new ExportTask(moduleMap.get(scheme.getProtocol()).getModuleInstance(), message, schemeConverter.convert(scheme), registerRepository, exportDir);
+                    //executorService.submit(task);
+                    exportMessageRepository.save(new ExportMessage(exportDir, scheme.getModuleId(), scheme.getName(), message, ZonedDateTime.now()));
                 }
             }
         }
@@ -205,6 +213,53 @@ public class ExportEngine extends IOEngine<Exporter>{
         op.accept(scheme.getExportList());
         scheme.save();
         return true;
+    }
+    
+    private final static class QueueTask implements Runnable {
+        
+        private final SchemeRepository schemeRepository;
+        
+        private final ExportMessageRepository exportMessageRepository;
+        
+        private final RegisterRepository registerRepository;
+        
+        private final Map<String, ModuleWrapper<Exporter>> moduleMap;
+
+        public QueueTask(SchemeRepository schemeRepository, 
+                ExportMessageRepository exportMessageRepository, 
+                RegisterRepository registerRepository, 
+                Map<String, ModuleWrapper<Exporter>> moduleMap) {
+            this.schemeRepository = schemeRepository;
+            this.exportMessageRepository = exportMessageRepository;
+            this.registerRepository = registerRepository;
+            this.moduleMap = moduleMap;
+        }
+
+        @Override
+        public void run() {
+            Set<String> exportProtocols = moduleMap.entrySet().stream()
+                    .map(en -> en.getKey())
+                    .collect(Collectors.toSet());
+            List<Scheme> schemes = schemeRepository.findAllExportByProtocols(exportProtocols);
+            Set<String> exportSchemes = schemes.stream()
+                    .map(expScheme -> expScheme.getName())
+                    .collect(Collectors.toSet());
+            Map<String, Scheme> schemeMap = schemes.stream().collect(Collectors.toMap(Scheme::getName, Function.identity()));
+            Set<ExportMessage> exportMessages = exportMessageRepository.findBySchemesAndDate(exportSchemes, ZonedDateTime.now());
+            for (ExportMessage exportMessage: exportMessages) {
+                try {
+                    innerExport(moduleMap.get(exportMessage.getProtocol()).getModuleInstance(), schemeMap.get(exportMessage.getScheme()), exportMessage);
+                } catch (Exception ex) {
+                    LOGGER.error("Error during exporting message {} : {} by scheme {} in dir {}", 
+                            exportMessage.getMessage().getUid(), exportMessage.getMessage().getHeader(),
+                            exportMessage.getScheme(), exportMessage.getExportDirectory());
+                }
+            }
+        }
+        
+        private void innerExport(Exporter exporter, Scheme scheme, ExportMessage exportMessage) {
+            //Export or fail
+        }
     }
     
     /**
