@@ -22,6 +22,7 @@ import io.ebean.DB;
 import java.util.List;
 import java.util.Set;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Scheme;
+import tk.freaxsoftware.ribbon2.io.core.ModuleType;
 
 /**
  * Repository for IO schemes.
@@ -55,5 +56,9 @@ public class SchemeRepository {
     
     public List<Scheme> findAll() {
         return DB.find(Scheme.class).findList();
+    }
+    
+    public List<Scheme> findAllExportByProtocols(Set<String> protocols) {
+        return DB.find(Scheme.class).where().eq("type", ModuleType.EXPORT).and().in("protocol", protocols).findList();
     }
 }
