@@ -16,26 +16,34 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package tk.freaxsoftware.ribbon2.exchanger.repository;
+package tk.freaxsoftware.ribbon2.io.core.exporter;
 
-import io.ebean.DB;
-import java.time.ZonedDateTime;
-import java.util.Set;
-import tk.freaxsoftware.ribbon2.exchanger.entity.ExportMessage;
+import tk.freaxsoftware.ribbon2.core.data.MessageModel;
+import tk.freaxsoftware.ribbon2.io.core.IOMessage;
+import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 
 /**
- * Export message queue repository.
+ * Export message methods interface.
  * @author Stanislav Nepochatov
  */
-public class ExportMessageRepository {
+public interface ExportMessage extends IOMessage {
     
-    public ExportMessage save(ExportMessage exportMessage) {
-        exportMessage.save();
-        return exportMessage;
-    }
+    /**
+     * Get export scheme with config.
+     * @return export io scheme;
+     */
+    IOScheme getExportScheme();
     
-    public Set<ExportMessage> findBySchemesAndDate(Set<String> schemes, ZonedDateTime date) {
-        return DB.find(ExportMessage.class).where().in("scheme", schemes).and().le("tillDate", date).findSet();
-    }
+    /**
+     * Get message model instance to export.
+     * @return message model to export;
+     */
+    MessageModel getMessage();
+    
+    /**
+     * Get actual text content to export.
+     * @return text content of the message;
+     */
+    String getExportContent();
     
 }

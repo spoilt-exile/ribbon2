@@ -23,11 +23,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.io.core.IOExceptionCodes;
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
-import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.InputOutputException;
+import tk.freaxsoftware.ribbon2.io.core.exporter.ExportMessage;
 import tk.freaxsoftware.ribbon2.io.core.exporter.Exporter;
 
 /**
@@ -41,23 +40,23 @@ public class PlainExporter implements Exporter {
     private final static Logger LOGGER = LoggerFactory.getLogger(PlainExporter.class);
 
     @Override
-    public String export(MessageModel message, IOScheme scheme) {
-        String fileName = String.format("%s.%s", message.getUid(), scheme.getConfig().get("plainFileExtension"));
-        LOGGER.info("Writing message {} to file {}", message.getUid(), fileName);
+    public String export(ExportMessage message) {
+        String fileName = String.format("%s.%s", message.getMessage().getUid(), message.getExportScheme().getConfig().get("plainFileExtension"));
+        LOGGER.info("Writing message {} to file {}", message.getMessage().getUid(), fileName);
         StringBuffer messageBuffer = new StringBuffer();
-        messageBuffer.append(message.getUid());
+        messageBuffer.append(message.getMessage().getUid());
         messageBuffer.append('\n');
         messageBuffer.append(message.getHeader());
         messageBuffer.append('\n');
         messageBuffer.append('\n');
-        messageBuffer.append(message.getContent());
+        messageBuffer.append(message.getExportContent());
         messageBuffer.append('\n');
-        messageBuffer.append(message.getCreated().toString());
+        messageBuffer.append(message.getMessage().getCreated().toString());
         try {
-            Files.write(Paths.get(scheme.getConfig().get("plainFolderPath") + "/" + fileName), messageBuffer.toString().getBytes());
+            Files.write(Paths.get(message.getExportScheme().getConfig().get("plainFolderPath") + "/" + fileName), messageBuffer.toString().getBytes());
         } catch (IOException ioex) {
-            LOGGER.error("Error during export of message " + message.getUid(), ioex);
-            throw new InputOutputException(IOExceptionCodes.EXPORT_ERROR, String.format("Error during export of message %s: %s", message.getUid(), ioex.getMessage()));
+            LOGGER.error("Error during export of message " + message.getMessage().getUid(), ioex);
+            throw new InputOutputException(IOExceptionCodes.EXPORT_ERROR, String.format("Error during export of message %s: %s", message.getMessage().getUid(), ioex.getMessage()));
         }
         return fileName;
     }

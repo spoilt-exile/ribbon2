@@ -30,7 +30,7 @@ import tk.freaxsoftware.ribbon2.core.data.MessageModel;
  * @author Stanislav Nepochatov
  */
 @Entity
-public class ExportMessage extends Model {
+public class ExportQueue extends Model {
     
     @Id
     private Long id;
@@ -51,7 +51,7 @@ public class ExportMessage extends Model {
     /**
      * Empty constructor.
      */
-    public ExportMessage() {
+    public ExportQueue() {
     }
 
     /**
@@ -62,7 +62,7 @@ public class ExportMessage extends Model {
      * @param message message to export;
      * @param tillDate date till message should be exported;
      */
-    public ExportMessage(String exportDirectory, String protocol, String scheme, MessageModel message, ZonedDateTime tillDate) {
+    public ExportQueue(String exportDirectory, String protocol, String scheme, MessageModel message, ZonedDateTime tillDate) {
         this.exportDirectory = exportDirectory;
         this.protocol = protocol;
         this.scheme = scheme;
