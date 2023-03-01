@@ -1,0 +1,4 @@
+{
+    "ribbonId": "${message.uid}",
+    "ribbonMessage": "${message.content?json_string}"
+}

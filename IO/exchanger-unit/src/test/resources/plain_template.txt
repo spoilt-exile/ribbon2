@@ -1,0 +1,8 @@
+UID: ${message.uid}
+HEADER: ${message.header}
+TAGS: ${message.tags?join("-")?upper_case}
+
+${message.content}
+
+${(exportDate).format('yyyy-MM-dd HH:mm:ss')}         ${copyright}
+${exportDirectory}    ${exportSchemeProtocol}
