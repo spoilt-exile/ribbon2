@@ -21,6 +21,7 @@ package tk.freaxsoftware.ribbon2.exchanger.engine.export;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import freemarker.template.Version;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import no.api.freemarker.java8.Java8ObjectWrapper;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 import tk.freaxsoftware.ribbon2.exchanger.entity.ExportQueue;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
@@ -53,7 +55,15 @@ public class TemplateService {
     
     private static final String TEMP_EXPORT_SCHEME_PROTOCOL = "exportSchemeProtocol";
     
-    private final Configuration cfg = new Configuration(Configuration.VERSION_2_3_32);
+    private final Configuration cfg;
+
+    /**
+     * Empty constructor.
+     */
+    public TemplateService() {
+        cfg = new Configuration(Configuration.VERSION_2_3_32);
+        cfg.setObjectWrapper(new Java8ObjectWrapper(Configuration.VERSION_2_3_32));
+    }
     
     /**
      * Process export message's content by template from config. If template in config is absent it returns original content untouched.
@@ -64,6 +74,7 @@ public class TemplateService {
      * @throws TemplateException 
      */
     public String processMessage(IOScheme scheme, ExportQueue message) throws IOException, TemplateException {
+        //cfg.setObjectWrapper(new Java8);
         if (!scheme.getConfig().containsKey(GENERAL_TEMPLATE_KEY)) {
             return message.getMessage().getContent();
         }
@@ -86,6 +97,9 @@ public class TemplateService {
     }
     
     private String extractProperty(Set<MessagePropertyModel> properties, String key, String defaultValue) {
+        if (properties == null) {
+            return defaultValue;
+        }
         Optional<String> propertyValue = properties.stream()
                 .filter(pr -> Objects.equals(pr.getType(), key))
                 .map(prop -> prop.getContent())

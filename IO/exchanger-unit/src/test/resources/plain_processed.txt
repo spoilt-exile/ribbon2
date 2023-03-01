@@ -1,0 +1,10 @@
+UID: 28969eab-f9f8-4d1d-9028-a464ef623740
+HEADER: Test header
+TAGS: RIBBON-SYSTEM-TEST-EXPORT
+
+This is basic content of test message.
+
+Message will be exported.
+
+2022-02-24 05:00:00         Ukrinform
+System.Test    test
