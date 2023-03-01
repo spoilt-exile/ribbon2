@@ -39,7 +39,7 @@ import tk.freaxsoftware.ribbon2.exchanger.engine.ExportEngine;
 import tk.freaxsoftware.ribbon2.exchanger.engine.ImportEngine;
 import tk.freaxsoftware.ribbon2.exchanger.facade.DirectoryFacade;
 import tk.freaxsoftware.ribbon2.exchanger.repository.DirectoryRepository;
-import tk.freaxsoftware.ribbon2.exchanger.repository.ExportMessageRepository;
+import tk.freaxsoftware.ribbon2.exchanger.repository.ExportQueueRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.RegisterRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.SchemeRepository;
 import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
@@ -88,7 +88,7 @@ public class ExchangerUnit {
         if (config.getExchanger().getType() == ModuleType.EXPORT) {
             ExportEngine engine = new ExportEngine(new String[] {config.getExchanger().getModuleClass()}, 
                     new SchemeRepository(), new SchemeConverter(), new RegisterRepository(), 
-                    new DirectoryRepository(), new ExportMessageRepository());
+                    new DirectoryRepository(), new ExportQueueRepository());
             engine.start();
         }
         AnnotationUtil.subscribeReceiverInstance(new DirectoryFacade(new DirectoryRepository(), new DirectoryConverter()));

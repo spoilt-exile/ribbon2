@@ -26,11 +26,10 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.io.core.IOExceptionCodes;
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
-import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.InputOutputException;
+import tk.freaxsoftware.ribbon2.io.core.exporter.ExportMessage;
 import tk.freaxsoftware.ribbon2.io.core.exporter.Exporter;
 
 /**
@@ -44,12 +43,12 @@ public class MailExporter implements Exporter {
     private final static Logger LOGGER = LoggerFactory.getLogger(MailExporter.class);
 
     @Override
-    public String export(MessageModel message, IOScheme scheme) {
-        MailExportConfig config = new MailExportConfig(scheme);
+    public String export(ExportMessage message) {
+        MailExportConfig config = new MailExportConfig(message.getExportScheme());
         Session smtpSession = initSmtpSession(config);
         for (String to: config.getToList()) {
-            LOGGER.info("Sending message '{}' by mail '{}' for scheme '{}'", message.getHeader(), to, scheme.getName());
-            sendEmail(smtpSession, config.getFrom(), to, message.getHeader(), message.getContent());
+            LOGGER.info("Sending message '{}' by mail '{}' for scheme '{}'", message.getHeader(), to, message.getExportScheme().getName());
+            sendEmail(smtpSession, config.getFrom(), to, message.getHeader(), message.getExportContent());
         }
         return message.getHeader();
     }

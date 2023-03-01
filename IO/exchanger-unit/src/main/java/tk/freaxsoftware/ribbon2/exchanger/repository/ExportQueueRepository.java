@@ -1,7 +1,7 @@
 /*
  * This file is part of Ribbon2 news message system.
  * 
- * Copyright (C) 2020 Freax Software
+ * Copyright (C) 2020-2022 Freax Software
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,19 +16,26 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package tk.freaxsoftware.ribbon2.io.core.exporter;
+package tk.freaxsoftware.ribbon2.exchanger.repository;
+
+import io.ebean.DB;
+import java.time.ZonedDateTime;
+import java.util.Set;
+import tk.freaxsoftware.ribbon2.exchanger.entity.ExportQueue;
 
 /**
- * Exporter methods inteface.
+ * Export message queue repository.
  * @author Stanislav Nepochatov
  */
-public interface Exporter {
+public class ExportQueueRepository {
     
-    /**
-     * Exports specified messaged by supplied scheme.
-     * @param message message to export;
-     * @return id of the message in other system;
-     */
-    String export(ExportMessage message);
+    public ExportQueue save(ExportQueue exportMessage) {
+        exportMessage.save();
+        return exportMessage;
+    }
+    
+    public Set<ExportQueue> findBySchemesAndDate(Set<String> schemes, ZonedDateTime date) {
+        return DB.find(ExportQueue.class).where().in("scheme", schemes).and().le("tillDate", date).findSet();
+    }
     
 }
