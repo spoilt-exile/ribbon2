@@ -21,7 +21,6 @@ package tk.freaxsoftware.ribbon2.exchanger.engine.export;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.Version;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -74,7 +73,6 @@ public class TemplateService {
      * @throws TemplateException 
      */
     public String processMessage(IOScheme scheme, ExportQueue message) throws IOException, TemplateException {
-        //cfg.setObjectWrapper(new Java8);
         if (!scheme.getConfig().containsKey(GENERAL_TEMPLATE_KEY)) {
             return message.getMessage().getContent();
         }
