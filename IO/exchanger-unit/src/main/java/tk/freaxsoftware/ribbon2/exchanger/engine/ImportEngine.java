@@ -38,6 +38,7 @@ import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME_NOT_FOUND;
+import tk.freaxsoftware.ribbon2.exchanger.ExchangerUnit;
 import tk.freaxsoftware.ribbon2.exchanger.converters.SchemeConverter;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Register;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Scheme;
@@ -74,7 +75,7 @@ public class ImportEngine extends IOEngine<Importer> {
     
     private final DirectoryRepository directoryRepository;
     
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
+    private final ScheduledExecutorService scheduler;
     
     private final Map<String, Future> schemeMap = new ConcurrentHashMap();
     
@@ -84,6 +85,7 @@ public class ImportEngine extends IOEngine<Importer> {
             SchemeConverter schemeConverter, RegisterRepository registerRepository,
             DirectoryRepository directoryRepository) {
         super(ModuleType.IMPORT, classes);
+        scheduler = Executors.newScheduledThreadPool(ExchangerUnit.config.getExchanger().getImportConfing().getThreadPoolSize());
         this.schemeRepository = schemeRepository;
         this.schemeConverter = schemeConverter;
         this.registerRepository = registerRepository;

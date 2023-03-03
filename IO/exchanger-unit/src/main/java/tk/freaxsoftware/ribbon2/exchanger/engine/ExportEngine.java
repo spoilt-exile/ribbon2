@@ -46,6 +46,7 @@ import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.DIRECTORY_NOT_FOUND;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME_NOT_FOUND;
 import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
+import tk.freaxsoftware.ribbon2.exchanger.ExchangerUnit;
 import tk.freaxsoftware.ribbon2.exchanger.converters.SchemeConverter;
 import tk.freaxsoftware.ribbon2.exchanger.engine.export.DefaultExportMessage;
 import tk.freaxsoftware.ribbon2.exchanger.engine.export.TemplateService;
@@ -132,11 +133,12 @@ public class ExportEngine extends IOEngine<Exporter>{
         if (exportQueueFuture != null && !exportQueueFuture.isDone()) {
             return;
         }
+        Integer queuePeriod = ExchangerUnit.config.getExchanger().getExportConfig().getQueuePeriod();
         exportQueueFuture = executorService.scheduleAtFixedRate(
                 new QueueTask(schemeRepository, exportQueueRepository, 
                         registerRepository, moduleMap, schemeConverter, 
                         new TemplateService()), 
-                0, 2, TimeUnit.MINUTES);
+                15, queuePeriod, TimeUnit.SECONDS);
     }
     
     private void sendExportDirectoriesRegistration() {
@@ -234,6 +236,9 @@ public class ExportEngine extends IOEngine<Exporter>{
         return true;
     }
     
+    /**
+     * Export queue task: reads active schemes by protocols and looks corresponding messages in queue to export.
+     */
     private final static class QueueTask implements Runnable {
         
         private final SchemeRepository schemeRepository;

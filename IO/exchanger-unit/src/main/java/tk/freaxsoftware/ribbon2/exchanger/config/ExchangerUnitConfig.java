@@ -67,6 +67,10 @@ public class ExchangerUnitConfig {
         private Set<DirectoryPermissionModel> importPermissions;
         
         private Set<DirectoryPermissionModel> exportPermissions;
+        
+        private ImportConfig importConfing;
+        
+        private ExportConfig exportConfig;
 
         public ModuleType getType() {
             return type;
@@ -116,9 +120,61 @@ public class ExchangerUnitConfig {
             this.exportPermissions = exportPermissions;
         }
 
+        public ImportConfig getImportConfing() {
+            return importConfing;
+        }
+
+        public void setImportConfing(ImportConfig importConfing) {
+            this.importConfing = importConfing;
+        }
+
+        public ExportConfig getExportConfig() {
+            return exportConfig;
+        }
+
+        public void setExportConfig(ExportConfig exportConfig) {
+            this.exportConfig = exportConfig;
+        }
+
         @Override
         public String toString() {
-            return "{" + "type=" + type + ", moduleClass=" + moduleClass + ", importPermissions=" + importPermissions + ", exportPermissions=" + exportPermissions + '}';
+            return "{" + "type=" + type + ", moduleClass=" + moduleClass + ", enablePermissionCaching=" + enablePermissionCaching + ", permissionCacheExpiry=" + permissionCacheExpiry + ", importPermissions=" + importPermissions + ", exportPermissions=" + exportPermissions + ", importConfing=" + importConfing + ", exportConfig=" + exportConfig + '}';
+        }
+        
+        public static class ImportConfig {
+            
+            private Integer threadPoolSize;
+
+            public Integer getThreadPoolSize() {
+                return threadPoolSize;
+            }
+
+            public void setThreadPoolSize(Integer threadPoolSize) {
+                this.threadPoolSize = threadPoolSize;
+            }
+
+            @Override
+            public String toString() {
+                return "{" + "threadPoolSize=" + threadPoolSize + '}';
+            }
+        }
+        
+        public static class ExportConfig {
+            
+            private Integer queuePeriod;
+
+            public Integer getQueuePeriod() {
+                return queuePeriod;
+            }
+
+            public void setQueuePeriod(Integer queuePeriod) {
+                this.queuePeriod = queuePeriod;
+            }
+
+            @Override
+            public String toString() {
+                return "{" + "queuePeriod=" + queuePeriod + '}';
+            }
         }
     }
 }
