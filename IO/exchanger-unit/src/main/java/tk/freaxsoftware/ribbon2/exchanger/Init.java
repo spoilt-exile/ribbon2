@@ -18,11 +18,16 @@
  */
 package tk.freaxsoftware.ribbon2.exchanger;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.ebean.Database;
 import io.ebean.DatabaseFactory;
 import io.ebean.config.AutoTuneConfig;
 import io.ebean.config.AutoTuneMode;
 import io.ebean.config.DatabaseConfig;
+import io.ebean.config.JsonConfig;
 import io.ebean.datasource.DataSourceConfig;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -48,6 +53,7 @@ import tk.freaxsoftware.ribbon2.core.data.request.DirectoryPermissionHolder;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonMessageExceptionHandler;
 import tk.freaxsoftware.ribbon2.exchanger.config.ExchangerUnitConfig;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Directory;
+import tk.freaxsoftware.ribbon2.exchanger.entity.ExportQueue;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Register;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Scheme;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
@@ -136,6 +142,14 @@ public class Init {
         config.addClass(Directory.class);
         config.addClass(Register.class);
         config.addClass(Scheme.class);
+        config.addClass(ExportQueue.class);
+        
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
+        config.setObjectMapper(mapper);
+        
         Database database = DatabaseFactory.create(config);
     }
     
