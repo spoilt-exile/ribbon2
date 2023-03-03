@@ -110,8 +110,14 @@ public class ExchangerUnit {
                 DbConfig.class, (conf, property) -> conf.setUsername(property)));
         overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_PASSWORD", 
                 DbConfig.class, (conf, property) -> conf.setPassword(property)));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ExchangerConfig.ExportConfig>("EXCHANGER_EXPORT_QUEUE_PERIOD", 
+                ExchangerUnitConfig.ExchangerConfig.ExportConfig.class, (conf, property) -> conf.setQueuePeriod(Integer.parseInt(property))));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ExchangerConfig.ImportConfig>("EXCHANGER_IMPORT_THREAD_POOL_SIZE", 
+                ExchangerUnitConfig.ExchangerConfig.ImportConfig.class, (conf, property) -> conf.setThreadPoolSize(Integer.parseInt(property))));
         
         overrider.processConfig(config.getExchanger());
+        overrider.processConfig(config.getExchanger().getExportConfig());
+        overrider.processConfig(config.getExchanger().getImportConfing());
         overrider.processConfig(config.getDb());
     }
     

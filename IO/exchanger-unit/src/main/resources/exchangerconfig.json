@@ -17,7 +17,13 @@
             }
         ],
         "type": "EXPORT",
-        "moduleClass": "tk.freaxsoftware.ribbon2.io.exporter.plain.PlainExporter"
+        "moduleClass": "tk.freaxsoftware.ribbon2.io.exporter.plain.PlainExporter",
+        "importConfig": {
+            "threadPoolSize": 10
+        },
+        "exportConfig": {
+            "queuePeriod": 120
+        }
     },
     "db": {
         "jdbcUrl": "jdbc:postgresql://localhost:5432/ribbon2-exchange",
