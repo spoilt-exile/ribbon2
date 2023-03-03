@@ -21,8 +21,10 @@ package tk.freaxsoftware.ribbon2.exchanger.entity;
 import io.ebean.Model;
 import io.ebean.annotation.DbJsonB;
 import java.time.ZonedDateTime;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 
 /**
@@ -30,11 +32,13 @@ import tk.freaxsoftware.ribbon2.core.data.MessageModel;
  * @author Stanislav Nepochatov
  */
 @Entity
+@Table(name = "export_queue")
 public class ExportQueue extends Model {
     
     @Id
     private Long id;
     
+    @Column(name = "export_directory")
     private String exportDirectory;
     
     private String protocol;

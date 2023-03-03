@@ -9,4 +9,5 @@
 
     <include file="changelogs/db_1_messagestore.xml" relativeToChangelogFile="true"/>
     <include file="changelogs/db_2_init_entities.xml" relativeToChangelogFile="true"/>
+    <include file="changelogs/db_3_export_queue.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

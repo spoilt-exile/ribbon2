@@ -167,7 +167,7 @@ public class ExportEngine extends IOEngine<Exporter>{
                 Set<String> dirIntersect = new HashSet<>(scheme.getExportList());
                 dirIntersect.retainAll(message.getDirectories());
                 for (String exportDir: dirIntersect) {
-                    exportQueueRepository.save(new ExportQueue(exportDir, scheme.getModuleId(), scheme.getName(), message, ZonedDateTime.now()));
+                    exportQueueRepository.save(new ExportQueue(exportDir, scheme.getProtocol(), scheme.getName(), message, ZonedDateTime.now()));
                 }
             }
         }
@@ -267,12 +267,15 @@ public class ExportEngine extends IOEngine<Exporter>{
             Set<String> exportProtocols = moduleMap.entrySet().stream()
                     .map(en -> en.getKey())
                     .collect(Collectors.toSet());
+            LOGGER.info("Run export queue: {}", exportProtocols);
             List<Scheme> schemes = schemeRepository.findAllExportByProtocols(exportProtocols);
             Set<String> exportSchemes = schemes.stream()
                     .map(expScheme -> expScheme.getName())
                     .collect(Collectors.toSet());
+            LOGGER.info("List of schemes: {}", exportSchemes);
             Map<String, Scheme> schemeMap = schemes.stream().collect(Collectors.toMap(Scheme::getName, Function.identity()));
             Set<ExportQueue> exportQueue = exportMessageRepository.findBySchemesAndDate(exportSchemes, ZonedDateTime.now());
+            LOGGER.info("Queue size: {}", exportQueue.size());
             for (ExportQueue exportMessage: exportQueue) {
                 innerHandle(exportMessage, schemeMap.get(exportMessage.getScheme()));
             }
@@ -282,9 +285,10 @@ public class ExportEngine extends IOEngine<Exporter>{
             try {
                 innerExport(moduleMap.get(exportMessage.getProtocol()).getModuleInstance(), exportMessage, scheme);
             } catch (Exception ex) {
-                LOGGER.error("Error during exporting message {} : {} by scheme {} in dir {}", 
+                LOGGER.error("Error during exporting message {} : {} by scheme {} protocol {} in dir {}", 
                         exportMessage.getMessage().getUid(), exportMessage.getMessage().getHeader(),
-                        exportMessage.getScheme(), exportMessage.getExportDirectory());
+                        exportMessage.getScheme(), exportMessage.getProtocol(), exportMessage.getExportDirectory());
+                LOGGER.error("Error: ", ex);
                 exportMessage.setError(ex.getMessage());
                 exportMessage.save();
             }
