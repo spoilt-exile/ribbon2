@@ -267,15 +267,13 @@ public class ExportEngine extends IOEngine<Exporter>{
             Set<String> exportProtocols = moduleMap.entrySet().stream()
                     .map(en -> en.getKey())
                     .collect(Collectors.toSet());
-            LOGGER.info("Run export queue: {}", exportProtocols);
             List<Scheme> schemes = schemeRepository.findAllExportByProtocols(exportProtocols);
             Set<String> exportSchemes = schemes.stream()
                     .map(expScheme -> expScheme.getName())
                     .collect(Collectors.toSet());
-            LOGGER.info("List of schemes: {}", exportSchemes);
             Map<String, Scheme> schemeMap = schemes.stream().collect(Collectors.toMap(Scheme::getName, Function.identity()));
             Set<ExportQueue> exportQueue = exportMessageRepository.findBySchemesAndDate(exportSchemes, ZonedDateTime.now());
-            LOGGER.info("Queue size: {}", exportQueue.size());
+            LOGGER.info("Export queue run: protocols {}, schemes {}, size {}", exportProtocols, exportSchemes, exportQueue.size());
             for (ExportQueue exportMessage: exportQueue) {
                 innerHandle(exportMessage, schemeMap.get(exportMessage.getScheme()));
             }
