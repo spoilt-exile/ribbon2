@@ -44,14 +44,18 @@ public class PlainExporter implements Exporter {
         String fileName = String.format("%s.%s", message.getMessage().getUid(), message.getExportScheme().getConfig().get("plainFileExtension"));
         LOGGER.info("Writing message {} to file {}", message.getMessage().getUid(), fileName);
         StringBuffer messageBuffer = new StringBuffer();
-        messageBuffer.append(message.getMessage().getUid());
-        messageBuffer.append('\n');
-        messageBuffer.append(message.getHeader());
-        messageBuffer.append('\n');
-        messageBuffer.append('\n');
-        messageBuffer.append(message.getExportContent());
-        messageBuffer.append('\n');
-        messageBuffer.append(message.getMessage().getCreated().toString());
+        if (message.isContentProcessed()) {
+            messageBuffer.append(message.getExportContent());
+        } else {
+            messageBuffer.append(message.getMessage().getUid());
+            messageBuffer.append('\n');
+            messageBuffer.append(message.getHeader());
+            messageBuffer.append('\n');
+            messageBuffer.append('\n');
+            messageBuffer.append(message.getExportContent());
+            messageBuffer.append('\n');
+            messageBuffer.append(message.getMessage().getCreated().toString());
+        }
         try {
             Files.write(Paths.get(message.getExportScheme().getConfig().get("plainFolderPath") + "/" + fileName), messageBuffer.toString().getBytes());
         } catch (IOException ioex) {

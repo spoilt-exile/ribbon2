@@ -76,5 +76,10 @@ public class DefaultExportMessage implements ExportMessage {
     public IOScheme getExportScheme() {
         return exportScheme;
     }
+
+    @Override
+    public Boolean isContentProcessed() {
+        return exportScheme.getConfig().containsKey(TemplateService.GENERAL_TEMPLATE_KEY);
+    }
     
 }

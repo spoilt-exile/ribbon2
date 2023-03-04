@@ -46,4 +46,10 @@ public interface ExportMessage extends IOMessage {
      */
     String getExportContent();
     
+    /**
+     * Returns flag if message content were processed by template.
+     * @return true if content were processed / false if export message contains raw content;
+     */
+    Boolean isContentProcessed();
+    
 }

@@ -40,7 +40,7 @@ import tk.freaxsoftware.ribbon2.io.core.IOScheme;
  */
 public class TemplateService {
     
-    private static final String GENERAL_TEMPLATE_KEY = "generalTemplate";
+    public static final String GENERAL_TEMPLATE_KEY = "generalTemplate";
     
     private static final String TEMP_MESSAGE_KEY = "message";
     
