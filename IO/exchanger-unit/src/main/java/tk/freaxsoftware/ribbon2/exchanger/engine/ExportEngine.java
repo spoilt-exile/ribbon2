@@ -22,10 +22,14 @@ import com.google.common.collect.ImmutableSet;
 import freemarker.template.TemplateException;
 import java.io.IOException;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -42,6 +46,7 @@ import tk.freaxsoftware.extras.bus.bridge.http.LocalHttpCons;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
+import tk.freaxsoftware.ribbon2.core.data.request.MessagePropertyRegistrationRequest;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.DIRECTORY_NOT_FOUND;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME_NOT_FOUND;
@@ -72,6 +77,12 @@ public class ExportEngine extends IOEngine<Exporter>{
     private final static Logger LOGGER = LoggerFactory.getLogger(ExportEngine.class);
     
     private final static String PERMISSION_CAN_ASSIGN_EXPORT = "canAssignExport";
+    
+    private final static String EXPORT_EMBARGO_PROPERTY_TYPE = "EMBARGO";
+    
+    private final static String EXPORT_EMBARGO_PROPERTY_DESC = "Embargo message process until date (ISO 8601 YYYY-MM-DDThh:mm:ss±hh format)";
+    
+    private final static DateTimeFormatter EXPORT_EMBARGO_DATE_FORMAT = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
     
     private final SchemeRepository schemeRepository;
     
@@ -124,6 +135,7 @@ public class ExportEngine extends IOEngine<Exporter>{
             moduleMap.put(wrapper.getModuleData().protocol(), wrapper);
         }
         sendExportDirectoriesRegistration();
+        registerEmbargoProperty();
         MessageBus.addSubscription(MessageModel.NOTIFICATION_MESSAGE_CREATED, 
                 holder -> processExportMessage((MessageModel) holder.getContent()));
         checkQueueRun();
@@ -139,6 +151,15 @@ public class ExportEngine extends IOEngine<Exporter>{
                         registerRepository, moduleMap, schemeConverter, 
                         new TemplateService()), 
                 15, queuePeriod, TimeUnit.SECONDS);
+    }
+    
+    private void registerEmbargoProperty() {
+        MessagePropertyRegistrationRequest propertyRegistrationRequest = new MessagePropertyRegistrationRequest();
+        propertyRegistrationRequest.setTag("exc-export");
+        propertyRegistrationRequest.setPropertyTypes(Arrays.asList(new MessagePropertyRegistrationRequest.Entry(EXPORT_EMBARGO_PROPERTY_TYPE, EXPORT_EMBARGO_PROPERTY_DESC)));
+        MessageBus.fire(MessagePropertyRegistrationRequest.CALL_REGISTER_PROPERTY, propertyRegistrationRequest, 
+                MessageOptions.Builder.newInstance().deliveryNotification()
+                        .async().pointToPoint().build());
     }
     
     private void sendExportDirectoriesRegistration() {
@@ -169,11 +190,26 @@ public class ExportEngine extends IOEngine<Exporter>{
                 Set<String> dirIntersect = new HashSet<>(scheme.getExportList());
                 dirIntersect.retainAll(message.getDirectories());
                 for (String exportDir: dirIntersect) {
-                    exportQueueRepository.save(new ExportQueue(exportDir, scheme.getProtocol(), scheme.getName(), message, ZonedDateTime.now()));
+                    exportQueueRepository.save(new ExportQueue(exportDir, scheme.getProtocol(), scheme.getName(), message, getMessageExportDate(message)));
                 }
             }
         }
         checkQueueRun();
+    }
+    
+    private ZonedDateTime getMessageExportDate(MessageModel model) {
+        Optional<MessagePropertyModel> embargoPropertyOpt = model.getProperties().stream()
+                .filter(pr -> Objects.equals(pr.getType(), EXPORT_EMBARGO_PROPERTY_TYPE))
+                .findFirst();
+        if (embargoPropertyOpt.isPresent()) {
+            try {
+                ZonedDateTime parsedEmbargoDate = ZonedDateTime.parse(embargoPropertyOpt.get().getContent(), EXPORT_EMBARGO_DATE_FORMAT);
+                return parsedEmbargoDate;
+            } catch (Exception ex) {
+                LOGGER.info("Unable to parse export embargo date for message {} from property value {}", model.getUid(), embargoPropertyOpt.get().getContent());
+            }
+        }
+        return ZonedDateTime.now();
     }
 
     @Override

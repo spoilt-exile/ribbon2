@@ -85,7 +85,7 @@ public class ImportEngine extends IOEngine<Importer> {
             SchemeConverter schemeConverter, RegisterRepository registerRepository,
             DirectoryRepository directoryRepository) {
         super(ModuleType.IMPORT, classes);
-        scheduler = Executors.newScheduledThreadPool(ExchangerUnit.config.getExchanger().getImportConfing().getThreadPoolSize());
+        scheduler = Executors.newScheduledThreadPool(ExchangerUnit.config.getExchanger().getImportConfig().getThreadPoolSize());
         this.schemeRepository = schemeRepository;
         this.schemeConverter = schemeConverter;
         this.registerRepository = registerRepository;
