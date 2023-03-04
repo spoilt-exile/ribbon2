@@ -80,7 +80,7 @@ public class ExportEngine extends IOEngine<Exporter>{
     
     private final static String EXPORT_EMBARGO_PROPERTY_TYPE = "EMBARGO";
     
-    private final static String EXPORT_EMBARGO_PROPERTY_DESC = "Embargo message process until date (ISO 8601 YYYY-MM-DDThh:mm:ss±hh format)";
+    private final static String EXPORT_EMBARGO_PROPERTY_DESC = "Embargo message process until date (ISO 8601 YYYY-MM-DDThh:mm:ss±hh:mm format)";
     
     private final static DateTimeFormatter EXPORT_EMBARGO_DATE_FORMAT = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
     
