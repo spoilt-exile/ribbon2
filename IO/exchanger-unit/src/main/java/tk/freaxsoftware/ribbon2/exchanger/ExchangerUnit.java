@@ -117,7 +117,7 @@ public class ExchangerUnit {
         
         overrider.processConfig(config.getExchanger());
         overrider.processConfig(config.getExchanger().getExportConfig());
-        overrider.processConfig(config.getExchanger().getImportConfing());
+        overrider.processConfig(config.getExchanger().getImportConfig());
         overrider.processConfig(config.getDb());
     }
     

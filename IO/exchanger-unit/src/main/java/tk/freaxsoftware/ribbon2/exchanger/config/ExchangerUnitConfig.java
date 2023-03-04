@@ -68,7 +68,7 @@ public class ExchangerUnitConfig {
         
         private Set<DirectoryPermissionModel> exportPermissions;
         
-        private ImportConfig importConfing;
+        private ImportConfig importConfig;
         
         private ExportConfig exportConfig;
 
@@ -120,12 +120,12 @@ public class ExchangerUnitConfig {
             this.exportPermissions = exportPermissions;
         }
 
-        public ImportConfig getImportConfing() {
-            return importConfing;
+        public ImportConfig getImportConfig() {
+            return importConfig;
         }
 
-        public void setImportConfing(ImportConfig importConfing) {
-            this.importConfing = importConfing;
+        public void setImportConfig(ImportConfig importConfig) {
+            this.importConfig = importConfig;
         }
 
         public ExportConfig getExportConfig() {
@@ -138,7 +138,7 @@ public class ExchangerUnitConfig {
 
         @Override
         public String toString() {
-            return "{" + "type=" + type + ", moduleClass=" + moduleClass + ", enablePermissionCaching=" + enablePermissionCaching + ", permissionCacheExpiry=" + permissionCacheExpiry + ", importPermissions=" + importPermissions + ", exportPermissions=" + exportPermissions + ", importConfing=" + importConfing + ", exportConfig=" + exportConfig + '}';
+            return "{" + "type=" + type + ", moduleClass=" + moduleClass + ", enablePermissionCaching=" + enablePermissionCaching + ", permissionCacheExpiry=" + permissionCacheExpiry + ", importPermissions=" + importPermissions + ", exportPermissions=" + exportPermissions + ", importConfing=" + importConfig + ", exportConfig=" + exportConfig + '}';
         }
         
         public static class ImportConfig {
