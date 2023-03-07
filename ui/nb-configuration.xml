@@ -13,7 +13,9 @@ You can copy and paste the single properties, into the pom.xml file and the IDE 
 That way multiple projects can share the same settings (useful for formatting rules for example).
 Any value defined here will override the pom.xml file value but is only applicable to the current project.
 -->
-        <org-netbeans-modules-projectapi.jsf_2e_language>Facelets</org-netbeans-modules-projectapi.jsf_2e_language>
+        <org-netbeans-modules-projectapi.jsf_2e_language>JSP</org-netbeans-modules-projectapi.jsf_2e_language>
         <netbeans.hint.licensePath>${project.parent.basedir}/LICENSE_HEADER</netbeans.hint.licensePath>
+        <org-netbeans-modules-payara-micro.hotDeploy>true</org-netbeans-modules-payara-micro.hotDeploy>
+        <org-netbeans-modules-payara-micro.version/>
     </properties>
 </project-shared-configuration>
