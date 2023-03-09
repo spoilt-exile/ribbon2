@@ -18,7 +18,9 @@
  */
 package tk.freaxsoftware.ribbon2.io.core;
 
-import java.util.Set;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Module registration request.
@@ -34,13 +36,13 @@ public class ModuleRegistration {
     
     private String[] requiredConfigKeys;
     
-    private Set<String> schemes;
+    private Map<String, SchemeInstance> schemes;
 
     public ModuleRegistration() {
     }
 
     public ModuleRegistration(String id, ModuleType type, String protocol, 
-            String[] requiredConfigKeys, Set<String> schemes) {
+            String[] requiredConfigKeys, Map<String, SchemeInstance> schemes) {
         this.id = id;
         this.type = type;
         this.protocol = protocol;
@@ -80,11 +82,11 @@ public class ModuleRegistration {
         this.requiredConfigKeys = requiredConfigKeys;
     }
 
-    public Set<String> getSchemes() {
+    public Map<String, SchemeInstance> getSchemes() {
         return schemes;
     }
 
-    public void setSchemes(Set<String> schemes) {
+    public void setSchemes(Map<String, SchemeInstance> schemes) {
         this.schemes = schemes;
     }
     
@@ -111,5 +113,30 @@ public class ModuleRegistration {
     public String schemeExportDismissTopic() {
         return String.format("%s.%s", IOLocalIds.IO_SCHEME_EXPORT_DISMISS_TOPIC, 
                 protocol);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 73 * hash + Objects.hashCode(this.id);
+        hash = 73 * hash + Objects.hashCode(this.type);
+        hash = 73 * hash + Objects.hashCode(this.protocol);
+        hash = 73 * hash + Arrays.deepHashCode(this.requiredConfigKeys);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ModuleRegistration other = (ModuleRegistration) obj;
+        return Objects.equals(this.id, other.id);
     }
 }

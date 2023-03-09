@@ -29,7 +29,6 @@ import io.javalin.openapi.OpenApiSecurity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +47,6 @@ import tk.freaxsoftware.ribbon2.gateway.io.data.IOProtocol;
 import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
 import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
-import tk.freaxsoftware.ribbon2.io.core.ModuleRegistration;
 
 /**
  * IO API routes.
@@ -125,16 +123,7 @@ public class IORoutes {
         isAdmin();
         String dirName = ctx.pathParam("dirName");
         LOGGER.info("Request to get export IO schemes by directory {}", dirName);
-        Set<String> exportSchemes = IOService.getInstance().getExportDirectories().get(dirName);
-        List<IOModuleScheme> dirExportSchemes = new ArrayList<>();
-        if (exportSchemes != null && !exportSchemes.isEmpty()) {
-            List<IOModuleScheme> moduleSchemes = new ArrayList<>();
-            IOService.getInstance().getRegistrations().forEach(reg -> {
-                moduleSchemes.addAll(IOModuleScheme.ofModuleRegistration(reg));
-            });
-            moduleSchemes.stream().filter(mod -> exportSchemes.contains(mod.getScheme())).forEach(modScheme -> dirExportSchemes.add(modScheme));
-        }
-        ctx.json(dirExportSchemes);
+        ctx.json(IOService.getInstance().getSchemesByExportDirectiry(dirName));
     }
     
     @OpenApi(
@@ -195,11 +184,7 @@ public class IORoutes {
                 .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
                 .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
                 .deliveryCall().build(), IOScheme.class);
-        ModuleRegistration reg = IOService.getInstance().getById(saved.getId());
-        if (reg != null) {
-            reg.getSchemes().add(saved.getName());
-        }
-        ctx.json(reg);
+        ctx.json(saved);
     }
     
     @OpenApi(
@@ -234,11 +219,6 @@ public class IORoutes {
                 .deliveryCall().build(), Boolean.class);
         if (deleted != null && deleted) {
             ctx.status(200);
-            ModuleRegistration reg = IOService.getInstance().getById(String.format("%s.%s", type, protocol));
-            if (reg != null) {
-                reg.getSchemes().remove(name);
-            }
-            IOService.getInstance().removeSchemeFromExports(name);
         } else {
             ctx.status(404);
         };
@@ -276,7 +256,6 @@ public class IORoutes {
                 .header(IOLocalIds.IO_SCHEME_NAME_HEADER, name)
                 .deliveryCall().build(), Boolean.class);
         if (assigned != null && assigned) {
-            IOService.getInstance().assignSchemeToExports(dir, name);
             ctx.status(200);
         } else {
             ctx.status(400);
@@ -315,7 +294,6 @@ public class IORoutes {
                 .header(IOLocalIds.IO_SCHEME_NAME_HEADER, name)
                 .deliveryCall().build(), Boolean.class);
         if (assigned != null && assigned) {
-            IOService.getInstance().dismuissSchemeFromExports(dir, name);
             ctx.status(200);
         } else {
             ctx.status(400);

@@ -39,17 +39,35 @@ public class IOLocalIds {
     public final static String IO_REGISTER_TOPIC = "Ribbon.IO.Register";
     
     /**
+     * Topic for update status info regarding IO scheme on gateway.
+     */
+    public final static String IO_SCHEME_STATUS_UPDATED_TOPIC = "Ribbon.IO.SchemeStatusUpdated";
+    
+    /**
+     * Type name for set of scheme status updates.
+     */
+    public final static String IO_SCHEME_STATUS_UPDATED_TYPE_NAME = "SchemeStatusUpdateSet";
+    
+    /**
+     * Type token for set of scheme status updates.
+     */
+    public final static TypeToken IO_SCHEME_STATUS_UPDATED_TYPE_TOKEN = new TypeToken<Set<SchemeStatusUpdate>>() {};
+    
+    /**
      * Topic for sending list of export directories on gateway.
+     * @deprecated 
      */
     public final static String IO_REGISTER_EXPORT_DIRS = "Ribbon.IO.RegisterExportDirectories";
     
     /**
      * Type name for export directories.
+     * @deprecated 
      */
     public final static String IO_REGISTER_EXPORT_DIRS_TYPE_NAME = "ExportDirsMap";
     
     /**
      * Type token for export directories.
+     * @deprecated
      */
     public final static TypeToken IO_REGISTER_EXPORT_DIRS_TYPE_TOKEN = new TypeToken<Map<String, Set<String>>>() {};
     

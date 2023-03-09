@@ -1,7 +1,7 @@
 /*
  * This file is part of Ribbon2 news message system.
  * 
- * Copyright (C) 2020 Freax Software
+ * Copyright (C) 2020-2022 Freax Software
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,20 +16,15 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package tk.freaxsoftware.ribbon2.gateway.io.data;
+package tk.freaxsoftware.ribbon2.io.core;
 
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import tk.freaxsoftware.ribbon2.io.core.ModuleRegistration;
-import tk.freaxsoftware.ribbon2.io.core.ModuleType;
-import tk.freaxsoftware.ribbon2.io.core.SchemeInstance;
 
 /**
- * Module brief info.
+ * Scheme status update notification.
  * @author Stanislav Nepochatov
  */
-public class IOModuleScheme {
+public class SchemeStatusUpdate {
     
     private String id;
     
@@ -47,54 +42,36 @@ public class IOModuleScheme {
     
     private Set<String> exportDirectories;
 
-    public IOModuleScheme() {
-    }
-    
-    public IOModuleScheme(ModuleRegistration reg, String scheme, SchemeInstance instance) {
-        this.id = reg.getId();
-        this.type = reg.getType();
-        this.protocol = reg.getProtocol();
-        this.scheme = scheme;
-        this.status = instance.getStatus();
-        this.errorDescription = instance.getErrorDescription();
-        this.raisingAdminError = instance.getRaisingAdminError();
-        this.exportDirectories = instance.getExportDirectories();
-    }
-
     public String getId() {
         return id;
     }
 
-    public IOModuleScheme setId(String id) {
+    public void setId(String id) {
         this.id = id;
-        return this;
     }
 
     public ModuleType getType() {
         return type;
     }
 
-    public IOModuleScheme setType(ModuleType type) {
+    public void setType(ModuleType type) {
         this.type = type;
-        return this;
     }
 
     public String getProtocol() {
         return protocol;
     }
 
-    public IOModuleScheme setProtocol(String protocol) {
+    public void setProtocol(String protocol) {
         this.protocol = protocol;
-        return this;
     }
 
     public String getScheme() {
         return scheme;
     }
 
-    public IOModuleScheme setScheme(String scheme) {
+    public void setScheme(String scheme) {
         this.scheme = scheme;
-        return this;
     }
 
     public SchemeInstance.Status getStatus() {
@@ -129,10 +106,7 @@ public class IOModuleScheme {
         this.exportDirectories = exportDirectories;
     }
     
-    public static List<IOModuleScheme> ofModuleRegistration(ModuleRegistration reg) {
-        return reg.getSchemes().entrySet().stream()
-                .map(entry -> new IOModuleScheme(reg, entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
+    public SchemeInstance buildInstance() {
+        return new SchemeInstance(status, errorDescription, raisingAdminError, exportDirectories);
     }
-    
 }

@@ -24,12 +24,16 @@ import io.ebean.annotation.DbJsonB;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import static tk.freaxsoftware.ribbon2.exchanger.engine.IOEngine.GENERAL_ERROR_HANDLING_KEY;
+import tk.freaxsoftware.ribbon2.io.core.ErrorHandling;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
+import tk.freaxsoftware.ribbon2.io.core.SchemeInstance;
 
 /**
  * IO Scheme DB entity.
@@ -121,5 +125,14 @@ public class Scheme extends Model implements Serializable {
 
     public void setExportList(Set<String> exportList) {
         this.exportList = exportList;
+    }
+    
+    /**
+     * Builds scheme runtime data holder with default status but with initialized export directory list and admin error flag.
+     * @return new scheme instance;
+     */
+    public SchemeInstance buildInstance() {
+        Boolean raisingAdminError = ErrorHandling.valueOf((String) config.getOrDefault(GENERAL_ERROR_HANDLING_KEY, ErrorHandling.RAISE_ERROR.name())) == ErrorHandling.RAISE_ADM_ERROR;
+        return type == ModuleType.EXPORT ? new SchemeInstance(raisingAdminError, new CopyOnWriteArraySet(exportList)) : new SchemeInstance(raisingAdminError);
     }
 }
