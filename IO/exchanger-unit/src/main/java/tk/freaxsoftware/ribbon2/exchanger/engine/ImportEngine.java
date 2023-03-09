@@ -19,6 +19,7 @@
 package tk.freaxsoftware.ribbon2.exchanger.engine;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,7 @@ import tk.freaxsoftware.ribbon2.io.core.IOExceptionCodes;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.InputOutputException;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
+import tk.freaxsoftware.ribbon2.io.core.SchemeInstance;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportMessage;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportSource;
 import tk.freaxsoftware.ribbon2.io.core.importer.Importer;
@@ -65,7 +67,7 @@ public class ImportEngine extends IOEngine<Importer> {
     
     private static final String GENERAL_TIMEOUT_KEY = "generalTimeout";
     
-    private static final String GENERAL_DIRECTORY = "generalDirectory";
+    private static final String GENERAL_DIRECTORY_KEY = "generalDirectory";
     
     private final SchemeRepository schemeRepository;
     
@@ -103,7 +105,7 @@ public class ImportEngine extends IOEngine<Importer> {
             for (Scheme scheme: schemes) {
                 LOGGER.info("Processing scheme {}", scheme.getName());
                 if (isConfigValid(scheme.getConfig(), wrapper.getModuleData().requiredConfigKeys())) {
-                    launchScheme(wrapper, schemeConverter.convert(scheme));
+                    launchScheme(wrapper, scheme);
                 } else {
                     LOGGER.warn("Some config keys are absent in scheme {}, skipping", scheme.getName());
                 }
@@ -115,8 +117,8 @@ public class ImportEngine extends IOEngine<Importer> {
     @Override
     public IOScheme saveScheme(IOScheme scheme, String username) {
         LOGGER.info("Saving scheme {} with protocol {}", scheme.getName(), scheme.getProtocol());
-        if (scheme.getConfig().containsKey(GENERAL_DIRECTORY)) {
-            checkDirectoryAccess(username, ImmutableSet.of((String) scheme.getConfig().get(GENERAL_DIRECTORY)), PERMISSION_CAN_ASSIGN_IMPORT);
+        if (scheme.getConfig().containsKey(GENERAL_DIRECTORY_KEY)) {
+            checkDirectoryAccess(username, ImmutableSet.of((String) scheme.getConfig().get(GENERAL_DIRECTORY_KEY)), PERMISSION_CAN_ASSIGN_IMPORT);
         }
         if (scheme.getConfig().containsKey(GENERAL_TIMEOUT_KEY)) {
             Double timeout = (Double) scheme.getConfig().get(GENERAL_TIMEOUT_KEY);
@@ -127,7 +129,7 @@ public class ImportEngine extends IOEngine<Importer> {
         if (schemeMap.containsKey(saved.getName())) {
             stopScheme(wrapper, saved);
         }
-        launchScheme(wrapper, scheme);
+        launchScheme(wrapper, saved);
         return schemeConverter.convert(saved);
     }
 
@@ -157,13 +159,15 @@ public class ImportEngine extends IOEngine<Importer> {
                 String.format("Scheme by name %s not found!", name));
     }
     
-    private void launchScheme(ModuleWrapper<Importer> wrapper, IOScheme scheme) {
+    private void launchScheme(ModuleWrapper<Importer> wrapper, Scheme scheme) {
         LOGGER.info("Launching import for scheme {} by module {}", scheme.getName(), wrapper.getModuleData().id());
-        ImportSource source = wrapper.getModuleInstance().createSource(scheme);
+        ImportSource source = wrapper.getModuleInstance().createSource(schemeConverter.convert(scheme));
         Future future = scheduler.scheduleAtFixedRate(new ImportTask(source, registerRepository, directoryRepository), 0, 
                 (long) scheme.getConfig().get(GENERAL_TIMEOUT_KEY), TimeUnit.SECONDS);
         schemeMap.put(scheme.getName(), future);
-        wrapper.getSchemes().add(scheme.getName());
+        SchemeInstance instance = scheme.buildInstance();
+        wrapper.getSchemes().put(scheme.getName(), instance);
+        sendSchemeStatusUpdate((Set) Sets.newHashSet(instance));
     }
     
     private void stopScheme(ModuleWrapper<Importer> wrapper, Scheme scheme) {
@@ -249,8 +253,8 @@ public class ImportEngine extends IOEngine<Importer> {
             MessageModel messageModel = message.getMessage();
             if (messageModel.getDirectories() == null || (messageModel.getDirectories() != null 
                     && messageModel.getDirectories().isEmpty())) {
-                if (scheme.getConfig().containsKey(GENERAL_DIRECTORY)) {
-                    messageModel.setDirectories(Set.of((String) scheme.getConfig().get(GENERAL_DIRECTORY)));
+                if (scheme.getConfig().containsKey(GENERAL_DIRECTORY_KEY)) {
+                    messageModel.setDirectories(Set.of((String) scheme.getConfig().get(GENERAL_DIRECTORY_KEY)));
                 } else {
                     throw new InputOutputException(IOExceptionCodes.IMPORT_ERROR,
                             "Can't process message: no directory configured nor module doesn't set them.");

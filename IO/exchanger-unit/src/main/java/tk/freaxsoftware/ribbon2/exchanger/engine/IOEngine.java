@@ -31,11 +31,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
+import tk.freaxsoftware.extras.bus.bridge.http.LocalHttpCons;
 import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryCheckAccessRequest;
 import tk.freaxsoftware.ribbon2.core.data.request.MessagePropertyRegistrationRequest;
@@ -49,6 +49,8 @@ import tk.freaxsoftware.ribbon2.io.core.IOModule;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.ModuleRegistration;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
+import tk.freaxsoftware.ribbon2.io.core.SchemeInstance;
+import tk.freaxsoftware.ribbon2.io.core.SchemeStatusUpdate;
 import tk.freaxsoftware.ribbon2.io.core.exporter.Exporter;
 import tk.freaxsoftware.ribbon2.io.core.importer.Importer;
 
@@ -58,6 +60,8 @@ import tk.freaxsoftware.ribbon2.io.core.importer.Importer;
  * @param <T> type of the IO module;
  */
 public abstract class IOEngine<T> {
+    
+    public static final String GENERAL_ERROR_HANDLING_KEY = "generalErrorHandling";
     
     private final static Logger LOGGER = LoggerFactory.getLogger(IOEngine.class);
     
@@ -110,8 +114,8 @@ public abstract class IOEngine<T> {
     
     /**
      * Deletes scheme by name and stops it's task.
-     * @param name
-     * @return 
+     * @param name name of the scheme to delete;
+     * @return result of deletion as boolean value;
      */
     public abstract Boolean deleteScheme(String name);
     
@@ -166,7 +170,7 @@ public abstract class IOEngine<T> {
      * @param schemes array with name of schemes;
      * @return created module registration;
      */
-    protected ModuleRegistration sendRegistration(ModuleWrapper<T> wrapper, ModuleType type, Set<String> schemes) {
+    protected ModuleRegistration sendRegistration(ModuleWrapper<T> wrapper, ModuleType type, Map<String, SchemeInstance> schemes) {
         ModuleRegistration registration = new ModuleRegistration(wrapper.getModuleData().id(), 
                 type, wrapper.getModuleData().protocol(), wrapper.getModuleData().requiredConfigKeys(), 
                 wrapper.getSchemes());
@@ -211,6 +215,10 @@ public abstract class IOEngine<T> {
         throw new CoreException(ACCESS_DENIED, String.format("User %s doesn't have access for current operation.", user));
     }
     
+    protected void sendSchemeStatusUpdate(Set<SchemeStatusUpdate> update) {
+        MessageBus.fire(IOLocalIds.IO_SCHEME_STATUS_UPDATED_TOPIC, update, MessageOptions.Builder.newInstance().header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true").header(LocalHttpCons.L_HTTP_NODE_REGISTERED_TYPE_HEADER, IOLocalIds.IO_SCHEME_STATUS_UPDATED_TYPE_NAME).deliveryNotification().build());
+    }
+    
     private DirectoryCheckAccessRequest processByCache(DirectoryCheckAccessRequest request) {
         if (ExchangerUnit.config.getExchanger().getEnablePermissionCaching()) {
             Instant now = Instant.now();
@@ -253,10 +261,10 @@ public abstract class IOEngine<T> {
         
         private T moduleInstance;
         
-        private Set<String> schemes;
+        private Map<String, SchemeInstance> schemes;
 
         public ModuleWrapper() {
-            schemes = new CopyOnWriteArraySet();
+            schemes = new ConcurrentHashMap();
         }
 
         public ModuleWrapper(IOModule moduleData, T moduleInstance) {
@@ -281,11 +289,11 @@ public abstract class IOEngine<T> {
             this.moduleInstance = moduleInstance;
         }
 
-        public Set<String> getSchemes() {
+        public Map<String, SchemeInstance> getSchemes() {
             return schemes;
         }
 
-        public void setSchemes(Set<String> schemes) {
+        public void setSchemes(Map<String, SchemeInstance> schemes) {
             this.schemes = schemes;
         }
         

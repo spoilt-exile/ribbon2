@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -66,6 +67,7 @@ import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.ModuleRegistration;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
+import tk.freaxsoftware.ribbon2.io.core.SchemeInstance;
 import tk.freaxsoftware.ribbon2.io.core.exporter.Exporter;
 
 /**
@@ -118,7 +120,9 @@ public class ExportEngine extends IOEngine<Exporter>{
             ModuleWrapper<Exporter> wrapper = (ModuleWrapper<Exporter>) exporter;
             LOGGER.info("Processing module {}", wrapper.getModuleData().id());
             List<Scheme> schemes = schemeRepository.findByModuleId(wrapper.getModuleData().id());
-            wrapper.setSchemes(schemes.stream().map(scheme -> scheme.getName()).collect(Collectors.toSet()));
+            Map<String, SchemeInstance> schemeMap = new ConcurrentHashMap();
+            schemes.forEach(scheme -> schemeMap.put(scheme.getName(), scheme.buildInstance()));
+            wrapper.setSchemes(schemeMap);
             ModuleRegistration registration = sendRegistration(wrapper, ModuleType.EXPORT, wrapper.getSchemes());
             MessageBus.addSubscription(registration.schemeExportAssignTopic(), (holder) -> {
                 String username = MessageUtils.getAuthFromHeader(holder);
@@ -215,7 +219,10 @@ public class ExportEngine extends IOEngine<Exporter>{
     @Override
     public IOScheme saveScheme(IOScheme scheme, String username) {
         LOGGER.info("Saving scheme {} with protocol {}", scheme.getName(), scheme.getProtocol());
-        return schemeConverter.convert(schemeRepository.save(schemeConverter.convertBack(scheme)));
+        Scheme saved = schemeRepository.save(schemeConverter.convertBack(scheme));
+        ModuleWrapper<Exporter> wrapper = moduleMap.get(saved.getProtocol());
+        wrapper.getSchemes().put(saved.getName(), saved.buildInstance());
+        return schemeConverter.convert(saved);
     }
 
     @Override
@@ -235,6 +242,8 @@ public class ExportEngine extends IOEngine<Exporter>{
         Scheme existingScheme = schemeRepository.findByName(name);
         if (existingScheme != null) {
             LOGGER.warn("Deleting scheme {}", existingScheme.getName());
+            ModuleWrapper<Exporter> wrapper = moduleMap.get(existingScheme.getProtocol());
+            wrapper.getSchemes().remove(existingScheme.getName());
             return existingScheme.delete();
         }
         LOGGER.error("Scheme by name {} not found", name);
@@ -269,6 +278,8 @@ public class ExportEngine extends IOEngine<Exporter>{
         }
         op.accept(scheme.getExportList());
         scheme.save();
+        ModuleWrapper<Exporter> wrapper = moduleMap.get(scheme.getProtocol());
+        wrapper.getSchemes().put(scheme.getName(), scheme.buildInstance());
         return true;
     }
     

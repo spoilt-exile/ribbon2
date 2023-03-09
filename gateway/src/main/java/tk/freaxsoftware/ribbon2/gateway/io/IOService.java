@@ -18,21 +18,22 @@
  */
 package tk.freaxsoftware.ribbon2.gateway.io;
 
-import java.util.List;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.annotation.Receive;
 import tk.freaxsoftware.extras.bus.bridge.http.TypeResolver;
+import tk.freaxsoftware.ribbon2.gateway.io.data.IOModuleScheme;
 import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
 import tk.freaxsoftware.ribbon2.io.core.ModuleRegistration;
+import tk.freaxsoftware.ribbon2.io.core.SchemeInstance;
+import tk.freaxsoftware.ribbon2.io.core.SchemeStatusUpdate;
 
 /**
  * Service for handling IO modules messages (singleton).
@@ -44,12 +45,11 @@ public class IOService {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(IOService.class);
     
-    private final List<ModuleRegistration> registrations = new CopyOnWriteArrayList<>();
-    
-    private final Map<String, Set<String>> exportDirectories = new ConcurrentHashMap();
+    private final Set<ModuleRegistration> registrations = new CopyOnWriteArraySet<>();
     
     private IOService() {
         TypeResolver.register(IOLocalIds.IO_REGISTER_EXPORT_DIRS_TYPE_NAME, IOLocalIds.IO_REGISTER_EXPORT_DIRS_TYPE_TOKEN);
+        TypeResolver.register(IOLocalIds.IO_SCHEME_STATUS_UPDATED_TYPE_NAME, IOLocalIds.IO_SCHEME_STATUS_UPDATED_TYPE_TOKEN);
     }
     
     @Receive(IOLocalIds.IO_REGISTER_TOPIC)
@@ -59,24 +59,23 @@ public class IOService {
         registrations.add(registration);
     }
     
-    @Receive(IOLocalIds.IO_REGISTER_EXPORT_DIRS)
-    public void registerExportDirs(MessageHolder<Map<String, Set<String>>> dirsHolder) {
-        Map<String, Set<String>> exportDirMap = dirsHolder.getContent();
-        for (Entry<String, Set<String>> dirEntry: exportDirMap.entrySet()) {
-            LOGGER.info("Adding export record for dir {} on schemes {}", dirEntry.getKey(), dirEntry.getValue());
-            if (!exportDirectories.containsKey(dirEntry.getKey())) {
-                exportDirectories.put(dirEntry.getKey(), new CopyOnWriteArraySet());
+    @Receive(IOLocalIds.IO_SCHEME_STATUS_UPDATED_TOPIC)
+    public void schemeStatusUpdated(MessageHolder<Set<SchemeStatusUpdate>> updatesHolder) {
+        for (SchemeStatusUpdate statusUpdate: updatesHolder.getContent()) {
+            Optional<ModuleRegistration> regOpt = registrations.stream()
+                    .filter(reg -> Objects.equals(reg.getId(), statusUpdate.getId()))
+                    .findFirst();
+            if (regOpt.isPresent()) {
+                regOpt.get().getSchemes().put(statusUpdate.getScheme(), statusUpdate.buildInstance());
+            } else {
+                LOGGER.warn("Skip update status for scheme {}, protocol {}, type {} cause registration not found.", 
+                        statusUpdate.getScheme(), statusUpdate.getProtocol(), statusUpdate.getType());
             }
-            exportDirectories.get(dirEntry.getKey()).addAll(dirEntry.getValue());
         }
     }
 
-    public List<ModuleRegistration> getRegistrations() {
+    public Set<ModuleRegistration> getRegistrations() {
         return registrations;
-    }
-
-    public Map<String, Set<String>> getExportDirectories() {
-        return exportDirectories;
     }
     
     public ModuleRegistration getById(String id) {
@@ -90,21 +89,16 @@ public class IOService {
         return registration;
     }
     
-    public void removeSchemeFromExports(String schemeName) {
-        exportDirectories.forEach((dirName, exports) -> exports.remove(schemeName));
-    }
-    
-    public void assignSchemeToExports(String dirName, String schemeName) {
-        if (!exportDirectories.containsKey(dirName)) {
-            exportDirectories.put(dirName, new CopyOnWriteArraySet());
+    public Set<IOModuleScheme> getSchemesByExportDirectiry(String directory) {
+        Set<IOModuleScheme> schemes = new HashSet();
+        for (ModuleRegistration registration: registrations) {
+            for (Entry<String, SchemeInstance> entry: registration.getSchemes().entrySet()) {
+                if (entry.getValue().getExportDirectories().contains(directory)) {
+                    schemes.add(new IOModuleScheme(registration, entry.getKey(), entry.getValue()));
+                }
+            }
         }
-        exportDirectories.get(dirName).add(schemeName);
-    }
-    
-    public void dismuissSchemeFromExports(String dirName, String schemeName) {
-        if (exportDirectories.containsKey(dirName)) {
-            exportDirectories.get(dirName).remove(schemeName);
-        }
+        return schemes;
     }
     
     public static IOService getInstance() {
