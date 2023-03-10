@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tk.freaxsoftware.ribbon2.io.core.IOExceptionCodes;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.InputOutputException;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportMessage;
@@ -62,7 +63,8 @@ public class PlainImportSource implements ImportSource {
                 messages.add(new PlainImportMessage(path));
             });
         } catch (IOException ex) {
-            LOGGER.error("IO exceptio on import", ex);
+            LOGGER.error("IO exception on import", ex);
+            throw new InputOutputException(IOExceptionCodes.IMPORT_CHECK_ERROR, "IO exception on import", ex);
         }
         return messages;
     }
