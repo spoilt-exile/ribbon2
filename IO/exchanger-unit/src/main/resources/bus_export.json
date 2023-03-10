@@ -27,7 +27,7 @@
         ],
         "additionalSubscriptions": [
             "Ribbon.IO.Register",
-            "Ribbon.IO.RegisterExportDirectories"
+            "Ribbon.IO.SchemeStatusUpdated"
         ]
     },
     "storage": {
