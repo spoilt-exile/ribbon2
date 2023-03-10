@@ -25,7 +25,8 @@
             "Ribbon.Global.Notification.DirectoryDeleted"
         ],
         "additionalSubscriptions": [
-            "Ribbon.IO.Register"
+            "Ribbon.IO.Register",
+            "Ribbon.IO.SchemeStatusUpdated"
         ]
     },
     "storage": {
