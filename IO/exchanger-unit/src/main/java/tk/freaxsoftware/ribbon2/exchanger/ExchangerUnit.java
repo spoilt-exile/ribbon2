@@ -27,7 +27,6 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
-import tk.freaxsoftware.extras.bus.bridge.http.TypeResolver;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 import tk.freaxsoftware.ribbon2.core.config.EnvironmentOverrider;
@@ -42,7 +41,6 @@ import tk.freaxsoftware.ribbon2.exchanger.repository.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.ExportQueueRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.RegisterRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.SchemeRepository;
-import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
 
 /**
@@ -76,7 +74,6 @@ public class ExchangerUnit {
         config = gson.fromJson(IOUtils.toString(ExchangerUnitConfig.class.getClassLoader().getResourceAsStream("exchangerconfig.json"), Charset.defaultCharset()), ExchangerUnitConfig.class);
         processConfig(config);
         LOGGER.info("Exchanger started, config: {}", config);
-        TypeResolver.register(IOLocalIds.IO_REGISTER_EXPORT_DIRS_TYPE_NAME, IOLocalIds.IO_REGISTER_EXPORT_DIRS_TYPE_TOKEN);
         
         Init.init(config);
         if (config.getExchanger().getType() == ModuleType.IMPORT) {

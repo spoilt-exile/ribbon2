@@ -48,7 +48,6 @@ public class IOService {
     private final Set<ModuleRegistration> registrations = new CopyOnWriteArraySet<>();
     
     private IOService() {
-        TypeResolver.register(IOLocalIds.IO_REGISTER_EXPORT_DIRS_TYPE_NAME, IOLocalIds.IO_REGISTER_EXPORT_DIRS_TYPE_TOKEN);
         TypeResolver.register(IOLocalIds.IO_SCHEME_STATUS_UPDATED_TYPE_NAME, IOLocalIds.IO_SCHEME_STATUS_UPDATED_TYPE_TOKEN);
     }
     

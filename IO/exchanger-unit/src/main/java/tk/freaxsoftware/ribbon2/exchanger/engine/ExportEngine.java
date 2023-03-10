@@ -361,6 +361,7 @@ public class ExportEngine extends IOEngine<Exporter>{
             statusUpdates.add(update);
             exportMessage.setError(ex.getMessage());
             exportMessage.save();
+            errorSchemes.add(scheme.getName());
             //TODO: add sending service message to admin on RAISE_ADM_ERROR
         }
         

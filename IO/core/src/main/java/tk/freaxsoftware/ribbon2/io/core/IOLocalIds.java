@@ -19,7 +19,6 @@
 package tk.freaxsoftware.ribbon2.io.core;
 
 import com.google.gson.reflect.TypeToken;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -52,24 +51,6 @@ public class IOLocalIds {
      * Type token for set of scheme status updates.
      */
     public final static TypeToken IO_SCHEME_STATUS_UPDATED_TYPE_TOKEN = new TypeToken<Set<SchemeStatusUpdate>>() {};
-    
-    /**
-     * Topic for sending list of export directories on gateway.
-     * @deprecated 
-     */
-    public final static String IO_REGISTER_EXPORT_DIRS = "Ribbon.IO.RegisterExportDirectories";
-    
-    /**
-     * Type name for export directories.
-     * @deprecated 
-     */
-    public final static String IO_REGISTER_EXPORT_DIRS_TYPE_NAME = "ExportDirsMap";
-    
-    /**
-     * Type token for export directories.
-     * @deprecated
-     */
-    public final static TypeToken IO_REGISTER_EXPORT_DIRS_TYPE_TOKEN = new TypeToken<Map<String, Set<String>>>() {};
     
     /**
      * Scheme create/update topic.
