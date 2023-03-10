@@ -54,6 +54,7 @@ import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME
 import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
 import tk.freaxsoftware.ribbon2.exchanger.ExchangerUnit;
 import tk.freaxsoftware.ribbon2.exchanger.converters.SchemeConverter;
+import static tk.freaxsoftware.ribbon2.exchanger.engine.IOEngine.buildStatusUpdateNotification;
 import static tk.freaxsoftware.ribbon2.exchanger.engine.IOEngine.sendSchemeStatusUpdate;
 import tk.freaxsoftware.ribbon2.exchanger.engine.export.DefaultExportMessage;
 import tk.freaxsoftware.ribbon2.exchanger.engine.export.TemplateService;
@@ -289,6 +290,8 @@ public class ExportEngine extends IOEngine<Exporter>{
         private final SchemeConverter schemeConverter;
         
         private final TemplateService templateService;
+        
+        private final Set<String> errorSchemes = new HashSet();
 
         public QueueTask(SchemeRepository schemeRepository, 
                 ExportQueueRepository exportMessageRepository, 
@@ -316,26 +319,32 @@ public class ExportEngine extends IOEngine<Exporter>{
             Map<String, Scheme> schemeMap = schemes.stream().collect(Collectors.toMap(Scheme::getName, Function.identity()));
             Set<ExportQueue> exportQueue = exportMessageRepository.findBySchemesAndDate(exportSchemes, ZonedDateTime.now());
             LOGGER.info("Export queue run: protocols {}, schemes {}, size {}", exportProtocols, exportSchemes, exportQueue.size());
+            Set<SchemeStatusUpdate> statusUpdates = new HashSet();
             for (ExportQueue exportMessage: exportQueue) {
-                innerHandle(exportMessage, schemeMap.get(exportMessage.getScheme()));
+                innerHandle(statusUpdates, exportMessage, schemeMap.get(exportMessage.getScheme()));
+            }
+            if (!statusUpdates.isEmpty()) {
+                sendSchemeStatusUpdate(statusUpdates);
             }
         }
         
-        private void innerHandle(ExportQueue exportMessage, Scheme scheme) {
+        private void innerHandle(Set<SchemeStatusUpdate> statusUpdates, ExportQueue exportMessage, Scheme scheme) {
             ErrorHandling errorHandling = scheme.errorHandling();
             ModuleWrapper<Exporter> module = moduleMap.get(scheme.getProtocol());
-            Set<SchemeStatusUpdate> statusUpdates = new HashSet();
             try {
                 innerExport(module.getModuleInstance(), exportMessage, scheme);
+                if (errorSchemes.contains(scheme.getName())) {
+                    SchemeInstance instance = scheme.buildInstance();
+                    SchemeStatusUpdate update = buildStatusUpdateNotification(module, instance, ModuleType.EXPORT, scheme.getName());
+                    statusUpdates.add(update);
+                    errorSchemes.remove(scheme.getName());
+                }
             } catch (Exception ex) {
                 LOGGER.error("Error during exporting message {} : {} by scheme {} protocol {} in dir {}", 
                         exportMessage.getMessage().getUid(), exportMessage.getMessage().getHeader(),
                         exportMessage.getScheme(), exportMessage.getProtocol(), exportMessage.getExportDirectory());
                 LOGGER.error("Error: ", ex);
                 errorHandle(statusUpdates, module, scheme, exportMessage, ex, errorHandling);
-            }
-            if (!statusUpdates.isEmpty()) {
-                sendSchemeStatusUpdate(statusUpdates);
             }
         }
         
@@ -347,6 +356,7 @@ public class ExportEngine extends IOEngine<Exporter>{
             SchemeInstance instance = scheme.buildInstance();
             instance.setStatus(SchemeInstance.Status.ERROR);
             instance.setErrorDescription(ex.getMessage());
+            module.getSchemes().put(scheme.getName(), instance);
             SchemeStatusUpdate update = buildStatusUpdateNotification(module, instance, ModuleType.EXPORT, scheme.getName());
             statusUpdates.add(update);
             exportMessage.setError(ex.getMessage());
