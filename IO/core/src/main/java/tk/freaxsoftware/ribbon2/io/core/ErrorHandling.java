@@ -18,6 +18,11 @@
  */
 package tk.freaxsoftware.ribbon2.io.core;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
  * Enum with options for error handling strategy.
  * @author Stanislav Nepochatov
@@ -41,5 +46,18 @@ public enum ErrorHandling {
      * No error raised. All queues will be cleared of messages. For tests and debugging.
      */
     DROP_ERROR;
+    
+    public final static String GENERAL_ERROR_HANDLING_KEY = "generalErrorHandling";
+    
+    /**
+     * Get error handling strategy from config.
+     * @param config scheme config;
+     * @return error hadnling strategy from config or default value;
+     */
+    public static ErrorHandling errorHandling(Map<String, Object> config) {
+        String rawStrategy = (String) config.getOrDefault(GENERAL_ERROR_HANDLING_KEY, ErrorHandling.RAISE_ERROR.name());
+        Set<String> currentStrategies = Arrays.stream(ErrorHandling.values()).map(err -> err.name()).collect(Collectors.toSet());
+        return currentStrategies.contains(rawStrategy) ? ErrorHandling.valueOf(rawStrategy) : ErrorHandling.RAISE_ERROR;
+    }
     
 }

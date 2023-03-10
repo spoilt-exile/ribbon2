@@ -46,11 +46,13 @@ import tk.freaxsoftware.ribbon2.exchanger.entity.Scheme;
 import tk.freaxsoftware.ribbon2.exchanger.repository.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.RegisterRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.SchemeRepository;
+import tk.freaxsoftware.ribbon2.io.core.ErrorHandling;
 import tk.freaxsoftware.ribbon2.io.core.IOExceptionCodes;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.InputOutputException;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
 import tk.freaxsoftware.ribbon2.io.core.SchemeInstance;
+import tk.freaxsoftware.ribbon2.io.core.SchemeStatusUpdate;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportMessage;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportSource;
 import tk.freaxsoftware.ribbon2.io.core.importer.Importer;
@@ -129,7 +131,7 @@ public class ImportEngine extends IOEngine<Importer> {
         if (schemeMap.containsKey(saved.getName())) {
             stopScheme(wrapper, saved);
         }
-        launchScheme(wrapper, saved);
+        launchSchemeAndSendUpdate(wrapper, saved);
         return schemeConverter.convert(saved);
     }
 
@@ -151,7 +153,7 @@ public class ImportEngine extends IOEngine<Importer> {
         if (existingScheme != null) {
             LOGGER.warn("Deleting scheme {}", existingScheme.getName());
             ModuleWrapper<Importer> wrapper = moduleMap.get(existingScheme.getProtocol());
-            stopScheme(wrapper, existingScheme);
+            stopSchemeAndSendUpdate(wrapper, existingScheme);
             return existingScheme.delete();
         }
         LOGGER.error("Scheme by name {} not found", name);
@@ -159,22 +161,33 @@ public class ImportEngine extends IOEngine<Importer> {
                 String.format("Scheme by name %s not found!", name));
     }
     
-    private void launchScheme(ModuleWrapper<Importer> wrapper, Scheme scheme) {
+    private SchemeInstance launchScheme(ModuleWrapper<Importer> wrapper, Scheme scheme) {
         LOGGER.info("Launching import for scheme {} by module {}", scheme.getName(), wrapper.getModuleData().id());
         ImportSource source = wrapper.getModuleInstance().createSource(schemeConverter.convert(scheme));
-        Future future = scheduler.scheduleAtFixedRate(new ImportTask(source, registerRepository, directoryRepository), 0, 
+        SchemeInstance instance = scheme.buildInstance();
+        Future future = scheduler.scheduleAtFixedRate(new ImportTask(instance, source, registerRepository, directoryRepository), 0, 
                 (long) scheme.getConfig().get(GENERAL_TIMEOUT_KEY), TimeUnit.SECONDS);
         schemeMap.put(scheme.getName(), future);
-        SchemeInstance instance = scheme.buildInstance();
         wrapper.getSchemes().put(scheme.getName(), instance);
-        sendSchemeStatusUpdate((Set) Sets.newHashSet(instance));
+        return instance;
     }
     
-    private void stopScheme(ModuleWrapper<Importer> wrapper, Scheme scheme) {
+    private void launchSchemeAndSendUpdate(ModuleWrapper<Importer> wrapper, Scheme scheme) {
+        SchemeInstance instance = launchScheme(wrapper, scheme);
+        sendSchemeStatusUpdate(Sets.newHashSet(buildStatusUpdateNotification(wrapper, instance, type, scheme.getName())));
+    }
+    
+    private SchemeInstance stopScheme(ModuleWrapper<Importer> wrapper, Scheme scheme) {
         LOGGER.warn("Stopping scheme {} current task.", scheme.getName());
         schemeMap.get(scheme.getName()).cancel(true);
         schemeMap.remove(scheme.getName());
-        wrapper.getSchemes().remove(scheme.getName());
+        return wrapper.getSchemes().remove(scheme.getName());
+    }
+    
+    private void stopSchemeAndSendUpdate(ModuleWrapper<Importer> wrapper, Scheme scheme) {
+        SchemeInstance instance = stopScheme(wrapper, scheme);
+        instance.setStatus(SchemeInstance.Status.DELETED);
+        sendSchemeStatusUpdate(Sets.newHashSet(buildStatusUpdateNotification(wrapper, instance, type, scheme.getName())));
     }
     
     private Boolean isConfigValid(Map<String,Object> config, String[] requiredConfigKeys) {
@@ -194,14 +207,17 @@ public class ImportEngine extends IOEngine<Importer> {
      */
     private static class ImportTask implements Runnable {
         
+        private final SchemeInstance instance;
+        
         private final ImportSource importSource;
         
         private final RegisterRepository registerRepository;
         
         private final DirectoryRepository directoryRepository;
 
-        public ImportTask(ImportSource importSource, RegisterRepository registerRepository, 
+        public ImportTask(SchemeInstance instance, ImportSource importSource, RegisterRepository registerRepository, 
                 DirectoryRepository directoryRepository) {
+            this.instance = instance;
             this.importSource = importSource;
             this.registerRepository = registerRepository;
             this.directoryRepository = directoryRepository;
@@ -233,12 +249,8 @@ public class ImportEngine extends IOEngine<Importer> {
                                 importedMessage.getUid(), message.getHeader(), importSource.getScheme().getId(), 
                                 importSource.getScheme().getName(), importedMessage.getDirectories());
                     } catch (InputOutputException ex) {
-                        LOGGER.error("Error on processing message {} during import of scheme {} for module {}",
-                                message.getId(),
-                                importSource.getScheme().getName(), importSource.getScheme().getId());
-                        LOGGER.error("Stacktrace:", ex);
-                        message.markAsRead();
                         importSource.onError(message, ex);
+                        throw ex;
                     }
                 }
                 importSource.close();
@@ -246,7 +258,23 @@ public class ImportEngine extends IOEngine<Importer> {
                 LOGGER.error("Error on processing import of scheme {} for module {}", 
                         importSource.getScheme().getName(), importSource.getScheme().getId());
                 LOGGER.error("Stacktrace:", ex);
+                errorHandle(importSource.getScheme(), ex);
             }
+        }
+        
+        private void errorHandle(IOScheme scheme, Exception ex) {
+            ErrorHandling errorHandling = ErrorHandling.errorHandling(scheme.getConfig());
+            if (errorHandling == ErrorHandling.DROP_ERROR) {
+                return;
+            }
+            instance.setStatus(SchemeInstance.Status.ERROR);
+            instance.setErrorDescription(ex.getMessage());
+            SchemeStatusUpdate update = new SchemeStatusUpdate(scheme.getId(), 
+                    scheme.getType(), scheme.getProtocol(), scheme.getName(), 
+                    instance.getStatus(), instance.getErrorDescription(), 
+                    instance.getRaisingAdminError(), null);
+            sendSchemeStatusUpdate(Sets.newHashSet(update));
+            //TODO: add sending service message to admin on RAISE_ADM_ERROR
         }
         
         private MessageModel processMessage(IOScheme scheme, ImportMessage message) {

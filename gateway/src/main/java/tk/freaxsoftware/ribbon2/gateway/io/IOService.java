@@ -66,7 +66,11 @@ public class IOService {
                     .filter(reg -> Objects.equals(reg.getId(), statusUpdate.getId()))
                     .findFirst();
             if (regOpt.isPresent()) {
-                regOpt.get().getSchemes().put(statusUpdate.getScheme(), statusUpdate.buildInstance());
+                if (statusUpdate.getStatus() == SchemeInstance.Status.DELETED) {
+                    regOpt.get().getSchemes().remove(statusUpdate.getScheme());
+                } else {
+                    regOpt.get().getSchemes().put(statusUpdate.getScheme(), statusUpdate.buildInstance());
+                }
             } else {
                 LOGGER.warn("Skip update status for scheme {}, protocol {}, type {} cause registration not found.", 
                         statusUpdate.getScheme(), statusUpdate.getProtocol(), statusUpdate.getType());
