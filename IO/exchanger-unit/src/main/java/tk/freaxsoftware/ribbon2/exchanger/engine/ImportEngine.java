@@ -41,6 +41,7 @@ import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME_NOT_FOUND;
 import tk.freaxsoftware.ribbon2.exchanger.ExchangerUnit;
 import tk.freaxsoftware.ribbon2.exchanger.converters.SchemeConverter;
+import static tk.freaxsoftware.ribbon2.exchanger.engine.IOEngine.sendSchemeStatusUpdate;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Register;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Scheme;
 import tk.freaxsoftware.ribbon2.exchanger.repository.DirectoryRepository;
@@ -254,6 +255,11 @@ public class ImportEngine extends IOEngine<Importer> {
                     }
                 }
                 importSource.close();
+                if (instance.getStatus() == SchemeInstance.Status.ERROR) {
+                    instance.setErrorDescription(null);
+                    instance.setStatus(SchemeInstance.Status.OK);
+                    sendUpdate(importSource.getScheme());
+                }
             } catch (Exception ex) {
                 LOGGER.error("Error on processing import of scheme {} for module {}", 
                         importSource.getScheme().getName(), importSource.getScheme().getId());
@@ -269,12 +275,16 @@ public class ImportEngine extends IOEngine<Importer> {
             }
             instance.setStatus(SchemeInstance.Status.ERROR);
             instance.setErrorDescription(ex.getMessage());
+            sendUpdate(scheme);
+            //TODO: add sending service message to admin on RAISE_ADM_ERROR
+        }
+        
+        private void sendUpdate(IOScheme scheme) {
             SchemeStatusUpdate update = new SchemeStatusUpdate(scheme.getId(), 
                     scheme.getType(), scheme.getProtocol(), scheme.getName(), 
                     instance.getStatus(), instance.getErrorDescription(), 
                     instance.getRaisingAdminError(), null);
             sendSchemeStatusUpdate(Sets.newHashSet(update));
-            //TODO: add sending service message to admin on RAISE_ADM_ERROR
         }
         
         private MessageModel processMessage(IOScheme scheme, ImportMessage message) {
