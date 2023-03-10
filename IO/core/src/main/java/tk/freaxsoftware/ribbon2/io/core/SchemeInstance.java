@@ -120,7 +120,8 @@ public class SchemeInstance {
     
     public static enum Status {
         OK,
-        ERROR;
+        ERROR,
+        DELETED;
     }
     
 }

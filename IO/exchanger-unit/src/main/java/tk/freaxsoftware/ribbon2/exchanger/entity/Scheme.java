@@ -30,7 +30,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import static tk.freaxsoftware.ribbon2.exchanger.engine.IOEngine.GENERAL_ERROR_HANDLING_KEY;
 import tk.freaxsoftware.ribbon2.io.core.ErrorHandling;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
 import tk.freaxsoftware.ribbon2.io.core.SchemeInstance;
@@ -132,7 +131,15 @@ public class Scheme extends Model implements Serializable {
      * @return new scheme instance;
      */
     public SchemeInstance buildInstance() {
-        Boolean raisingAdminError = ErrorHandling.valueOf((String) config.getOrDefault(GENERAL_ERROR_HANDLING_KEY, ErrorHandling.RAISE_ERROR.name())) == ErrorHandling.RAISE_ADM_ERROR;
+        Boolean raisingAdminError = errorHandling() == ErrorHandling.RAISE_ADM_ERROR;
         return type == ModuleType.EXPORT ? new SchemeInstance(raisingAdminError, new CopyOnWriteArraySet(exportList)) : new SchemeInstance(raisingAdminError);
+    }
+    
+    /**
+     * Gets current scheme error handling strategy from config. 
+     * @return parsed error handling strategy from config or default value;
+     */
+    public ErrorHandling errorHandling() {
+        return ErrorHandling.errorHandling(config);
     }
 }

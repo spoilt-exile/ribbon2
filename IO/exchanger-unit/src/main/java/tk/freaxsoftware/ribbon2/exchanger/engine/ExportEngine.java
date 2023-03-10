@@ -19,6 +19,7 @@
 package tk.freaxsoftware.ribbon2.exchanger.engine;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import freemarker.template.TemplateException;
 import java.io.IOException;
 import java.time.ZonedDateTime;
@@ -43,7 +44,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
-import tk.freaxsoftware.extras.bus.bridge.http.LocalHttpCons;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
@@ -54,6 +54,7 @@ import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME
 import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
 import tk.freaxsoftware.ribbon2.exchanger.ExchangerUnit;
 import tk.freaxsoftware.ribbon2.exchanger.converters.SchemeConverter;
+import static tk.freaxsoftware.ribbon2.exchanger.engine.IOEngine.sendSchemeStatusUpdate;
 import tk.freaxsoftware.ribbon2.exchanger.engine.export.DefaultExportMessage;
 import tk.freaxsoftware.ribbon2.exchanger.engine.export.TemplateService;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Directory;
@@ -63,11 +64,13 @@ import tk.freaxsoftware.ribbon2.exchanger.repository.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.ExportQueueRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.RegisterRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.SchemeRepository;
+import tk.freaxsoftware.ribbon2.io.core.ErrorHandling;
 import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.ModuleRegistration;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
 import tk.freaxsoftware.ribbon2.io.core.SchemeInstance;
+import tk.freaxsoftware.ribbon2.io.core.SchemeStatusUpdate;
 import tk.freaxsoftware.ribbon2.io.core.exporter.Exporter;
 
 /**
@@ -138,7 +141,6 @@ public class ExportEngine extends IOEngine<Exporter>{
             });
             moduleMap.put(wrapper.getModuleData().protocol(), wrapper);
         }
-        sendExportDirectoriesRegistration();
         registerEmbargoProperty();
         MessageBus.addSubscription(MessageModel.NOTIFICATION_MESSAGE_CREATED, 
                 holder -> processExportMessage((MessageModel) holder.getContent()));
@@ -163,25 +165,6 @@ public class ExportEngine extends IOEngine<Exporter>{
         propertyRegistrationRequest.setPropertyTypes(Arrays.asList(new MessagePropertyRegistrationRequest.Entry(EXPORT_EMBARGO_PROPERTY_TYPE, EXPORT_EMBARGO_PROPERTY_DESC)));
         MessageBus.fire(MessagePropertyRegistrationRequest.CALL_REGISTER_PROPERTY, propertyRegistrationRequest, 
                 MessageOptions.Builder.newInstance().deliveryNotification()
-                        .async().pointToPoint().build());
-    }
-    
-    private void sendExportDirectoriesRegistration() {
-        List<Scheme> schemes = schemeRepository.findAll();
-        Set<String> moduleIds = modules.stream().map(md -> md.getModuleData().id()).collect(Collectors.toSet());
-        Map<String, Set<String>> exportDirMap = new HashMap();
-        Set<String> dirNames = schemes.stream().flatMap(sch -> sch.getExportList().stream()).collect(Collectors.toSet());
-        for (String dirName: dirNames) {
-            Set<String> dirSchemes = schemes.stream()
-                    .filter(sch -> sch.getExportList().contains(dirName) && moduleIds.contains(sch.getModuleId()))
-                    .map(dirSchema -> dirSchema.getName())
-                    .collect(Collectors.toSet());
-            exportDirMap.put(dirName, dirSchemes);
-        }
-        MessageBus.fire(IOLocalIds.IO_REGISTER_EXPORT_DIRS, exportDirMap, 
-                MessageOptions.Builder.newInstance()
-                        .header(LocalHttpCons.L_HTTP_NODE_REGISTERED_TYPE_HEADER, IOLocalIds.IO_REGISTER_EXPORT_DIRS_TYPE_NAME)
-                        .deliveryNotification()
                         .async().pointToPoint().build());
     }
     
@@ -221,7 +204,9 @@ public class ExportEngine extends IOEngine<Exporter>{
         LOGGER.info("Saving scheme {} with protocol {}", scheme.getName(), scheme.getProtocol());
         Scheme saved = schemeRepository.save(schemeConverter.convertBack(scheme));
         ModuleWrapper<Exporter> wrapper = moduleMap.get(saved.getProtocol());
-        wrapper.getSchemes().put(saved.getName(), saved.buildInstance());
+        SchemeInstance instance = saved.buildInstance();
+        wrapper.getSchemes().put(saved.getName(), instance);
+        sendSchemeStatusUpdate(Sets.newHashSet(buildStatusUpdateNotification(wrapper, instance, type, scheme.getName())));
         return schemeConverter.convert(saved);
     }
 
@@ -243,7 +228,10 @@ public class ExportEngine extends IOEngine<Exporter>{
         if (existingScheme != null) {
             LOGGER.warn("Deleting scheme {}", existingScheme.getName());
             ModuleWrapper<Exporter> wrapper = moduleMap.get(existingScheme.getProtocol());
+            SchemeInstance instance = existingScheme.buildInstance();
             wrapper.getSchemes().remove(existingScheme.getName());
+            instance.setStatus(SchemeInstance.Status.DELETED);
+            sendSchemeStatusUpdate(Sets.newHashSet(buildStatusUpdateNotification(wrapper, instance, type, existingScheme.getName())));
             return existingScheme.delete();
         }
         LOGGER.error("Scheme by name {} not found", name);
@@ -279,7 +267,9 @@ public class ExportEngine extends IOEngine<Exporter>{
         op.accept(scheme.getExportList());
         scheme.save();
         ModuleWrapper<Exporter> wrapper = moduleMap.get(scheme.getProtocol());
-        wrapper.getSchemes().put(scheme.getName(), scheme.buildInstance());
+        SchemeInstance instance = scheme.buildInstance();
+        wrapper.getSchemes().put(scheme.getName(), instance);
+        sendSchemeStatusUpdate(Sets.newHashSet(buildStatusUpdateNotification(wrapper, instance, type, scheme.getName())));
         return true;
     }
     
@@ -332,16 +322,36 @@ public class ExportEngine extends IOEngine<Exporter>{
         }
         
         private void innerHandle(ExportQueue exportMessage, Scheme scheme) {
+            ErrorHandling errorHandling = scheme.errorHandling();
+            ModuleWrapper<Exporter> module = moduleMap.get(scheme.getProtocol());
+            Set<SchemeStatusUpdate> statusUpdates = new HashSet();
             try {
-                innerExport(moduleMap.get(exportMessage.getProtocol()).getModuleInstance(), exportMessage, scheme);
+                innerExport(module.getModuleInstance(), exportMessage, scheme);
             } catch (Exception ex) {
                 LOGGER.error("Error during exporting message {} : {} by scheme {} protocol {} in dir {}", 
                         exportMessage.getMessage().getUid(), exportMessage.getMessage().getHeader(),
                         exportMessage.getScheme(), exportMessage.getProtocol(), exportMessage.getExportDirectory());
                 LOGGER.error("Error: ", ex);
-                exportMessage.setError(ex.getMessage());
-                exportMessage.save();
+                errorHandle(statusUpdates, module, scheme, exportMessage, ex, errorHandling);
             }
+            if (!statusUpdates.isEmpty()) {
+                sendSchemeStatusUpdate(statusUpdates);
+            }
+        }
+        
+        private void errorHandle(Set<SchemeStatusUpdate> statusUpdates, ModuleWrapper<Exporter> module, Scheme scheme, ExportQueue exportMessage, Exception ex, ErrorHandling errorHandling) {
+            if (errorHandling == ErrorHandling.DROP_ERROR) {
+                exportMessage.delete();
+                return;
+            }
+            SchemeInstance instance = scheme.buildInstance();
+            instance.setStatus(SchemeInstance.Status.ERROR);
+            instance.setErrorDescription(ex.getMessage());
+            SchemeStatusUpdate update = buildStatusUpdateNotification(module, instance, ModuleType.EXPORT, scheme.getName());
+            statusUpdates.add(update);
+            exportMessage.setError(ex.getMessage());
+            exportMessage.save();
+            //TODO: add sending service message to admin on RAISE_ADM_ERROR
         }
         
         private void innerExport(Exporter exporter, ExportQueue exportMessage, Scheme scheme) throws IOException, TemplateException {

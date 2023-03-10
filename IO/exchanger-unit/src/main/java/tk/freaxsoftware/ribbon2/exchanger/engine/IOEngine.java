@@ -44,6 +44,7 @@ import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.ACCESS_DE
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.CALL_ERROR;
 import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
 import tk.freaxsoftware.ribbon2.exchanger.ExchangerUnit;
+import tk.freaxsoftware.ribbon2.io.core.ErrorHandling;
 import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
@@ -61,11 +62,11 @@ import tk.freaxsoftware.ribbon2.io.core.importer.Importer;
  */
 public abstract class IOEngine<T> {
     
-    public static final String GENERAL_ERROR_HANDLING_KEY = "generalErrorHandling";
-    
     private final static Logger LOGGER = LoggerFactory.getLogger(IOEngine.class);
     
     protected List<ModuleWrapper<T>> modules  = new ArrayList<>();
+    
+    protected final ModuleType type;
     
     private final Map<String, Instant> permissionCache;
     
@@ -75,6 +76,7 @@ public abstract class IOEngine<T> {
      * @param classes list of module classes from config;
      */
     public IOEngine(ModuleType type, String[] classes) {
+        this.type = type;
         if (ExchangerUnit.config.getExchanger().getEnablePermissionCaching()) {
             permissionCache = new ConcurrentHashMap<>();
         } else {
@@ -215,7 +217,14 @@ public abstract class IOEngine<T> {
         throw new CoreException(ACCESS_DENIED, String.format("User %s doesn't have access for current operation.", user));
     }
     
-    protected void sendSchemeStatusUpdate(Set<SchemeStatusUpdate> update) {
+    protected static SchemeStatusUpdate buildStatusUpdateNotification(ModuleWrapper<?> wrapper, SchemeInstance instance, ModuleType modType, String schemeName) {
+        return new SchemeStatusUpdate(wrapper.getModuleData().id(), 
+                modType, wrapper.getModuleData().protocol(), schemeName, 
+                instance.getStatus(), instance.getErrorDescription(), 
+                instance.getRaisingAdminError(), instance.getExportDirectories());
+    }
+    
+    protected static void sendSchemeStatusUpdate(Set<SchemeStatusUpdate> update) {
         MessageBus.fire(IOLocalIds.IO_SCHEME_STATUS_UPDATED_TOPIC, update, MessageOptions.Builder.newInstance().header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true").header(LocalHttpCons.L_HTTP_NODE_REGISTERED_TYPE_HEADER, IOLocalIds.IO_SCHEME_STATUS_UPDATED_TYPE_NAME).deliveryNotification().build());
     }
     

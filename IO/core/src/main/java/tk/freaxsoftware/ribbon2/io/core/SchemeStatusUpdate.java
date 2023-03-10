@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.io.core;
 
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -41,6 +42,27 @@ public class SchemeStatusUpdate {
     private Boolean raisingAdminError;
     
     private Set<String> exportDirectories;
+
+    public SchemeStatusUpdate() {
+    }
+
+    public SchemeStatusUpdate(String id, 
+            ModuleType type, 
+            String protocol, 
+            String scheme, 
+            SchemeInstance.Status status, 
+            String errorDescription, 
+            Boolean raisingAdminError, 
+            Set<String> exportDirectories) {
+        this.id = id;
+        this.type = type;
+        this.protocol = protocol;
+        this.scheme = scheme;
+        this.status = status;
+        this.errorDescription = errorDescription;
+        this.raisingAdminError = raisingAdminError;
+        this.exportDirectories = exportDirectories;
+    }
 
     public String getId() {
         return id;
@@ -108,5 +130,33 @@ public class SchemeStatusUpdate {
     
     public SchemeInstance buildInstance() {
         return new SchemeInstance(status, errorDescription, raisingAdminError, exportDirectories);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 61 * hash + Objects.hashCode(this.id);
+        hash = 61 * hash + Objects.hashCode(this.type);
+        hash = 61 * hash + Objects.hashCode(this.protocol);
+        hash = 61 * hash + Objects.hashCode(this.scheme);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SchemeStatusUpdate other = (SchemeStatusUpdate) obj;
+        if (!Objects.equals(this.id, other.id)) {
+            return false;
+        }
+        return Objects.equals(this.scheme, other.scheme);
     }
 }
