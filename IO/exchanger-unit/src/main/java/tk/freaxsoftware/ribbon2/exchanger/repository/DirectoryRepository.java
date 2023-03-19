@@ -19,6 +19,7 @@
 package tk.freaxsoftware.ribbon2.exchanger.repository;
 
 import io.ebean.DB;
+import java.util.Set;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Directory;
 
 /**
@@ -33,6 +34,10 @@ public class DirectoryRepository {
     
     public void deleteByFullname(String fullName) {
         DB.getDefault().find(Directory.class).where().eq("fullName", fullName).delete();
+    }
+    
+    public Set<Directory> findAll() {
+        return DB.getDefault().find(Directory.class).findSet();
     }
     
     public Directory save(Directory directory) {

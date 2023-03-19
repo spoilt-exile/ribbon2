@@ -17,7 +17,8 @@
             "Ribbon.Global.AddMessageProperty",
             "Ribbon.Property.Register",
             "Ribbon.Global.InitPermissions",
-            "Ribbon.Global.CheckDirectoryAccess"
+            "Ribbon.Global.CheckDirectoryAccess",
+            "Ribbon.Global.GetDirectoryAll"
         ],
         "crossConnectionsReceives": [
             "Ribbon.Global.Notification.DirectoryCreated",

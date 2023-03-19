@@ -273,6 +273,11 @@ public class ExportEngine extends IOEngine<Exporter>{
         sendSchemeStatusUpdate(Sets.newHashSet(buildStatusUpdateNotification(wrapper, instance, type, scheme.getName())));
         return true;
     }
+
+    @Override
+    public DirectoryRepository getDirectoryRepository() {
+        return directoryRepository;
+    }
     
     /**
      * Export queue task: reads active schemes by protocols and looks corresponding messages in queue to export.

@@ -203,6 +203,11 @@ public class ImportEngine extends IOEngine<Importer> {
         return true;
     }
     
+    @Override
+    public DirectoryRepository getDirectoryRepository() {
+        return directoryRepository;
+    }
+    
     /**
      * Import task routine: reads messages from source, tries to send and then marks them as sended.
      */

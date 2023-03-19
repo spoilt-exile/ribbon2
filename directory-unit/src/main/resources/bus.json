@@ -18,7 +18,8 @@
         ],
         "crossConnectionsReceives": [
             "Ribbon.Global.CheckDirectoryAccess",
-            "Ribbon.Global.InitPermissions"
+            "Ribbon.Global.InitPermissions",
+            "Ribbon.Global.GetDirectoryAll"
         ]
     },
     "storage": {
