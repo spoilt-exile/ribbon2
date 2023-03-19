@@ -31,19 +31,26 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tk.freaxsoftware.extras.bus.GlobalCons;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.bridge.http.LocalHttpCons;
 import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryCheckAccessRequest;
 import tk.freaxsoftware.ribbon2.core.data.request.MessagePropertyRegistrationRequest;
+import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
+import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.ACCESS_DENIED;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.CALL_ERROR;
 import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
 import tk.freaxsoftware.ribbon2.exchanger.ExchangerUnit;
+import tk.freaxsoftware.ribbon2.exchanger.entity.Directory;
+import tk.freaxsoftware.ribbon2.exchanger.repository.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
@@ -120,6 +127,8 @@ public abstract class IOEngine<T> {
      */
     public abstract Boolean deleteScheme(String name);
     
+    public abstract DirectoryRepository getDirectoryRepository();
+    
     /**
      * Process module class.
      * @param type type of current IO operation;
@@ -194,6 +203,13 @@ public abstract class IOEngine<T> {
         MessageBus.addSubscription(registration.schemeDeleteTopic(), (holder) -> {
             holder.getResponse().setContent(deleteScheme((String) holder.getContent()));
         });
+        MessageBus.addSubscription(GlobalCons.G_SUBSCRIBE_TOPIC, (holder) -> {
+            String topic = (String) holder.getHeaders().get(GlobalCons.G_SUBSCRIPTION_DEST_HEADER);
+            if (DirectoryModel.CALL_GET_DIRECTORY_ALL.equals(topic)) {
+                LOGGER.info("Cross connection to directory unit detected, syncing directories");
+                syncDirectories();
+            }
+        });
         return registration;
     }
     
@@ -257,6 +273,31 @@ public abstract class IOEngine<T> {
     
     private String getCacheKey(String directory, String permission, String user) {
         return String.format("%s@%s@%s", user, permission, directory);
+    }
+    
+    /**
+     * Syncs directory info with directory unit.
+     */
+    protected void syncDirectories() throws Exception {
+        PaginationRequest request = new PaginationRequest();
+        request.setPage(0);
+        request.setSize(10000); //TODO: raise limit if needed
+        request.setOrderBy("id");
+        request.setDirection(PaginationRequest.Order.ASC);
+        DirectoryPage page = MessageBus.fireCall(DirectoryModel.CALL_GET_DIRECTORY_ALL, request, MessageOptions.Builder.newInstance()
+                .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
+                .deliveryCall().build(), DirectoryPage.class);
+        Set<Directory> existingDirs = getDirectoryRepository().findAll();
+        Set<String> existingDirNames = existingDirs.stream().map(dir -> dir.getFullName()).collect(Collectors.toSet());
+        Set<String> actualDirNames = page.getContent().stream().map(dir -> dir.getFullName()).collect(Collectors.toSet());
+        for (DirectoryModel actualDir: page.getContent()) {
+            if (!existingDirNames.contains(actualDir.getFullName())) {
+                Directory newDir = new Directory();
+                newDir.setFullName(actualDir.getFullName());
+                getDirectoryRepository().save(newDir);
+            }
+        }
+        existingDirs.stream().filter(dir -> !actualDirNames.contains(dir.getFullName())).forEach(delDir -> delDir.delete());
     }
     
     /**
