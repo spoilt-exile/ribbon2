@@ -28,14 +28,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tk.freaxsoftware.extras.bus.GlobalCons;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryCheckAccessRequest;
 import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
+import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.ACCESS_DENIED;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.CALL_ERROR;
@@ -75,6 +79,13 @@ public class MessageService {
         } else {
             permissionCache = Collections.EMPTY_MAP;
         }
+        MessageBus.addSubscription(GlobalCons.G_SUBSCRIBE_TOPIC, (holder) -> {
+            String topic = (String) holder.getHeaders().get(GlobalCons.G_SUBSCRIPTION_DEST_HEADER);
+            if (DirectoryModel.CALL_GET_DIRECTORY_ALL.equals(topic)) {
+                LOGGER.info("Cross connection to directory unit detected, syncing directories");
+                syncDirectories();
+            }
+        });
     }
     
     /**
@@ -283,5 +294,31 @@ public class MessageService {
             }
         }
         return directories;
+    }
+    
+    /**
+     * Syncs directory info with directory unit.
+     */
+    protected void syncDirectories() throws Exception {
+        PaginationRequest request = new PaginationRequest();
+        request.setPage(0);
+        request.setSize(10000); //TODO: raise limit if needed
+        request.setOrderBy("id");
+        request.setDirection(PaginationRequest.Order.ASC);
+        DirectoryPage page = MessageBus.fireCall(DirectoryModel.CALL_GET_DIRECTORY_ALL, request, MessageOptions.Builder.newInstance()
+                .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
+                .deliveryCall().build(), DirectoryPage.class);
+        Set<Directory> existingDirs = directoryRepository.findAll();
+        Set<String> existingDirNames = existingDirs.stream().map(dir -> dir.getFullName()).collect(Collectors.toSet());
+        Set<String> actualDirNames = page.getContent().stream().map(dir -> dir.getFullName()).collect(Collectors.toSet());
+        for (DirectoryModel actualDir: page.getContent()) {
+            if (!existingDirNames.contains(actualDir.getFullName())) {
+                Directory newDir = new Directory();
+                newDir.setFullName(actualDir.getFullName());
+                directoryRepository.save(newDir);
+            }
+        }
+        //TODO make clean deletion and relocation of directory
+        existingDirs.stream().filter(dir -> !actualDirNames.contains(dir.getFullName())).forEach(delDir -> delDir.delete());
     }
 }

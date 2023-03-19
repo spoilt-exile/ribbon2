@@ -16,7 +16,8 @@
             "Ribbon.Global.InitPermissions",
             "Ribbon.Global.Notification.MessageCreated",
             "Ribbon.Global.Notification.MessageUpdated",
-            "Ribbon.Global.Notification.MessageDeleted"
+            "Ribbon.Global.Notification.MessageDeleted",
+            "Ribbon.Global.GetDirectoryAll"
         ],
         "crossConnectionsReceives": [
             "Ribbon.Property.Register",

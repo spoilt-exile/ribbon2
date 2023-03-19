@@ -19,6 +19,7 @@
 package tk.freaxsoftware.ribbon2.message.repo;
 
 import io.ebean.DB;
+import java.util.Set;
 import tk.freaxsoftware.ribbon2.message.entity.Directory;
 
 /**
@@ -38,6 +39,10 @@ public class DirectoryRepository {
     public Directory save(Directory directory) {
         directory.save();
         return directory;
+    }
+    
+    public Set<Directory> findAll() {
+        return DB.getDefault().find(Directory.class).findSet();
     }
     
 }
