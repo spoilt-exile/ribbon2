@@ -47,6 +47,10 @@ public class DirectoryFacade {
     @Receive(DirectoryModel.NOTIFICATION_DIRECTORY_CREATED)
     public void directoryCreated(MessageHolder<DirectoryModel> holder) {
         Directory created = converter.convert(holder.getContent());
+        Directory existed = directoryRepository.findByFullName(created.getFullName());
+        if (existed != null) {
+            return;
+        }
         LOGGER.info("Handling notification, directory {} created;", created.getFullName());
         directoryRepository.save(created);
     }
