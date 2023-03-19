@@ -53,14 +53,15 @@ public class DirectoryUnitConfig {
     }
     
     public static class DirectoryConfig {
-        private String[] createDirs;
+        private Set<String> createDirs;
         private Set<DirectoryPermissionModel> permissions;
+        private String errorDir;
 
-        public String[] getCreateDirs() {
+        public Set<String> getCreateDirs() {
             return createDirs;
         }
 
-        public void setCreateDirs(String[] createDirs) {
+        public void setCreateDirs(Set<String> createDirs) {
             this.createDirs = createDirs;
         }
 
@@ -72,9 +73,17 @@ public class DirectoryUnitConfig {
             this.permissions = permissions;
         }
 
+        public String getErrorDir() {
+            return errorDir;
+        }
+
+        public void setErrorDir(String errorDir) {
+            this.errorDir = errorDir;
+        }
+
         @Override
         public String toString() {
-            return "{" + "createDirs=" + createDirs + ", permissions=" + permissions + '}';
+            return "{" + "createDirs=" + createDirs + ", permissions=" + permissions + ", errorDirectory=" + errorDir + '}';
         }
     }
     

@@ -21,6 +21,7 @@ package tk.freaxsoftware.ribbon2.directory;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.slf4j.Logger;
@@ -49,6 +50,11 @@ import tk.freaxsoftware.ribbon2.directory.service.PermissionService;
  * @author Stanislav Nepochatov
  */
 public class DirectoryUnit {
+    
+    /**
+     * Topic to get name of directory for system errors.
+     */
+    public final static String CALL_GET_ERROR_DIRECTORY = "Ribbon.Global.GetErrorDirectory";
     
     private final static Logger LOGGER = LoggerFactory.getLogger(DirectoryUnit.class);
     
@@ -97,7 +103,9 @@ public class DirectoryUnit {
         overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DbConfig>("DB_PASSWORD", 
                 DbConfig.class, (conf, property) -> conf.setPassword(property)));
         overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DirectoryUnitConfig.DirectoryConfig>("DIRECTORY_CREATE_DIRS", 
-                DirectoryUnitConfig.DirectoryConfig.class, (conf, property) -> conf.setCreateDirs(property.split("$"))));
+                DirectoryUnitConfig.DirectoryConfig.class, (conf, property) -> conf.setCreateDirs(Set.of(property.split("$")))));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DirectoryUnitConfig.DirectoryConfig>("DIRECTORY_ERROR_DIR",
+                DirectoryUnitConfig.DirectoryConfig.class, (conf, property) -> conf.setErrorDir(property)));
         
         overrider.processConfig(config.getDb());
         overrider.processConfig(config.getDirectory());
