@@ -32,7 +32,8 @@
                 "description": "Allows user to change access control list on directory",
                 "defaultValue": false
             }
-        ]
+        ],
+        "errorDir": "System.Error"
     },
     "db": {
         "jdbcUrl": "jdbc:postgresql://localhost:5432/ribbon2-directory",

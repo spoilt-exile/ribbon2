@@ -30,6 +30,7 @@ import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.ACCESS_DENIED;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.DIRECTORY_NOT_FOUND;
+import tk.freaxsoftware.ribbon2.directory.DirectoryUnit;
 import tk.freaxsoftware.ribbon2.directory.entity.Directory;
 import tk.freaxsoftware.ribbon2.directory.entity.converters.DirectoryConverter;
 import tk.freaxsoftware.ribbon2.directory.repo.DirectoryRepository;
@@ -50,6 +51,16 @@ public class DirectoryService extends AuthService {
     public DirectoryService(DirectoryRepository directoryRepository, UserRepository userRespository, 
             GroupRepository groupRepository, PermissionRepository permissionRepository) {
         super(directoryRepository, userRespository, groupRepository, permissionRepository);
+        checkErrorDir();
+    }
+    
+    private void checkErrorDir() {
+        String errorDirName = DirectoryUnit.config.getDirectory().getErrorDir();
+        Directory errorDir = directoryRepository.findDirectoryByPath(errorDirName);
+        if (errorDir == null || !DirectoryUnit.config.getDirectory().getCreateDirs().contains(errorDirName)) {
+            LOGGER.error("Error directory '{}' not found or doesn't exist.", errorDirName);
+            throw new IllegalArgumentException(String.format("Error directoty '%s' not found or doesn't exist.", errorDirName));
+        }
     }
     
     /**

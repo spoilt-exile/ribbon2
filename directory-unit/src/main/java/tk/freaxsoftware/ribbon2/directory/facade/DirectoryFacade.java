@@ -30,6 +30,7 @@ import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
 import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
 import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
+import tk.freaxsoftware.ribbon2.directory.DirectoryUnit;
 import tk.freaxsoftware.ribbon2.directory.entity.Directory;
 import tk.freaxsoftware.ribbon2.directory.entity.converters.DirectoryConverter;
 import tk.freaxsoftware.ribbon2.directory.service.DirectoryService;
@@ -101,5 +102,11 @@ public class DirectoryFacade {
         findMessage.setResponse(new ResponseHolder());
         findMessage.getResponse().setContent(converter
                 .convertBack(directoryService.findByPath(findMessage.getContent())));
+    }
+    
+    @Receive(DirectoryUnit.CALL_GET_ERROR_DIRECTORY)
+    public void getErrorDirectory(MessageHolder<Void> getErrorDirMessage) {
+        getErrorDirMessage.setResponse(new ResponseHolder());
+        getErrorDirMessage.getResponse().setContent(DirectoryUnit.config.getDirectory().getErrorDir());
     }
 }
