@@ -29,6 +29,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,7 +167,7 @@ public class ImportEngine extends IOEngine<Importer> {
         LOGGER.info("Launching import for scheme {} by module {}", scheme.getName(), wrapper.getModuleData().id());
         ImportSource source = wrapper.getModuleInstance().createSource(schemeConverter.convert(scheme));
         SchemeInstance instance = scheme.buildInstance();
-        Future future = scheduler.scheduleAtFixedRate(new ImportTask(instance, source, registerRepository, directoryRepository), 0, 
+        Future future = scheduler.scheduleAtFixedRate(new ImportTask(instance, source, registerRepository, directoryRepository, () -> errorDir), 0, 
                 (long) scheme.getConfig().get(GENERAL_TIMEOUT_KEY), TimeUnit.SECONDS);
         schemeMap.put(scheme.getName(), future);
         wrapper.getSchemes().put(scheme.getName(), instance);
@@ -220,13 +221,16 @@ public class ImportEngine extends IOEngine<Importer> {
         private final RegisterRepository registerRepository;
         
         private final DirectoryRepository directoryRepository;
+        
+        private final Supplier<String> errorDirSupplier;
 
         public ImportTask(SchemeInstance instance, ImportSource importSource, RegisterRepository registerRepository, 
-                DirectoryRepository directoryRepository) {
+                DirectoryRepository directoryRepository, Supplier<String> errorDirSupplier) {
             this.instance = instance;
             this.importSource = importSource;
             this.registerRepository = registerRepository;
             this.directoryRepository = directoryRepository;
+            this.errorDirSupplier = errorDirSupplier;
         }
 
         @Override
@@ -281,7 +285,9 @@ public class ImportEngine extends IOEngine<Importer> {
             instance.setStatus(SchemeInstance.Status.ERROR);
             instance.setErrorDescription(ex.getMessage());
             sendUpdate(scheme);
-            //TODO: add sending service message to admin on RAISE_ADM_ERROR
+            if (errorHandling == ErrorHandling.RAISE_ADM_ERROR) {
+                postErrorMessage(scheme, null, ex, ModuleType.IMPORT, errorDirSupplier.get());
+            }
         }
         
         private void sendUpdate(IOScheme scheme) {

@@ -39,6 +39,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +56,7 @@ import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
 import tk.freaxsoftware.ribbon2.exchanger.ExchangerUnit;
 import tk.freaxsoftware.ribbon2.exchanger.converters.SchemeConverter;
 import static tk.freaxsoftware.ribbon2.exchanger.engine.IOEngine.buildStatusUpdateNotification;
+import static tk.freaxsoftware.ribbon2.exchanger.engine.IOEngine.postErrorMessage;
 import static tk.freaxsoftware.ribbon2.exchanger.engine.IOEngine.sendSchemeStatusUpdate;
 import tk.freaxsoftware.ribbon2.exchanger.engine.export.DefaultExportMessage;
 import tk.freaxsoftware.ribbon2.exchanger.engine.export.TemplateService;
@@ -156,7 +158,7 @@ public class ExportEngine extends IOEngine<Exporter>{
         exportQueueFuture = executorService.scheduleAtFixedRate(
                 new QueueTask(schemeRepository, exportQueueRepository, 
                         registerRepository, moduleMap, schemeConverter, 
-                        new TemplateService()), 
+                        new TemplateService(), () -> errorDir), 
                 15, queuePeriod, TimeUnit.SECONDS);
     }
     
@@ -297,19 +299,23 @@ public class ExportEngine extends IOEngine<Exporter>{
         private final TemplateService templateService;
         
         private final Set<String> errorSchemes = new HashSet();
+        
+        private final Supplier<String> errorDirSupplier;
 
         public QueueTask(SchemeRepository schemeRepository, 
                 ExportQueueRepository exportMessageRepository, 
                 RegisterRepository registerRepository, 
                 Map<String, ModuleWrapper<Exporter>> moduleMap,
                 SchemeConverter schemeConverter,
-                TemplateService templateService) {
+                TemplateService templateService,
+                Supplier<String> errorDirSupplier) {
             this.schemeRepository = schemeRepository;
             this.exportMessageRepository = exportMessageRepository;
             this.registerRepository = registerRepository;
             this.moduleMap = moduleMap;
             this.schemeConverter = schemeConverter;
             this.templateService = templateService;
+            this.errorDirSupplier = errorDirSupplier;
         }
 
         @Override
@@ -367,7 +373,13 @@ public class ExportEngine extends IOEngine<Exporter>{
             exportMessage.setError(ex.getMessage());
             exportMessage.save();
             errorSchemes.add(scheme.getName());
-            //TODO: add sending service message to admin on RAISE_ADM_ERROR
+            if (errorHandling == ErrorHandling.RAISE_ADM_ERROR) {
+                postErrorMessage(schemeConverter.convert(scheme), 
+                        Map.of("exportMessageUid", exportMessage.getMessage().getUid(), 
+                                "exportMessageHeader", exportMessage.getMessage().getHeader(),
+                                "exportTillDate", exportMessage.getTillDate()), 
+                        ex, ModuleType.EXPORT, errorDirSupplier.get());
+            }
         }
         
         private void innerExport(Exporter exporter, ExportQueue exportMessage, Scheme scheme) throws IOException, TemplateException {

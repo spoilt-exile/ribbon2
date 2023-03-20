@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.GlobalCons;
@@ -40,6 +41,8 @@ import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.bridge.http.LocalHttpCons;
 import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.data.MessageModel;
+import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryCheckAccessRequest;
 import tk.freaxsoftware.ribbon2.core.data.request.MessagePropertyRegistrationRequest;
 import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
@@ -75,6 +78,8 @@ public abstract class IOEngine<T> {
     protected final ModuleType type;
     
     private final Map<String, Instant> permissionCache;
+    
+    protected String errorDir;
     
     /**
      * Default constructor.
@@ -205,9 +210,15 @@ public abstract class IOEngine<T> {
         });
         MessageBus.addSubscription(GlobalCons.G_SUBSCRIBE_TOPIC, (holder) -> {
             String topic = (String) holder.getHeaders().get(GlobalCons.G_SUBSCRIPTION_DEST_HEADER);
-            if (DirectoryModel.CALL_GET_DIRECTORY_ALL.equals(topic)) {
-                LOGGER.info("Cross connection to directory unit detected, syncing directories");
-                syncDirectories();
+            switch (topic) {
+                case DirectoryModel.CALL_GET_DIRECTORY_ALL:
+                    LOGGER.info("Cross connection to directory unit detected, syncing directories");
+                    syncDirectories();
+                    break;
+                case DirectoryModel.CALL_GET_ERROR_DIRECTORY:
+                    LOGGER.info("Cross connection to directory unit detected, init error directory");
+                    initErrorDir();
+                    break;
             }
         });
         return registration;
@@ -298,6 +309,46 @@ public abstract class IOEngine<T> {
             }
         }
         existingDirs.stream().filter(dir -> !actualDirNames.contains(dir.getFullName())).forEach(delDir -> delDir.delete());
+    }
+    
+    protected void initErrorDir() throws Exception {
+        errorDir = MessageBus.fireCall(DirectoryModel.CALL_GET_ERROR_DIRECTORY, null, MessageOptions.Builder.newInstance()
+                .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
+                .deliveryCall().build(), String.class);
+    }
+    
+    
+    protected static void postErrorMessage(IOScheme scheme, Map<String, Object> attrs, Throwable throwable, ModuleType moduleType, String errorDirectory) {
+        if (errorDirectory == null) {
+            LOGGER.error("Unable to post system error message, error directory is null.");
+        }
+        MessageModel message = new MessageModel();
+        message.setHeader(String.format("EXCHANGER %s error on scheme %s protocol %s", moduleType.name(), scheme.getName(), scheme.getProtocol()));
+        message.setTags(Set.of("report", "exchanger", "error", "system"));
+        message.setDirectories(Set.of(errorDirectory));
+        
+        StringBuffer buffer = new StringBuffer();
+        
+        buffer.append(String.format("Operation: %s\n", moduleType.name()));
+        buffer.append(String.format("Protocol: %s\n", scheme.getProtocol()));
+        buffer.append(String.format("Scheme: %s\n", scheme.getName()));
+        buffer.append(String.format("Exception: %s\n", throwable.getClass().getCanonicalName()));
+        
+        if (attrs != null) {
+            buffer.append("Attributes:\n");
+            for (Map.Entry entry: attrs.entrySet()) {
+                buffer.append(String.format("%s : %s\n", entry.getKey(), entry.getValue().toString()));
+            }
+        }
+        
+        buffer.append("\nStacktrace:\n");
+        buffer.append(ExceptionUtils.getStackTrace(throwable));
+        
+        message.setContent(buffer.toString());
+        MessageBus.fire(MessageModel.CALL_CREATE_MESSAGE, message, MessageOptions.Builder.newInstance()
+                        .header(UserModel.AUTH_HEADER_USERNAME, "root")
+                        .header(UserModel.AUTH_HEADER_FULLNAME, "root")
+                        .deliveryNotification().build());
     }
     
     /**

@@ -78,7 +78,7 @@ public class MailImportMessage implements ImportMessage {
             copyright = config.getCopyright() == null ? fromAddress.getPersonal() : config.getCopyright();
         } catch (Exception ex) {
             LOGGER.error("Error during reading of the message", ex);
-            throw new InputOutputException(IOExceptionCodes.IMPORT_ERROR, "Error during reading of the message");
+            throw new InputOutputException(IOExceptionCodes.IMPORT_ERROR, "Error during reading of the message", ex);
         }
     }
     
@@ -121,7 +121,7 @@ public class MailImportMessage implements ImportMessage {
             parseContent();
         } catch (Exception ex) {
             LOGGER.error("Error during reading of the message", ex);
-            throw new InputOutputException(IOExceptionCodes.IMPORT_ERROR, "Error during reading of the message");
+            throw new InputOutputException(IOExceptionCodes.IMPORT_ERROR, "Error during reading of the message", ex);
         }
         MessageModel message = new MessageModel();
         message.setHeader(header);
@@ -149,7 +149,7 @@ public class MailImportMessage implements ImportMessage {
         } catch (Exception ex) {
             LOGGER.error("Error during marking of the message " + id, ex);
             throw new InputOutputException(IOExceptionCodes.MARK_ERROR, 
-                    String.format("Error marking reading of the message %s", id));
+                    String.format("Error marking reading of the message %s", id), ex);
         }
     }
 
