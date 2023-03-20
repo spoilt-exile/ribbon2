@@ -311,13 +311,23 @@ public abstract class IOEngine<T> {
         existingDirs.stream().filter(dir -> !actualDirNames.contains(dir.getFullName())).forEach(delDir -> delDir.delete());
     }
     
+    /**
+     * Init error directory name in engine. 
+     */
     protected void initErrorDir() throws Exception {
         errorDir = MessageBus.fireCall(DirectoryModel.CALL_GET_ERROR_DIRECTORY, null, MessageOptions.Builder.newInstance()
                 .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
                 .deliveryCall().build(), String.class);
     }
     
-    
+    /**
+     * Post system error message during handlin errors for IO operations.
+     * @param scheme IO scheme processing of which caused error;
+     * @param attrs additional attributes;
+     * @param throwable cought exception;
+     * @param moduleType type of module;
+     * @param errorDirectory name of error directory;
+     */
     protected static void postErrorMessage(IOScheme scheme, Map<String, Object> attrs, Throwable throwable, ModuleType moduleType, String errorDirectory) {
         if (errorDirectory == null) {
             LOGGER.error("Unable to post system error message, error directory is null.");
