@@ -18,7 +18,8 @@
             "Ribbon.Property.Register",
             "Ribbon.Global.InitPermissions",
             "Ribbon.Global.CheckDirectoryAccess",
-            "Ribbon.Global.GetDirectoryAll"
+            "Ribbon.Global.GetDirectoryAll",
+            "Ribbon.Global.GetErrorDirectory"
         ],
         "crossConnectionsReceives": [
             "Ribbon.Global.Notification.DirectoryCreated",

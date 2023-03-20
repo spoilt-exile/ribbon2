@@ -63,7 +63,7 @@ public class TelegramImportSource implements ImportSource {
                 LOGGER.error("Error during telegram bot registration for scheme {}", scheme.getName());
                 LOGGER.error("Error stack trace", tex);
                 throw new InputOutputException(IOExceptionCodes.IMPORT_CHECK_ERROR, 
-                        String.format("Error during telegram bot registration for scheme %s: %s", scheme.getName(), tex.getMessage()));
+                        String.format("Error during telegram bot registration for scheme %s: %s", scheme.getName(), tex.getMessage()), tex);
             }
         }
     }

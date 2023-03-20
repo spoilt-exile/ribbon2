@@ -115,7 +115,7 @@ public class MailImportSource implements ImportSource {
             LOGGER.error("Error during processing messages for scheme {}", scheme.getName());
             LOGGER.error("Error", ex);
             throw new InputOutputException(IOExceptionCodes.IMPORT_CHECK_ERROR, 
-                    String.format("Error during processing messages for scheme %s", scheme.getName()));
+                    String.format("Error during processing messages for scheme %s", scheme.getName()), ex);
         }
         return messages;
     }
@@ -145,7 +145,7 @@ public class MailImportSource implements ImportSource {
             LOGGER.error("Error during opening of POP3 connection for scheme {}", scheme.getName());
             LOGGER.error("Error", ex);
             throw new InputOutputException(IOExceptionCodes.IMPORT_CHECK_ERROR, 
-                    String.format("Error during opening of POP3 connection for scheme %s", scheme.getName()));
+                    String.format("Error during opening of POP3 connection for scheme %s", scheme.getName()), ex);
         }
     }
 
@@ -157,7 +157,7 @@ public class MailImportSource implements ImportSource {
             LOGGER.error("Error during closing POP3 connection for scheme {}", scheme.getName());
             LOGGER.error("Error", ex);
             throw new InputOutputException(IOExceptionCodes.PROCESSING_ERROR,
-                    String.format("Error during closing POP3 connection for scheme %s", scheme.getName()));
+                    String.format("Error during closing POP3 connection for scheme %s", scheme.getName()), ex);
         }
     }
 

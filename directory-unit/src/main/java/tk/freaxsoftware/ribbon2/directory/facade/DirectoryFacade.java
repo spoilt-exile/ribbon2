@@ -104,7 +104,7 @@ public class DirectoryFacade {
                 .convertBack(directoryService.findByPath(findMessage.getContent())));
     }
     
-    @Receive(DirectoryUnit.CALL_GET_ERROR_DIRECTORY)
+    @Receive(DirectoryModel.CALL_GET_ERROR_DIRECTORY)
     public void getErrorDirectory(MessageHolder<Void> getErrorDirMessage) {
         getErrorDirMessage.setResponse(new ResponseHolder());
         getErrorDirMessage.getResponse().setContent(DirectoryUnit.config.getDirectory().getErrorDir());

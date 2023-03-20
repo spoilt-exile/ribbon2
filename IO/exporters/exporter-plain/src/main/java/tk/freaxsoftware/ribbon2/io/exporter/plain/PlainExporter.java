@@ -60,7 +60,7 @@ public class PlainExporter implements Exporter {
             Files.write(Paths.get(message.getExportScheme().getConfig().get("plainFolderPath") + "/" + fileName), messageBuffer.toString().getBytes());
         } catch (IOException ioex) {
             LOGGER.error("Error during export of message " + message.getMessage().getUid(), ioex);
-            throw new InputOutputException(IOExceptionCodes.EXPORT_ERROR, String.format("Error during export of message %s: %s", message.getMessage().getUid(), ioex.getMessage()));
+            throw new InputOutputException(IOExceptionCodes.EXPORT_ERROR, String.format("Error during export of message %s: %s", message.getMessage().getUid(), ioex.getMessage()), ioex);
         }
         return fileName;
     }

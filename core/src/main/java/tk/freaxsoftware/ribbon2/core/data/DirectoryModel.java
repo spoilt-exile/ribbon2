@@ -36,6 +36,7 @@ public class DirectoryModel implements Serializable {
     public final static String CALL_GET_DIRECTORY_ALL = "Ribbon.Global.GetDirectoryAll";
     public final static String CALL_GET_DIRECTORY_BY_PERMISSION = "Ribbon.Global.GetDirectoryByPermission";
     public final static String CALL_GET_DIRECTORY_BY_PATH = "Ribbon.Global.GetDirectoryByPath";
+    public final static String CALL_GET_ERROR_DIRECTORY = "Ribbon.Global.GetErrorDirectory";
     
     public final static String NOTIFICATION_DIRECTORY_CREATED = "Ribbon.Global.Notification.DirectoryCreated";
     public final static String NOTIFICATION_DIRECTORY_UPDATED = "Ribbon.Global.Notification.DirectoryUpdated";

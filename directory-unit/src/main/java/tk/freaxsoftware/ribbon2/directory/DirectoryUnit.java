@@ -51,11 +51,6 @@ import tk.freaxsoftware.ribbon2.directory.service.PermissionService;
  */
 public class DirectoryUnit {
     
-    /**
-     * Topic to get name of directory for system errors.
-     */
-    public final static String CALL_GET_ERROR_DIRECTORY = "Ribbon.Global.GetErrorDirectory";
-    
     private final static Logger LOGGER = LoggerFactory.getLogger(DirectoryUnit.class);
     
     /**

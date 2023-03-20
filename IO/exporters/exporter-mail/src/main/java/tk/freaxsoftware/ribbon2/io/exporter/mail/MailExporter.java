@@ -87,7 +87,7 @@ public class MailExporter implements Exporter {
             LOGGER.error("Error during exporting message to {} for message {}", to, subject);
             LOGGER.error("Error in detail:", ex);
             throw new InputOutputException(IOExceptionCodes.EXPORT_ERROR, 
-                    String.format("Error during exporting message to %s for message %s", to, subject));
+                    String.format("Error during exporting message to %s for message %s", to, subject), ex);
         }
     }
 }
