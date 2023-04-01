@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.gateway.config;
 
+import java.util.List;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 
 /**
@@ -28,6 +29,7 @@ public class ApplicationConfig {
     
     private HttpConfig http;
     private DbConfig db;
+    private WatchdogConfig watchdog;
 
     public HttpConfig getHttp() {
         return http;
@@ -45,9 +47,17 @@ public class ApplicationConfig {
         this.db = db;
     }
 
+    public WatchdogConfig getWatchdog() {
+        return watchdog;
+    }
+
+    public void setWatchdog(WatchdogConfig watchdog) {
+        this.watchdog = watchdog;
+    }
+
     @Override
     public String toString() {
-        return "{" + "http=" + http + ", db=" + db + '}';
+        return "{" + "http=" + http + ", db=" + db + ", watchdog=" + watchdog + '}';
     }
     
     public static class HttpConfig {
@@ -114,6 +124,32 @@ public class ApplicationConfig {
         public static enum AuthType {
             HEADER,
             COOKIE;
+        }
+    }
+    
+    public static class WatchdogConfig {
+        private Boolean enable;
+        private List<String> ignoreTopics;
+
+        public Boolean getEnable() {
+            return enable;
+        }
+
+        public void setEnable(Boolean enable) {
+            this.enable = enable;
+        }
+
+        public List<String> getIgnoreTopics() {
+            return ignoreTopics;
+        }
+
+        public void setIgnoreTopics(List<String> ignoreTopics) {
+            this.ignoreTopics = ignoreTopics;
+        }
+
+        @Override
+        public String toString() {
+            return "{" + "enable=" + enable + ", ignoreTopics=" + ignoreTopics + '}';
         }
     }
 }

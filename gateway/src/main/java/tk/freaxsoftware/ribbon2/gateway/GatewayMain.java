@@ -33,6 +33,7 @@ import io.javalin.openapi.plugin.swagger.SwaggerConfiguration;
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.apache.commons.io.IOUtils;
@@ -244,6 +245,11 @@ public class GatewayMain {
                 ApplicationConfig.HttpConfig.class, (conf, property) -> conf.setAuthTokenSecret(property)));
         overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ApplicationConfig.HttpConfig>("HTTP_AUTH_TOKEN_VALID_DAYS", 
                 ApplicationConfig.HttpConfig.class, (conf, property) -> conf.setAuthTokenValidDays(Integer.valueOf(property))));
+        
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ApplicationConfig.WatchdogConfig>("WATCHDOG_ENABLE",
+                ApplicationConfig.WatchdogConfig.class, (conf, property) -> conf.setEnable(Boolean.valueOf(property))));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<ApplicationConfig.WatchdogConfig>("WATCHDOG_IGNORE_TOPICS",
+                ApplicationConfig.WatchdogConfig.class, (conf, property) -> conf.setIgnoreTopics(List.of(property.split(",")))));
         
         overrider.processConfig(config.getDb());
         overrider.processConfig(config.getHttp());
