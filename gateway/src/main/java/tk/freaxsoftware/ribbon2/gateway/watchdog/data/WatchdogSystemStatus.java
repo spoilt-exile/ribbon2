@@ -95,6 +95,15 @@ public class WatchdogSystemStatus {
         
         private WatchdogService.Status status;
 
+        public WatchdogTopicShort() {
+        }
+        
+        public WatchdogTopicShort(String topic, WatchdogService.StatusRecord statusRecord) {
+            this.topic = topic;
+            this.label = statusRecord.getLabel();
+            this.status = statusRecord.getStatus();
+        }
+
         public String getTopic() {
             return topic;
         }

@@ -20,7 +20,10 @@ package tk.freaxsoftware.ribbon2.gateway.watchdog;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Provides global registry for watchdog service. It allows 
@@ -30,7 +33,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class WatchdogRegistry {
     
-    private final static Map<String, Record> topicLevelMap = new ConcurrentHashMap();
+    private final static Map<String, Record> topicRecordMap = new ConcurrentHashMap();
+    
+    private final static Set<Pair<String, Record>> patternTopicRecords = new CopyOnWriteArraySet();
     
     /**
      * Register topic to watch. Use it for permanent topics, topics 
@@ -41,24 +46,43 @@ public class WatchdogRegistry {
      * @param node type of node which provides specified topic;
      */
     public static void registerTopic(String topic, String label, SeverityLevel level, Node node) {
-        topicLevelMap.put(topic, new Record(label, level, node));
+        topicRecordMap.put(topic, new Record(label, level, node));
     }
     
     /**
-     * Get copy of topic map with records.
+     * Register topic pattern to watch. Use it for permanent topics, patterns 
+     * can't be deleted from watchodg registry. Watchdog allows only placing patterns 
+     * with {@code WARNING} severity level. Topic patterns has lesser priority over normal topic records.
+     * @see SeverityLevel#WARNING
+     * @param topicRegex regular expression to match topic;
+     * @param label label describes functionality of topic;
+     * @param node type of node which provides specified topic;
+     */
+    public static void registerPatternTopic(String topicRegex, String label, Node node) {
+        patternTopicRecords.add(Pair.of(topicRegex, new Record(label, SeverityLevel.WARNING, node)));
+    }
+    
+    /**
+     * Get copy of topic map with records. It doesn't include pattern topics.
      * @return copy of topic map;
      */
     public static Map<String, Record> getTopicMap() {
-        return Map.copyOf(topicLevelMap);
+        return Map.copyOf(topicRecordMap);
     }
     
     /**
-     * Get record with label and severity level by topic.
+     * Get record with label and severity level by topic or topic pattern.
      * @param topic topic to search;
      * @return optional of record;
      */
     public static Optional<Record> getTopicRecord(String topic) {
-        return Optional.ofNullable(topicLevelMap.get(topic));
+        if (topicRecordMap.containsKey(topic)) {
+            return Optional.of(topicRecordMap.get(topic));
+        }
+        return patternTopicRecords.stream()
+                .filter(pr -> topic.matches(pr.getLeft()))
+                .map(matched -> matched.getRight())
+                .findFirst();
     }
     
     /**

@@ -18,6 +18,8 @@
  */
 package tk.freaxsoftware.ribbon2.gateway.watchdog;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -30,6 +32,7 @@ import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
 import tk.freaxsoftware.extras.bus.annotation.Receive;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
+import tk.freaxsoftware.ribbon2.gateway.watchdog.data.WatchdogSystemStatus;
 import tk.freaxsoftware.ribbon2.gateway.watchdog.data.WatchdogTopic;
 
 /**
@@ -135,6 +138,33 @@ public class WatchdogService {
             return Optional.of(new WatchdogTopic(topic, topicStatusMap.get(topic)));
         }
         return Optional.empty();
+    }
+    
+    /**
+     * Get global watchdog status.
+     * @return object with global status, node status and list of topics.
+     */
+    public WatchdogSystemStatus getWatchdogStatus() {
+        WatchdogSystemStatus status = new WatchdogSystemStatus();
+        status.setGlobalStatus(globalStatus);
+        
+        List<WatchdogSystemStatus.WatchdogNode> nodes = new LinkedList();
+        for (Map.Entry<WatchdogRegistry.Node, Status> nodeStatus: nodeStatusMap.entrySet()) {
+            WatchdogSystemStatus.WatchdogNode node = new WatchdogSystemStatus.WatchdogNode();
+            node.setNode(nodeStatus.getKey());
+            node.setStatus(nodeStatus.getValue());
+            
+            List<WatchdogSystemStatus.WatchdogTopicShort> topics = topicStatusMap.entrySet().stream()
+                    .filter(entry -> entry.getValue().getNode() == nodeStatus.getKey())
+                    .map(nodeEntry -> new WatchdogSystemStatus.WatchdogTopicShort(nodeEntry.getKey(), nodeEntry.getValue()))
+                    .collect(Collectors.toList());
+            node.setTopics(topics);
+            
+            nodes.add(node);
+        }
+        status.setNodes(nodes);
+        
+        return status;
     }
     
     public static class StatusRecord extends WatchdogRegistry.Record {
