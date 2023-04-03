@@ -12,5 +12,9 @@
         "driver": "org.postgresql.ds.PGSimpleDataSource",
         "username": "ribbon2",
         "password": "ribbon2"
+    },
+    "watchdog": {
+        "enable": true,
+        "ignoreTopics": []
     }
 }

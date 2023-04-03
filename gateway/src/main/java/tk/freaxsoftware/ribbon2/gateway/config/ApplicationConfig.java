@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.gateway.config;
 
+import java.util.Collections;
 import java.util.List;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 
@@ -130,6 +131,11 @@ public class ApplicationConfig {
     public static class WatchdogConfig {
         private Boolean enable;
         private List<String> ignoreTopics;
+
+        public WatchdogConfig() {
+            enable = true;
+            ignoreTopics = Collections.EMPTY_LIST;
+        }
 
         public Boolean getEnable() {
             return enable;

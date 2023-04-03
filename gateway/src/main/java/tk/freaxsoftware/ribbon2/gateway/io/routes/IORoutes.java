@@ -45,6 +45,7 @@ import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
 import tk.freaxsoftware.ribbon2.gateway.io.data.IOModuleScheme;
 import tk.freaxsoftware.ribbon2.gateway.io.data.IOProtocol;
 import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
+import tk.freaxsoftware.ribbon2.gateway.watchdog.WatchdogRegistry;
 import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 
@@ -55,6 +56,23 @@ import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 public class IORoutes {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(IORoutes.class);
+    
+    public static void initWatchdog() {
+        WatchdogRegistry.registerPatternTopic(toPattern(IOLocalIds.IO_SCHEME_GET_TOPIC), 
+                "Get full IO scheme", WatchdogRegistry.Node.EXCHANGER);
+        WatchdogRegistry.registerPatternTopic(toPattern(IOLocalIds.IO_SCHEME_SAVE_TOPIC), 
+                "Save IO scheme", WatchdogRegistry.Node.EXCHANGER);
+        WatchdogRegistry.registerPatternTopic(toPattern(IOLocalIds.IO_SCHEME_DELETE_TOPIC), 
+                "Delete IO scheme", WatchdogRegistry.Node.EXCHANGER);
+        WatchdogRegistry.registerPatternTopic(toPattern(IOLocalIds.IO_SCHEME_EXPORT_ASSIGN_TOPIC), 
+                "Assign export scheme to directory", WatchdogRegistry.Node.EXCHANGER);
+        WatchdogRegistry.registerPatternTopic(toPattern(IOLocalIds.IO_SCHEME_EXPORT_DISMISS_TOPIC), 
+                "Dismiss export scheme from directory", WatchdogRegistry.Node.EXCHANGER);
+    }
+    
+    private static String toPattern(String rawTopic) {
+        return rawTopic + ".*";
+    }
     
     @OpenApi(
         summary = "Get IO protocols",

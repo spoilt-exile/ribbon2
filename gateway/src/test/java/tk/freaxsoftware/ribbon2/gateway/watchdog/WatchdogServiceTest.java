@@ -165,8 +165,8 @@ public class WatchdogServiceTest {
     
     @Test
     public void shouldProcessPatternTopics() {
-        final String patTopic1 = "Exc.Pattern.Topic1";
-        final String patTopic2 = "Exc.Pattorn.Topic2";
+        final String patTopic1 = "Exc.Pattern.Topic.Top1";
+        final String patTopic2 = "Exc.Pattorn.Topic.Top2";
         Assert.assertFalse(watchdog.getWatchByTopic(patTopic1).isPresent());
         Assert.assertFalse(watchdog.getWatchByTopic(patTopic2).isPresent());
         
