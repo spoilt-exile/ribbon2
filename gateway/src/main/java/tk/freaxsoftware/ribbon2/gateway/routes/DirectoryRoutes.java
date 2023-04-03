@@ -45,6 +45,7 @@ import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPermissionTaggedHold
 import tk.freaxsoftware.ribbon2.core.exception.CoreError;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
+import tk.freaxsoftware.ribbon2.gateway.watchdog.WatchdogRegistry;
 
 /**
  * Routes for CRUD operations with directories.
@@ -53,6 +54,29 @@ import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
 public class DirectoryRoutes {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(DirectoryRoutes.class);
+    
+    public static void initWatchdog() {
+        WatchdogRegistry.registerTopic(DirectoryModel.CALL_CREATE_DIRECTORY, "Create directory", 
+                WatchdogRegistry.SeverityLevel.WARNING, WatchdogRegistry.Node.DIRECTORY);
+        WatchdogRegistry.registerTopic(DirectoryModel.CALL_UPDATE_DIRECTORY, "Update directory", 
+                WatchdogRegistry.SeverityLevel.WARNING, WatchdogRegistry.Node.DIRECTORY);
+        WatchdogRegistry.registerTopic(DirectoryModel.CALL_GET_DIRECTORY_ALL, "Get directories paged", 
+                WatchdogRegistry.SeverityLevel.WARNING, WatchdogRegistry.Node.DIRECTORY);
+        WatchdogRegistry.registerTopic(DirectoryModel.CALL_GET_DIRECTORY_BY_PATH, "Get directory by path", 
+                WatchdogRegistry.SeverityLevel.WARNING, WatchdogRegistry.Node.DIRECTORY);
+        WatchdogRegistry.registerTopic(DirectoryModel.CALL_DELETE_DIRECTORY, "Delete directory by path", 
+                WatchdogRegistry.SeverityLevel.WARNING, WatchdogRegistry.Node.DIRECTORY);
+        WatchdogRegistry.registerTopic(DirectoryAccessModel.CALL_GET_DIR_ACCESS, "Get directory access by path", 
+                WatchdogRegistry.SeverityLevel.WARNING, WatchdogRegistry.Node.DIRECTORY);
+        WatchdogRegistry.registerTopic(DirectoryEditAccessRequest.CALL_EDIT_DIR_ACCESS, "Edit directory access by path", 
+                WatchdogRegistry.SeverityLevel.WARNING, WatchdogRegistry.Node.DIRECTORY);
+        WatchdogRegistry.registerTopic(DirectoryPermissionTaggedModel.CALL_GET_PERMISSIONS, "Get all directories permissions", 
+                WatchdogRegistry.SeverityLevel.WARNING, WatchdogRegistry.Node.DIRECTORY);
+        WatchdogRegistry.registerTopic(DirectoryModel.CALL_GET_DIRECTORY_BY_PERMISSION, "Get directory by permissions", 
+                WatchdogRegistry.SeverityLevel.WARNING, WatchdogRegistry.Node.DIRECTORY);
+        WatchdogRegistry.registerTopic(DirectoryPermissionTaggedModel.CALL_GET_CURRENT_PERMISSIONS, "Get current permissions by directory", 
+                WatchdogRegistry.SeverityLevel.WARNING, WatchdogRegistry.Node.DIRECTORY);
+    }
     
     @OpenApi(
         summary = "Create directory",

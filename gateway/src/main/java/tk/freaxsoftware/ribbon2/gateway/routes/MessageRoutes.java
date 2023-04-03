@@ -42,6 +42,7 @@ import tk.freaxsoftware.ribbon2.core.exception.CoreError;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import static tk.freaxsoftware.ribbon2.gateway.io.routes.IORoutes.isAdmin;
 import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
+import tk.freaxsoftware.ribbon2.gateway.watchdog.WatchdogRegistry;
 
 /**
  * Routes for CRUD operations with messages.
@@ -50,6 +51,23 @@ import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
 public class MessageRoutes {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(MessageRoutes.class);
+    
+    public static void initWatchdog() {
+        WatchdogRegistry.registerTopic(MessageModel.CALL_CREATE_MESSAGE, "Create message", 
+                WatchdogRegistry.SeverityLevel.ERROR, WatchdogRegistry.Node.MESSENGER);
+        WatchdogRegistry.registerTopic(MessageModel.CALL_UPDATE_MESSAGE, "Update message", 
+                WatchdogRegistry.SeverityLevel.ERROR, WatchdogRegistry.Node.MESSENGER);
+        WatchdogRegistry.registerTopic(MessageModel.CALL_DELETE_MESSAGE, "Delete message", 
+                WatchdogRegistry.SeverityLevel.ERROR, WatchdogRegistry.Node.MESSENGER);
+        WatchdogRegistry.registerTopic(MessageModel.CALL_GET_MESSAGE_ALL, "Get messages page", 
+                WatchdogRegistry.SeverityLevel.ERROR, WatchdogRegistry.Node.MESSENGER);
+        WatchdogRegistry.registerTopic(MessageModel.CALL_GET_MESSAGE_BY_UID, "Get messages by dir and uid", 
+                WatchdogRegistry.SeverityLevel.ERROR, WatchdogRegistry.Node.MESSENGER);
+        WatchdogRegistry.registerTopic(MessagePropertyTagged.CALL_GET_PROPERTIES, "Get all message properties", 
+                WatchdogRegistry.SeverityLevel.ERROR, WatchdogRegistry.Node.MESSENGER);
+        WatchdogRegistry.registerTopic(MessagePropertyModel.CALL_ADD_PROPERTY, "Add message property", 
+                WatchdogRegistry.SeverityLevel.ERROR, WatchdogRegistry.Node.MESSENGER);
+    }
     
     @OpenApi(
         summary = "Create message",

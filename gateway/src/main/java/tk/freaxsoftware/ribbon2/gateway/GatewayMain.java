@@ -58,6 +58,8 @@ import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.gateway.io.IOService;
 import tk.freaxsoftware.ribbon2.gateway.io.routes.IORoutes;
 import tk.freaxsoftware.ribbon2.gateway.routes.AuthRoutes;
+import tk.freaxsoftware.ribbon2.gateway.routes.WatchdogRoutes;
+import tk.freaxsoftware.ribbon2.gateway.watchdog.WatchdogService;
 
 /**
  * Main class for API gateway.
@@ -91,6 +93,9 @@ public class GatewayMain {
         config = gson.fromJson(IOUtils.toString(GatewayMain.class.getClassLoader().getResourceAsStream("appconfig.json"), Charset.defaultCharset()), ApplicationConfig.class);
         processConfig(config);
         LOGGER.info("Gateway started, config: {}", config);
+        DirectoryRoutes.initWatchdog();
+        MessageRoutes.initWatchdog();
+        IORoutes.initWatchdog();
         Javalin app = Javalin.create(javalinConfig -> {
             OpenApiConfiguration openApiConfiguration = new OpenApiConfiguration();
             openApiConfiguration.getInfo().setTitle("Ribbon2 System API");
@@ -200,10 +205,20 @@ public class GatewayMain {
                         get(IORoutes::getExportSchemesByDirectory);
                     });
                 });
+                
+                path("watchdog", () -> {
+                    path("/statusByTopic/{topic}", () -> {
+                        get(WatchdogRoutes::getWatchByTopic);
+                    });
+                    path("/status", () -> {
+                        get(WatchdogRoutes::getWatch);
+                    });
+                });
             });
         }).start(config.getHttp().getPort());
         Init.init(config);
         AuthRoutes.init(app, config.getHttp());;
+        WatchdogRoutes.init(new WatchdogService(config.getWatchdog()));
         
         AnnotationUtil.subscribeReceiverInstance(IOService.getInstance());
         

@@ -56,6 +56,9 @@ public class WatchdogService {
 
     public WatchdogService(ApplicationConfig.WatchdogConfig watchdogConfig) {
         this.watchdogConfig = watchdogConfig;
+        if (!watchdogConfig.getEnable()) {
+            return;
+        }
         WatchdogRegistry.getTopicMap()
                 .forEach((topic, record) -> topicStatusMap.put(topic, new StatusRecord(Status.DISCONNECTED, record)));
         AnnotationUtil.subscribeReceiverInstance(this);
@@ -103,6 +106,9 @@ public class WatchdogService {
     @Receive(GlobalCons.G_SUBSCRIBE_TOPIC)
     public void checkSubscribe(MessageHolder<Object> holder) {
         String topic = holder.getHeaders().get(GlobalCons.G_SUBSCRIPTION_DEST_HEADER);
+        if (watchdogConfig.getIgnoreTopics().contains(topic)) {
+            return;
+        }
         if (!topicStatusMap.containsKey(topic)) {
             Optional<WatchdogRegistry.Record> recordOpt = WatchdogRegistry.getTopicRecord(topic);
             if (recordOpt.isEmpty()) {
@@ -119,7 +125,7 @@ public class WatchdogService {
     @Receive(GlobalCons.G_UNSUBSCRIBE_TOPIC)
     public void checkUnsubscribe(MessageHolder<Object> holder) {
         String topic = holder.getHeaders().get(GlobalCons.G_SUBSCRIPTION_DEST_HEADER);
-        if (!topicStatusMap.containsKey(topic)) {
+        if (watchdogConfig.getIgnoreTopics().contains(topic) || !topicStatusMap.containsKey(topic)) {
             return;
         }
         LOGGER.info("Watched topic '{}' disconnected.", topic);
