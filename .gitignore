@@ -12,3 +12,4 @@
 /IO/exporters/exporter-mail/target/
 /IO/importers/importer-telegram/target/
 /ui/target/
+/IO/importers/importer-rss/target/

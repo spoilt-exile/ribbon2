@@ -18,19 +18,13 @@
  */
 package tk.freaxsoftware.ribbon2.io.importer.mail;
 
-import com.sun.mail.util.BASE64DecoderStream;
-import com.sun.mail.util.QPDecoderStream;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.Flags;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
-import javax.mail.util.SharedByteArrayInputStream;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
