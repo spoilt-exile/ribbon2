@@ -23,8 +23,6 @@ import com.sun.syndication.feed.synd.SyndEntry;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportMessage;
