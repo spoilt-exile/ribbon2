@@ -59,6 +59,11 @@
         </dependency>
         <dependency>
             <groupId>tk.freaxsoftware.ribbon2.io</groupId>
+            <artifactId>importer-rss</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>tk.freaxsoftware.ribbon2.io</groupId>
             <artifactId>exporter-plain</artifactId>
             <version>1.0</version>
         </dependency>
