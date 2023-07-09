@@ -39,6 +39,7 @@ import java.util.concurrent.Executors;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tk.freaxsoftware.extras.bus.MessageContextHolder;
 import tk.freaxsoftware.extras.bus.annotation.AnnotationUtil;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonMapper;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
@@ -235,6 +236,9 @@ public class GatewayMain {
             error.setMessage(ex.getMessage());
             ctx.status(RibbonErrorCodes.CALL_ERROR.getHttpCode());
             ctx.json(error);
+        });
+        app.after((cntxt) -> {
+            MessageContextHolder.clearContext();
         });
         registerTypes();
     }
