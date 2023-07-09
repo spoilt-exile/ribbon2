@@ -57,7 +57,7 @@ public class DirectoryService extends AuthService {
     private void checkErrorDir() {
         String errorDirName = DirectoryUnit.config.getDirectory().getErrorDir();
         Directory errorDir = directoryRepository.findDirectoryByPath(errorDirName);
-        if (errorDir == null || !DirectoryUnit.config.getDirectory().getCreateDirs().contains(errorDirName)) {
+        if (errorDir == null && !DirectoryUnit.config.getDirectory().getCreateDirs().contains(errorDirName)) {
             LOGGER.error("Error directory '{}' not found or doesn't exist.", errorDirName);
             throw new IllegalArgumentException(String.format("Error directoty '%s' not found or doesn't exist.", errorDirName));
         }

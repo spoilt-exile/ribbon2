@@ -40,7 +40,7 @@ public class MessageGenericConverter implements Converter<Message, MessageModel>
         model.setUpdatedBy(source.getUpdatedBy());
         model.setHeader(source.getHeader());
         model.setTags(source.getTags());
-        model.setDirectories(source.getDirectoryNames());
+        model.setDirectories(source.getDirectories());
         model.setProperties(source.getProperties());
         return model;
     }

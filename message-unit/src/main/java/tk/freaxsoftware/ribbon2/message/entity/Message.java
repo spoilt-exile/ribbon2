@@ -25,12 +25,8 @@ import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 
 /**
@@ -60,15 +56,8 @@ public class Message extends Model {
     
     private ZonedDateTime updated;
     
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "message_directory", 
-            joinColumns = @JoinColumn(name = "message_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "directory_id", referencedColumnName = "id")
-    )
-    private Set<Directory> directories;
-    
     @DbArray
-    private Set<String> directoryNames;
+    private Set<String> directories;
     
     private String header;
     
@@ -137,20 +126,12 @@ public class Message extends Model {
         this.updated = updated;
     }
 
-    public Set<Directory> getDirectories() {
+    public Set<String> getDirectories() {
         return directories;
     }
 
-    public void setDirectories(Set<Directory> directories) {
+    public void setDirectories(Set<String> directories) {
         this.directories = directories;
-    }
-
-    public Set<String> getDirectoryNames() {
-        return directoryNames;
-    }
-
-    public void setDirectoryNames(Set<String> directoryNames) {
-        this.directoryNames = directoryNames;
     }
 
     public String getHeader() {

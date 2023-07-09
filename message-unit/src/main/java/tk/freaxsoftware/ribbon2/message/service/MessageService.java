@@ -25,6 +25,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -96,7 +97,7 @@ public class MessageService {
      */
     public Message createMessage(Message message, String user) {
         LOGGER.info("Create message {} on directories {} by user {}", 
-                message.getHeader(), message.getDirectoryNames(), user);
+                message.getHeader(), message.getDirectories(), user);
         if (message.getParentUid() != null && !message.getParentUid().isEmpty()) {
             Message parentMessage = messageRepository.findByUid(message.getParentUid());
             if (parentMessage == null) {
@@ -108,14 +109,14 @@ public class MessageService {
         message.setUid(UUID.randomUUID().toString());
         message.setCreated(ZonedDateTime.now());
         message.setCreatedBy(user);
-        message.setDirectories(linkDirectories(message.getDirectoryNames()));
         message.getProperties().forEach(pr -> {
             checkPropertyType(pr.getType());
             pr.setCreated(ZonedDateTime.now());
             pr.setCreatedBy(user);
             pr.setUid(UUID.randomUUID().toString());
         });
-        checkDirectoryAccess(user, message.getDirectoryNames(), Message.PERMISSION_CAN_CREATE_MESSAGE);
+        verifyDirectories(message.getDirectories());
+        checkDirectoryAccess(user, message.getDirectories(), Message.PERMISSION_CAN_CREATE_MESSAGE);
         return messageRepository.save(message);
     }
     
@@ -127,14 +128,13 @@ public class MessageService {
      */
     public Message updateMessage(Message message, String user) {
         LOGGER.info("Update message {} on directories {} by user {}", 
-                message.getUid(), message.getDirectoryNames(), user);
+                message.getUid(), message.getDirectories(), user);
         Message existingMessage = messageRepository.findByUid(message.getUid());
         if (existingMessage != null) {
             existingMessage.setHeader(message.getHeader());
             existingMessage.setContent(message.getContent());
             existingMessage.setTags(message.getTags());
-            existingMessage.setDirectories(linkDirectories(message.getDirectoryNames()));
-            existingMessage.setDirectoryNames(message.getDirectoryNames());
+            existingMessage.setDirectories(message.getDirectories());
             existingMessage.setUpdated(ZonedDateTime.now());
             existingMessage.setUpdatedBy(user);
             message.getProperties().forEach(pr -> {
@@ -146,7 +146,7 @@ public class MessageService {
                     existingMessage.getProperties().add(pr);
                 }
             });
-            checkDirectoryAccess(user, message.getDirectoryNames(), Message.PERMISSION_CAN_UPDATE_MESSAGE);
+            checkDirectoryAccess(user, message.getDirectories(), Message.PERMISSION_CAN_UPDATE_MESSAGE);
             return messageRepository.save(existingMessage);
         }
         throw new CoreException(MESSAGE_NOT_FOUND, 
@@ -158,8 +158,8 @@ public class MessageService {
         Message existingMessage = messageRepository.findByUid(uid);
         if (existingMessage != null) {
             LOGGER.warn("Deleting message {} from directories: {}", 
-                    existingMessage.getUid(), existingMessage.getDirectoryNames());
-            checkDirectoryAccess(user, existingMessage.getDirectoryNames(), Message.PERMISSION_CAN_DELETE_MESSAGE);
+                    existingMessage.getUid(), existingMessage.getDirectories());
+            checkDirectoryAccess(user, existingMessage.getDirectories(), Message.PERMISSION_CAN_DELETE_MESSAGE);
             existingMessage.delete();
             return existingMessage;
         }
@@ -279,21 +279,24 @@ public class MessageService {
         return String.format("%s@%s@%s", user, permission, directory);
     }
     
-    private Set<Directory> linkDirectories(Set<String> directoryNames) {
-        Set<Directory> directories = new HashSet<>();
-        if (directoryNames == null || (directoryNames != null && directoryNames.isEmpty())) {
-            throw new CoreException(MESSAGE_DIRECTORIES_REQUIRED, "Can't create message without directories.");
+    private void verifyDirectories(Set<String> directoryNames) {
+        if (directoryNames == null || (directoryNames != null 
+                && directoryNames.isEmpty())) {
+            throw new CoreException(MESSAGE_DIRECTORIES_REQUIRED, 
+                    "Can't create message without directories.");
         }
-        for (String directoryName: directoryNames) {
-            Directory finded = directoryRepository.findByFullName(directoryName);
-            if (finded != null) {
-                directories.add(finded);
-            } else {
-                throw new CoreException(DIRECTORY_NOT_FOUND, 
-                        String.format("Directory %s not found!", directoryName));
-            }
+        Set<Directory> foundDirectories = directoryRepository
+                .findAllByFullName(directoryNames);
+        Set<String> foundDirNames = foundDirectories.stream()
+                .map(dir -> dir.getFullName())
+                .collect(Collectors.toSet());
+        if (!Objects.equals(directoryNames, foundDirNames)) {
+            Set<String> notFoundDirNames = directoryNames.stream()
+                    .filter(dirName -> !foundDirNames.contains(dirName))
+                    .collect(Collectors.toSet());
+            throw new CoreException(DIRECTORY_NOT_FOUND, 
+                    String.format("Directories %s not found!", notFoundDirNames));
         }
-        return directories;
     }
     
     /**

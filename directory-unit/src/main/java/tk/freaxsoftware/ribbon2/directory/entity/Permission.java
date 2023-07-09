@@ -31,14 +31,9 @@ import javax.persistence.Lob;
 public class Permission extends Model {
     
     /**
-     * Id of entity;
-     */
-    @Id
-    private Long id;
-    
-    /**
      * Id of the permission.
      */
+    @Id
     private String key;
     
     /**
@@ -60,19 +55,10 @@ public class Permission extends Model {
     public Permission() {}
 
     public Permission(Long id, String key, Boolean defaultValue, String description, String tag) {
-        this.id = id;
         this.key = key;
         this.defaultValue = defaultValue;
         this.description = description;
         this.tag = tag;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getKey() {
