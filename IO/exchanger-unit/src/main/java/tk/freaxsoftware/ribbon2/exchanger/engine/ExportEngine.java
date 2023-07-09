@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageBus;
+import tk.freaxsoftware.extras.bus.MessageContextHolder;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
@@ -146,7 +147,7 @@ public class ExportEngine extends IOEngine<Exporter>{
         }
         registerEmbargoProperty();
         MessageBus.addSubscription(MessageModel.NOTIFICATION_MESSAGE_CREATED, 
-                holder -> processExportMessage((MessageModel) holder.getContent()));
+                holder -> processExportMessage((MessageModel) holder.getContent(), holder.getTrxId()));
         checkQueueRun();
     }
     
@@ -171,7 +172,7 @@ public class ExportEngine extends IOEngine<Exporter>{
                         .async().pointToPoint().build());
     }
     
-    private void processExportMessage(MessageModel message) {
+    private void processExportMessage(MessageModel message, String trxId) {
         Set<String> moduleIds = moduleMap.values().stream().map(exporter -> exporter.getModuleData().id()).collect(Collectors.toSet());
         List<Scheme> schemes = schemeRepository.findByExportDir(moduleIds, message.getDirectories());
         if (!schemes.isEmpty()) {
@@ -180,7 +181,7 @@ public class ExportEngine extends IOEngine<Exporter>{
                 Set<String> dirIntersect = new HashSet<>(scheme.getExportList());
                 dirIntersect.retainAll(message.getDirectories());
                 for (String exportDir: dirIntersect) {
-                    exportQueueRepository.save(new ExportQueue(exportDir, scheme.getProtocol(), scheme.getName(), message, getMessageExportDate(message)));
+                    exportQueueRepository.save(new ExportQueue(exportDir, scheme.getProtocol(), scheme.getName(), trxId, message, getMessageExportDate(message)));
                 }
             }
         }
@@ -342,6 +343,7 @@ public class ExportEngine extends IOEngine<Exporter>{
         private void innerHandle(Set<SchemeStatusUpdate> statusUpdates, ExportQueue exportMessage, Scheme scheme) {
             ErrorHandling errorHandling = scheme.errorHandling();
             ModuleWrapper<Exporter> module = moduleMap.get(scheme.getProtocol());
+            MessageContextHolder.getContext().setTrxId(exportMessage.getTrxId());
             try {
                 innerExport(module.getModuleInstance(), exportMessage, scheme);
                 if (errorSchemes.contains(scheme.getName())) {
@@ -357,6 +359,7 @@ public class ExportEngine extends IOEngine<Exporter>{
                 LOGGER.error("Error: ", ex);
                 errorHandle(statusUpdates, module, scheme, exportMessage, ex, errorHandling);
             }
+            MessageContextHolder.clearContext();
         }
         
         private void errorHandle(Set<SchemeStatusUpdate> statusUpdates, ModuleWrapper<Exporter> module, Scheme scheme, ExportQueue exportMessage, Exception ex, ErrorHandling errorHandling) {

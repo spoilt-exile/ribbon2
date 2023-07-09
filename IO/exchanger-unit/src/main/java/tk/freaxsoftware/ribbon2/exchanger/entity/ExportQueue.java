@@ -45,6 +45,8 @@ public class ExportQueue extends Model {
     
     private String scheme;
     
+    private String trxId;
+    
     @DbJsonB
     private MessageModel message;
     
@@ -63,13 +65,20 @@ public class ExportQueue extends Model {
      * @param exportDirectory directory which export initated from;
      * @param protocol protocol of module to export;
      * @param scheme name of scheme;
+     * @param trxId transaction id;
      * @param message message to export;
      * @param tillDate date till message should be exported;
      */
-    public ExportQueue(String exportDirectory, String protocol, String scheme, MessageModel message, ZonedDateTime tillDate) {
+    public ExportQueue(String exportDirectory, 
+            String protocol, 
+            String scheme, 
+            String trxId,
+            MessageModel message, 
+            ZonedDateTime tillDate) {
         this.exportDirectory = exportDirectory;
         this.protocol = protocol;
         this.scheme = scheme;
+        this.trxId = trxId;
         this.message = message;
         this.tillDate = tillDate;
     }
@@ -104,6 +113,14 @@ public class ExportQueue extends Model {
 
     public void setScheme(String scheme) {
         this.scheme = scheme;
+    }
+
+    public String getTrxId() {
+        return trxId;
+    }
+
+    public void setTrxId(String trxId) {
+        this.trxId = trxId;
     }
 
     public MessageModel getMessage() {

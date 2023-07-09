@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageBus;
+import tk.freaxsoftware.extras.bus.MessageContextHolder;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
@@ -275,6 +276,7 @@ public class ImportEngine extends IOEngine<Importer> {
                 LOGGER.error("Stacktrace:", ex);
                 errorHandle(importSource.getScheme(), ex);
             }
+            MessageContextHolder.clearContext();
         }
         
         private void errorHandle(IOScheme scheme, Exception ex) {

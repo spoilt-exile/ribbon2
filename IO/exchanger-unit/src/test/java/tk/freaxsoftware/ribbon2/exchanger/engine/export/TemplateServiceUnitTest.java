@@ -51,7 +51,7 @@ public class TemplateServiceUnitTest {
     public void shouldProcessMessagePlain() throws IOException, TemplateException {
         String template = loadTemplate("plain_template.txt");
         IOScheme scheme = buildScheme(template);
-        ExportQueue queue = new ExportQueue("System.Test", scheme.getProtocol(), scheme.getName(), buildMessage(), staticDate);
+        ExportQueue queue = new ExportQueue("System.Test", scheme.getProtocol(), scheme.getName(), "testTrx1", buildMessage(), staticDate);
         String processed = templateService.processMessage(scheme, queue);
         String processedSaved = loadTemplate("plain_processed.txt");
         Assert.assertEquals(processed, processedSaved);
@@ -61,7 +61,7 @@ public class TemplateServiceUnitTest {
     public void shouldProcessMessageJson() throws IOException, TemplateException {
         String template = loadTemplate("template.json");
         IOScheme scheme = buildScheme(template);
-        ExportQueue queue = new ExportQueue("System.Test", scheme.getProtocol(), scheme.getName(), buildMessage(), staticDate);
+        ExportQueue queue = new ExportQueue("System.Test", scheme.getProtocol(), scheme.getName(), "testTrx1", buildMessage(), staticDate);
         String processed = templateService.processMessage(scheme, queue);
         String processedSaved = loadTemplate("processed.json");
         Assert.assertEquals(processed, processedSaved);
