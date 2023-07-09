@@ -45,4 +45,8 @@ public class DirectoryRepository {
         return DB.getDefault().find(Directory.class).findSet();
     }
     
+    public Set<Directory> findAllByFullName(Set<String> dirs) {
+        return DB.getDefault().find(Directory.class).where().in("fullName", dirs).findSet();
+    }
+    
 }

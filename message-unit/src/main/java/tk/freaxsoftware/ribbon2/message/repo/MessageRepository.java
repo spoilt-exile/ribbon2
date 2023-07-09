@@ -47,8 +47,7 @@ public class MessageRepository {
      * @return paged list;
      */
     public PagedList<Message> findPage(String directory, PaginationRequest request) {
-        Query<Message> query = DB.getDefault().find(Message.class).where().arrayContains("directoryNames", directory).query();
-        
+        Query<Message> query = DB.getDefault().find(Message.class).where().arrayContains("directories", directory).query();
         return DBUtils.findPaginatedEntityWithQuery(request, query);
     }
 }
