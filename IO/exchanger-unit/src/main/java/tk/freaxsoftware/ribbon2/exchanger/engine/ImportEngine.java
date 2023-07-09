@@ -264,7 +264,6 @@ public class ImportEngine extends IOEngine<Importer> {
                         throw ex;
                     }
                 }
-                importSource.close();
                 if (instance.getStatus() == SchemeInstance.Status.ERROR) {
                     instance.setErrorDescription(null);
                     instance.setStatus(SchemeInstance.Status.OK);
@@ -275,6 +274,14 @@ public class ImportEngine extends IOEngine<Importer> {
                         importSource.getScheme().getName(), importSource.getScheme().getId());
                 LOGGER.error("Stacktrace:", ex);
                 errorHandle(importSource.getScheme(), ex);
+            } finally {
+                try {
+                    importSource.close();
+                } catch (Exception closeEx) {
+                    LOGGER.error("Error on closing import source of scheme {} for module {}", 
+                            importSource.getScheme().getName(), importSource.getScheme().getId());
+                    LOGGER.error("Stacktrace:", closeEx);
+                }
             }
             MessageContextHolder.clearContext();
         }
