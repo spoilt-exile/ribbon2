@@ -19,13 +19,14 @@
 
 package tk.freaxsoftware.ribbon2.core.data;
 
+import java.io.Serializable;
 import java.util.Set;
 
 /**
  * User data class.
  * @author Stanislav Nepochatov
  */
-public class UserModel {
+public class UserModel implements Serializable {
     
     public final static String NOTIFICATION_USER_CREATED = "Ribbon.Global.Notification.UserCreated";
     public final static String NOTIFICATION_USER_UPDATED = "Ribbon.Global.Notification.UserUpdated";

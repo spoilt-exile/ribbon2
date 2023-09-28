@@ -19,6 +19,7 @@
 package tk.freaxsoftware.ribbon2.uix.rest;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -53,36 +54,28 @@ public class AuthRestClient {
      * Perform authentication of user.
      * @param login username of user;
      * @param password raw password of user;
-     * @return raw JWT token of the user;
+     * @return rest result with raw JWT token;
      * @throws URISyntaxException
      * @throws IOException 
      */
-    public String auth(String login, String password) throws URISyntaxException, IOException {
+    public RestResult<String> auth(String login, String password) throws URISyntaxException, IOException {
         HttpPost request = new HttpPost(new URIBuilder(baseUrl + "/auth").addParameter("login", login).addParameter("password", password).build());
         HttpResponse response = clientBuilder.build().execute(request);
-        if (response.getStatusLine().getStatusCode() == 200) {
-            return IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
-        } else {
-            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Auth request failed with status: " + response.getStatusLine().toString());
-        }
+        return RestResult.ofResponseRaw(response);
     }
     
     /**
      * Get current account info of user.
      * @param jwtKey raw JWT key;
-     * @return user model;
+     * @return rest result with user model;
      * @throws URISyntaxException
      * @throws IOException 
      */
-    public UserModel getAccount(String jwtKey) throws URISyntaxException, IOException {
+    public RestResult<UserModel> getAccount(String jwtKey) throws URISyntaxException, IOException {
         HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/api/account").build());
         request.addHeader("x-ribbon2-auth", jwtKey);
         HttpResponse response = clientBuilder.build().execute(request);
-        if (response.getStatusLine().getStatusCode() == 200) {
-            return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), UserModel.class);
-        } else {
-            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Auth request failed with status: " + response.getStatusLine().toString());
-        }
+        return RestResult.ofResponse(response, new TypeToken<UserModel>() {});
     }
     
 }

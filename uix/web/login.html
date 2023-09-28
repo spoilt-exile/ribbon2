@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Ribbon2 Login page</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" media="screen" href="/web/static/main.css">
+        <script src="https://unpkg.com/htmx.org@1.9.4"></script>
+    </head>
+    <body>
+        <div align="center">
+            <div class="login-frame">
+                <font color="red" id="login_error"></font>
+                <form hx-post="/login" hx-target="#login_error">
+                        <b>LOGIN:</b><br>
+                        <input type="text" name="login" required><br>
+                        <b>PASSWORD:</b><br>
+                        <input type="password" name="password" required><br>
+                        <input type="submit" value="Enter">
+                        <input type="reset" value="Clear">
+                </form>
+            </div>
+        </div>
+    </body>
+</html>
