@@ -23,7 +23,10 @@ package tk.freaxsoftware.ribbon2.uix.config;
  * @author Stanislav Nepochatov
  */
 public class UixConfig {
+    
     private String gatewayUrl;
+    
+    private HttpConfig http;
 
     public String getGatewayUrl() {
         return gatewayUrl;
@@ -33,8 +36,52 @@ public class UixConfig {
         this.gatewayUrl = gatewayUrl;
     }
 
+    public HttpConfig getHttp() {
+        return http;
+    }
+
+    public void setHttp(HttpConfig http) {
+        this.http = http;
+    }
+
     @Override
     public String toString() {
-        return "{" + "gatewayUrl=" + gatewayUrl + '}';
+        return "{" + "gatewayUrl=" + gatewayUrl + ", http=" + http + '}';
+    }
+    
+    public static class HttpConfig {
+        
+        private Integer port;
+        private String authCookieName;
+        private Integer authTokenValidDays;
+
+        public Integer getPort() {
+            return port;
+        }
+
+        public void setPort(Integer port) {
+            this.port = port;
+        }
+
+        public String getAuthCookieName() {
+            return authCookieName;
+        }
+
+        public void setAuthCookieName(String authCookieName) {
+            this.authCookieName = authCookieName;
+        }
+
+        public Integer getAuthTokenValidDays() {
+            return authTokenValidDays;
+        }
+
+        public void setAuthTokenValidDays(Integer authTokenValidDays) {
+            this.authTokenValidDays = authTokenValidDays;
+        }
+
+        @Override
+        public String toString() {
+            return "{" + "port=" + port + ", authCookieName=" + authCookieName + ", authTokenValidDays=" + authTokenValidDays + '}';
+        }
     }
 }
