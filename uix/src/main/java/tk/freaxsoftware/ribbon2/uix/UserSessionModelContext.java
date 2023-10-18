@@ -18,21 +18,21 @@
  */
 package tk.freaxsoftware.ribbon2.uix;
 
-import tk.freaxsoftware.ribbon2.core.data.UserModel;
+import tk.freaxsoftware.ribbon2.uix.model.UserSessionModel;
 
 /**
- * User context holder.
+ * User session context holder.
  * @author Stanislav Nepochatov
  */
-public class UserModelContext {
+public class UserSessionModelContext {
     
-    private static ThreadLocal<UserModel> context = new ThreadLocal<>();
+    private static ThreadLocal<UserSessionModel> context = new ThreadLocal<>();
 
-    public static UserModel getUser() {
+    public static UserSessionModel getUser() {
         return context.get();
     }
 
-    public static void setUser(UserModel user) {
+    public static void setUser(UserSessionModel user) {
         context.set(user);
     }
     

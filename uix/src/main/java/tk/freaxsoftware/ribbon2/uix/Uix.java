@@ -38,6 +38,7 @@ import tk.freaxsoftware.ribbon2.uix.config.UixConfig;
 import tk.freaxsoftware.ribbon2.uix.config.UixConfig.HttpConfig;
 import tk.freaxsoftware.ribbon2.uix.rest.GatewayService;
 import tk.freaxsoftware.ribbon2.uix.routes.LoginRoutes;
+import tk.freaxsoftware.ribbon2.uix.routes.MainRoutes;
 
 /**
  * UIX unit main class.
@@ -84,12 +85,8 @@ public class Uix {
         
         JavalinRenderer.register(new JavalinFreemarker(freeMarkerConfiguration), ".html");
         
-        app.get("/", (ctx) -> {
-            ctx.render("index.html", Map.of(
-                    "user", UserModelContext.getUser()));
-        });
-        
         LoginRoutes.init(app, gatewayService);
+        MainRoutes.init(app, gatewayService);
         
         app.start(config.getHttp().getPort());
     }

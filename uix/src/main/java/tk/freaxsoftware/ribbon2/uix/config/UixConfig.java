@@ -83,5 +83,9 @@ public class UixConfig {
         public String toString() {
             return "{" + "port=" + port + ", authCookieName=" + authCookieName + ", authTokenValidDays=" + authTokenValidDays + '}';
         }
+        
+        public Integer authTokenMaxAge() {
+            return authTokenValidDays * 24 * 60 * 60;
+        }
     }
 }

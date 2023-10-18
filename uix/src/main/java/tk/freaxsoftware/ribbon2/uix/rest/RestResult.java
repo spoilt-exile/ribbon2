@@ -100,7 +100,8 @@ public class RestResult<T> {
                 error.setStatusLine(response.getStatusLine().getReasonPhrase());
                 Header contentTypeHeader = response.getEntity().getContentType();
                 error.setContentType(contentTypeHeader != null ? contentTypeHeader.getValue() : "null");
-                error.setIoError(true);
+                error.setCoreErrorCode(RibbonErrorCodes.CALL_ERROR);
+                error.setCoreErrorMessage(ex.getMessage());
                 errorResult.setError(error);
                 return errorResult;
             }
@@ -129,12 +130,22 @@ public class RestResult<T> {
                 error.setStatusLine(response.getStatusLine().getReasonPhrase());
                 Header contentTypeHeader = response.getEntity().getContentType();
                 error.setContentType(contentTypeHeader != null ? contentTypeHeader.getValue() : "null");
-                error.setIoError(true);
+                error.setCoreErrorCode(RibbonErrorCodes.CALL_ERROR);
+                error.setCoreErrorMessage(ex.getMessage());
                 errorResult.setError(error);
                 return errorResult;
             }
         }
         return createErrorResult(response);
+    }
+    
+    public static RestResult<Object> ofException(Exception ex) {
+        RestResult errorResult = new RestResult();
+        Error error = new Error();
+        error.setCoreErrorCode(RibbonErrorCodes.CALL_ERROR);
+        error.setCoreErrorMessage(ex.getMessage());
+        errorResult.setError(error);
+        return errorResult;
     }
     
     private static RestResult createErrorResult(HttpResponse response) {
@@ -154,7 +165,8 @@ public class RestResult<T> {
                 error.setContent(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()));
             }
         } catch (IOException ex) {
-            error.setIoError(true);
+            error.setCoreErrorCode(RibbonErrorCodes.CALL_ERROR);
+            error.setCoreErrorMessage(ex.getMessage());
         }
         return errorResult;
     }
@@ -221,13 +233,9 @@ public class RestResult<T> {
         public void setCoreErrorMessage(String coreErrorMessage) {
             this.coreErrorMessage = coreErrorMessage;
         }
-
-        public boolean isIoError() {
-            return ioError;
-        }
-
-        public void setIoError(boolean ioError) {
-            this.ioError = ioError;
+        
+        public String renderError() {
+            return coreErrorCode != null ? String.format("Core error %s: %s", coreErrorCode, coreErrorMessage) : String.format("Req error: %d %s", status, statusLine);
         }
     }
     

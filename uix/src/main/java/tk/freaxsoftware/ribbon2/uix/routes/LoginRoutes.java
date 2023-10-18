@@ -22,7 +22,8 @@ import io.javalin.Javalin;
 import java.util.Map;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.uix.Uix;
-import tk.freaxsoftware.ribbon2.uix.UserModelContext;
+import tk.freaxsoftware.ribbon2.uix.UserSessionModelContext;
+import tk.freaxsoftware.ribbon2.uix.model.UserSessionModel;
 import tk.freaxsoftware.ribbon2.uix.rest.GatewayService;
 
 /**
@@ -35,12 +36,13 @@ public class LoginRoutes {
     
     public static void init(Javalin app, GatewayService gatewayService) {
         app.before("/*", ctx -> {
-            UserModel logined = null;
+            UserSessionModel logined = null;
             if (ctx.sessionAttribute(USER_SESSION_KEY) != null) {
                 logined = ctx.sessionAttribute(USER_SESSION_KEY);
             } else if (ctx.cookie(Uix.config.getHttp().getAuthCookieName()) != null) {
-                logined = gatewayService.getAuthRestClient().getAccount(
+                UserModel user = gatewayService.getAuthRestClient().getAccount(
                         ctx.cookie(Uix.config.getHttp().getAuthCookieName())).getResult();
+                logined = UserSessionModel.ofUserModelAndJwtKey(user, ctx.cookie(Uix.config.getHttp().getAuthCookieName()));
             }
             
             if (logined == null) {
@@ -49,12 +51,12 @@ public class LoginRoutes {
                     ctx.redirect("/login");
                 }
             } else {
-                UserModelContext.setUser(logined);
+                UserSessionModelContext.setUser(logined);
             }
         });
         
         app.after("/*", ctx -> {
-            UserModelContext.setUser(null);
+            UserSessionModelContext.setUser(null);
         });
         
         app.get("/login", ctx -> {
@@ -66,13 +68,11 @@ public class LoginRoutes {
             final String password = ctx.formParam("password");
             gatewayService.getAuthRestClient().auth(login, password)
                     .onSuccess(token -> {
-                        System.out.println("SUCCESS");
-                        ctx.cookie(Uix.config.getHttp().getAuthCookieName(), token);
+                        ctx.cookie(Uix.config.getHttp().getAuthCookieName(), token, Uix.config.getHttp().authTokenMaxAge());
                         ctx.header("HX-Redirect", "/");
                     })
                     .onError(error -> {
-                        System.out.println("Error: " + error.getCoreErrorCode().name() + " " + error.getCoreErrorMessage());
-                        ctx.result(error.getCoreErrorCode().name() + " " + error.getCoreErrorMessage());
+                        ctx.result(error.renderError());
                     });
         });
     }
