@@ -1,3 +1,16 @@
-<#list directories as directory>
-    <li>${directory.name} : ${directory.fullName}</li>
-</#list>
+<#macro dirTreeList dirList>
+    <ul>
+        <#list dirList as childDir>
+            <li>
+                <div>
+                    ${childDir.parentDirectory.name}
+                </div>
+            </li>
+            <#if childDir.directoryChildren??>
+                <@dirTreeList childDir.directoryChildren />
+            </#if>
+        </#list>
+    </ul>
+</#macro>
+
+<@dirTreeList directories.directoryChildren />
