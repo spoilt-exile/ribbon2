@@ -13,5 +13,8 @@
         <#list user.groups as group>
             <li>${group}</li>
         </#list>
+        <div id="dirs" hx-trigger="load, every 30s" hx-get="/directories">
+            
+        </div>
     </body>
 </html>

@@ -56,18 +56,16 @@ public class DirectoryRestClient {
     /**
      * Get all directories sorted for tree.
      * @param jwtKey raw JWT key;
-     * @return page of directories;
-     * @throws URISyntaxException
-     * @throws IOException 
+     * @return rest result with page of directories;
      */
-    public DirectoryPage getDirectories(String jwtKey) throws URISyntaxException, IOException {
-        HttpGet request = new HttpGet(new URIBuilder(baseUrl).addParameter(PARAM_PAGE, "0").addParameter(PARAM_SIZE, "10000").build());
-        request.addHeader("x-ribbon2-auth", jwtKey);
-        HttpResponse response = clientBuilder.build().execute(request);
-        if (response.getStatusLine().getStatusCode() == 200) {
-            return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), DirectoryPage.class);
-        } else {
-            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Directory request failed with status: " + response.getStatusLine().toString());
+    public RestResult<DirectoryPage> getDirectories(String jwtKey) {
+        try {
+            HttpGet request = new HttpGet(new URIBuilder(baseUrl).addParameter(PARAM_PAGE, "0").addParameter(PARAM_SIZE, "10000").build());
+            request.addHeader("x-ribbon2-auth", jwtKey);
+            HttpResponse response = clientBuilder.build().execute(request);
+            return RestResult.ofResponse(response, new TypeToken<DirectoryPage>() {});
+        } catch (Exception ex) {
+            return (RestResult) RestResult.ofException(ex);
         }
     }
     
