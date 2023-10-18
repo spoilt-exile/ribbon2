@@ -19,8 +19,14 @@
 package tk.freaxsoftware.ribbon2.uix.routes;
 
 import io.javalin.Javalin;
+import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
 import tk.freaxsoftware.ribbon2.uix.UserSessionModelContext;
+import tk.freaxsoftware.ribbon2.uix.model.DirectoryNode;
 import tk.freaxsoftware.ribbon2.uix.rest.GatewayService;
 
 /**
@@ -28,6 +34,8 @@ import tk.freaxsoftware.ribbon2.uix.rest.GatewayService;
  * @author Stanislav Nepochatov
  */
 public class MainRoutes {
+    
+    private final static Logger LOGGER = LoggerFactory.getLogger(MainRoutes.class);
       
     public static void init(Javalin app, GatewayService gatewayService) {
         app.get("/", (ctx) -> {
@@ -37,12 +45,40 @@ public class MainRoutes {
         app.get("/directories", (ctx) -> {
             gatewayService.getDirectoryRestClient().getDirectories(UserSessionModelContext.getUser().getJwtKey())
                     .onSuccess(page -> {
-                        ctx.render("directories.html", Map.of("directories", page.getContent()));
+                        ctx.render("directories.html", Map.of("directories", convertToTree(page)));
                     })
                     .onError(err -> {
                         ctx.result(err.renderError());
                     });
         });
+    }
+    
+    private static DirectoryNode convertToTree(DirectoryPage dirPage) {
+        DirectoryNode root = new DirectoryNode();
+        Map<String, DirectoryNode> pathMap = new HashMap<>();
+        
+        for (DirectoryModel current: dirPage.getContent()) {
+            String parentName = current.parentName();
+            LOGGER.info("Processing directory {} with parent {}", current.getFullName(), parentName);
+            if (parentName.isEmpty()) {
+                LOGGER.info("Adding {} directory to ROOT", current.getFullName());
+                DirectoryNode insertToRootNode = new DirectoryNode(current);
+                root.getDirectoryChildren().add(insertToRootNode);
+                pathMap.put(current.getFullName(), insertToRootNode);
+            } else {
+                if (pathMap.containsKey(current.parentName())) {
+                    DirectoryNode parent = pathMap.get(current.parentName());
+                    LOGGER.info("Adding {} directory to {}", current.getFullName(), parent.getParentDirectory().getFullName());
+                    DirectoryNode insertedInside = new DirectoryNode(current);
+                    parent.getDirectoryChildren().add(insertedInside);
+                    pathMap.put(current.getFullName(), insertedInside);
+                } else {
+                    LOGGER.warn("Discarding {} directory", current.getFullName());
+                }
+            }
+        }
+        
+        return root;
     }
     
 }
