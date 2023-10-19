@@ -7,6 +7,7 @@
         <script src="https://unpkg.com/htmx.org@1.9.4"></script>
     </head>
     <body>
+        <input type="submit" value="LOGOUT" hx-post="/logout" hx-trigger="click"/>
         Hi, ${user.login}!<br/>
         Email: ${user.email}<br/>
         Groups:<br/>

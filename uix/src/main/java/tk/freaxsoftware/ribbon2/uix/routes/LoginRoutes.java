@@ -43,6 +43,9 @@ public class LoginRoutes {
                 UserModel user = gatewayService.getAuthRestClient().getAccount(
                         ctx.cookie(Uix.config.getHttp().getAuthCookieName())).getResult();
                 logined = UserSessionModel.ofUserModelAndJwtKey(user, ctx.cookie(Uix.config.getHttp().getAuthCookieName()));
+                if (logined != null) {
+                    ctx.sessionAttribute(USER_SESSION_KEY, logined);
+                }
             }
             
             if (logined == null) {
@@ -74,6 +77,12 @@ public class LoginRoutes {
                     .onError(error -> {
                         ctx.result(error.renderError());
                     });
+        });
+        
+        app.post("/logout", ctx -> {
+            ctx.removeCookie(Uix.config.getHttp().getAuthCookieName());
+            ctx.req().getSession().invalidate();
+            ctx.header("HX-Redirect", "/login");
         });
     }
     
