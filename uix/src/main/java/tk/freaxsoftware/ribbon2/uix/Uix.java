@@ -28,7 +28,7 @@ import io.javalin.rendering.template.JavalinFreemarker;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Map;
+import no.api.freemarker.java8.Java8ObjectWrapper;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +82,7 @@ public class Uix {
         
         Configuration freeMarkerConfiguration = new Configuration(VERSION_2_3_32);
         freeMarkerConfiguration.setDirectoryForTemplateLoading(new File("web"));
+        freeMarkerConfiguration.setObjectWrapper(new Java8ObjectWrapper(VERSION_2_3_32));
         
         JavalinRenderer.register(new JavalinFreemarker(freeMarkerConfiguration), ".html");
         

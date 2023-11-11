@@ -24,9 +24,11 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
 import tk.freaxsoftware.ribbon2.uix.UserSessionModelContext;
 import tk.freaxsoftware.ribbon2.uix.model.DirectoryNode;
+import tk.freaxsoftware.ribbon2.uix.model.PageableUrlWrapper;
 import tk.freaxsoftware.ribbon2.uix.rest.GatewayService;
 
 /**
@@ -46,6 +48,20 @@ public class MainRoutes {
             gatewayService.getDirectoryRestClient().getDirectories(UserSessionModelContext.getUser().getJwtKey())
                     .onSuccess(page -> {
                         ctx.render("directories.html", Map.of("directories", convertToTree(page)));
+                    })
+                    .onError(err -> {
+                        ctx.result(err.renderError());
+                    });
+        });
+        
+        app.get("/messages/{dir}", (ctx) -> {
+            final String dir = ctx.pathParam("dir");
+            final int page = Integer.parseInt(ctx.queryParam("page"));
+            final int pageSize = Integer.parseInt(ctx.queryParam("pageSize"));
+            gatewayService.getMessageRestClient().getMessages(UserSessionModelContext.getUser().getJwtKey(), dir, pageSize, page)
+                    .onSuccess(messagePage -> {
+                        PageableUrlWrapper<MessageModel> messages = new PageableUrlWrapper(messagePage, String.format("/%s/%s", "messages", dir), pageSize, pageSize);
+                        ctx.render("messages.html", Map.of("messages", messages));
                     })
                     .onError(err -> {
                         ctx.result(err.renderError());

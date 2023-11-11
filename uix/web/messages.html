@@ -1,0 +1,20 @@
+<table>
+    <thead>
+        <tr>
+            <th>UID</th>
+            <th>Author</th>
+            <th>Date</th>
+            <th>Header</th>
+        </tr>
+    </thead>
+    <tbody>
+        <#list messages.content as message>
+        <tr>
+            <td>${message.uid}</td>
+            <td>${message.createdBy}</td>
+            <td>${message.created.format('yyyy MM dd HH:mm:ss')}</td>
+            <td>${message.header}</td>
+        </tr>
+        </#list>
+    </tbody>
+</table>

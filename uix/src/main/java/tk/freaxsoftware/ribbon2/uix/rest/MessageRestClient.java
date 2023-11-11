@@ -39,7 +39,7 @@ import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyTagged;
 import static tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.PARAM_PAGE;
 import static tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.PARAM_SIZE;
-import tk.freaxsoftware.ribbon2.core.data.response.MessagePage;
+import tk.freaxsoftware.ribbon2.core.data.response.DefaultPage;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 
@@ -60,23 +60,23 @@ public class MessageRestClient {
     }
     
     /**
-     * Get all messages.
+     * Get messages paged.
      * @param jwtKey raw JWT key;
      * @param directory directory for loading messages from;
-     * @return page of messages;
-     * @throws URISyntaxException
-     * @throws IOException 
+     * @param pageSize size of page;
+     * @param page number of page;
+     * @return rest result with page of messages;
      */
-    public MessagePage getMessages(String jwtKey, String directory, int pageSize, int page) throws URISyntaxException, IOException {
-        HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/" + directory)
-                .addParameter(PARAM_PAGE, String.valueOf(page))
-                .addParameter(PARAM_SIZE, String.valueOf(pageSize)).build());
-        request.addHeader("x-ribbon2-auth", jwtKey);
-        HttpResponse response = clientBuilder.build().execute(request);
-        if (response.getStatusLine().getStatusCode() == 200) {
-            return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), MessagePage.class);
-        } else {
-            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Messages request failed with status: " + response.getStatusLine().toString());
+    public RestResult<DefaultPage<MessageModel>> getMessages(String jwtKey, String directory, int pageSize, int page) {
+        try {
+            HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/" + directory)
+                    .addParameter(PARAM_PAGE, String.valueOf(page))
+                    .addParameter(PARAM_SIZE, String.valueOf(pageSize)).build());
+            request.addHeader("x-ribbon2-auth", jwtKey);
+            HttpResponse response = clientBuilder.build().execute(request);
+            return RestResult.ofResponse(response, new TypeToken<DefaultPage<MessageModel>>() {});
+        } catch (Exception ex) {
+            return (RestResult) RestResult.ofException(ex);
         }
     }
     
@@ -85,16 +85,16 @@ public class MessageRestClient {
      * @param jwtKey raw JWT key;
      * @param uid message uid;
      * @param directory directory for loading message from;
-     * @return message model with content;
+     * @return rest result with message model with content;
      */
-    public MessageModel getMessageByUid(String jwtKey, String uid, String directory) throws URISyntaxException, IOException {
-        HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/" + uid + "/dir/" + directory).build());
-        request.addHeader("x-ribbon2-auth", jwtKey);
-        HttpResponse response = clientBuilder.build().execute(request);
-        if (response.getStatusLine().getStatusCode() == 200) {
-            return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), MessageModel.class);
-        } else {
-            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Messages request failed with status: " + response.getStatusLine().toString());
+    public RestResult<MessageModel> getMessageByUid(String jwtKey, String uid, String directory) {
+        try {
+            HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/" + uid + "/dir/" + directory).build());
+            request.addHeader("x-ribbon2-auth", jwtKey);
+            HttpResponse response = clientBuilder.build().execute(request);
+            return RestResult.ofResponse(response, new TypeToken<MessageModel>() {});
+        } catch (Exception ex) {
+            return (RestResult) RestResult.ofException(ex);
         }
     }
     
