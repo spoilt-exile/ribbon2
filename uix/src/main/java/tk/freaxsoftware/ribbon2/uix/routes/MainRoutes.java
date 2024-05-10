@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
+import tk.freaxsoftware.ribbon2.core.data.response.DefaultPage;
 import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
 import tk.freaxsoftware.ribbon2.uix.UserSessionModelContext;
 import tk.freaxsoftware.ribbon2.uix.model.DirectoryNode;
@@ -45,27 +46,17 @@ public class MainRoutes {
         });
         
         app.get("/directories", (ctx) -> {
-            gatewayService.getDirectoryRestClient().getDirectories(UserSessionModelContext.getUser().getJwtKey())
-                    .onSuccess(page -> {
-                        ctx.render("directories.html", Map.of("directories", convertToTree(page)));
-                    })
-                    .onError(err -> {
-                        ctx.result(err.renderError());
-                    });
+            final DirectoryPage page = gatewayService.getDirectoryRestClient().getDirectories(UserSessionModelContext.getUser().getJwtKey());
+            ctx.render("directories.html", Map.of("directories", convertToTree(page)));
         });
         
         app.get("/messages/{dir}", (ctx) -> {
             final String dir = ctx.pathParam("dir");
             final int page = Integer.parseInt(ctx.queryParam("page"));
             final int pageSize = Integer.parseInt(ctx.queryParam("pageSize"));
-            gatewayService.getMessageRestClient().getMessages(UserSessionModelContext.getUser().getJwtKey(), dir, pageSize, page)
-                    .onSuccess(messagePage -> {
-                        PageableUrlWrapper<MessageModel> messages = new PageableUrlWrapper(messagePage, String.format("/%s/%s", "messages", dir), pageSize, pageSize);
-                        ctx.render("messages.html", Map.of("messages", messages));
-                    })
-                    .onError(err -> {
-                        ctx.result(err.renderError());
-                    });
+            final DefaultPage<MessageModel> messagePage = gatewayService.getMessageRestClient().getMessages(UserSessionModelContext.getUser().getJwtKey(), dir, pageSize, page);
+            PageableUrlWrapper<MessageModel> messages = new PageableUrlWrapper(messagePage, String.format("/%s/%s", "messages", dir), pageSize, pageSize);
+            ctx.render("messages.html", Map.of("messages", messages));
         });
     }
     

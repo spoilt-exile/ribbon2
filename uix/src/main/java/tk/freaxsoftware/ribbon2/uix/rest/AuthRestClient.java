@@ -18,14 +18,14 @@
  */
 package tk.freaxsoftware.ribbon2.uix.rest;
 
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
-import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 
 /**
@@ -35,8 +35,6 @@ import tk.freaxsoftware.ribbon2.core.data.UserModel;
 public class AuthRestClient {
     
     private final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-    
-    private final Gson gson = GsonUtils.getGson();
     
     private final String baseUrl;
 
@@ -48,32 +46,28 @@ public class AuthRestClient {
      * Perform authentication of user.
      * @param login username of user;
      * @param password raw password of user;
-     * @return rest result with raw JWT token;
+     * @return raw JWT token;
+     * @throws java.net.URISyntaxException
+     * @throws java.io.IOException
      */
-    public RestResult<String> auth(String login, String password) {
-        try {
-            HttpPost request = new HttpPost(new URIBuilder(baseUrl + "/auth").addParameter("login", login).addParameter("password", password).build());
-            HttpResponse response = clientBuilder.build().execute(request);
-            return RestResult.ofResponseRaw(response);
-        } catch (Exception ex) {
-            return (RestResult) RestResult.ofException(ex);
-        }
+    public String auth(String login, String password) throws URISyntaxException, IOException {
+        HttpPost request = new HttpPost(new URIBuilder(baseUrl + "/auth").addParameter("login", login).addParameter("password", password).build());
+        HttpResponse response = clientBuilder.build().execute(request);
+        return ResponseUtil.handleResponseRaw(response);
     }
     
     /**
      * Get current account info of user.
      * @param jwtKey raw JWT key;
-     * @return rest result with user model;
+     * @return user model;
+     * @throws java.net.URISyntaxException
+     * @throws java.io.IOException
      */
-    public RestResult<UserModel> getAccount(String jwtKey) {
-        try {
-            HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/api/account").build());
-            request.addHeader("x-ribbon2-auth", jwtKey);
-            HttpResponse response = clientBuilder.build().execute(request);
-            return RestResult.ofResponse(response, new TypeToken<UserModel>() {});
-        } catch (Exception ex) {
-            return (RestResult) RestResult.ofException(ex);
-        }
+    public UserModel getAccount(String jwtKey) throws URISyntaxException, IOException {
+        HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/api/account").build());
+        request.addHeader("x-ribbon2-auth", jwtKey);
+        HttpResponse response = clientBuilder.build().execute(request);
+        return ResponseUtil.handleResponse(response, new TypeToken<UserModel>() {});
     }
     
 }
