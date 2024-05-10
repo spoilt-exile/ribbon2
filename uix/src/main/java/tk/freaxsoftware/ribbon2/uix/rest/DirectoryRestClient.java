@@ -22,9 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.util.Set;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -34,8 +32,6 @@ import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import static tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.PARAM_PAGE;
 import static tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.PARAM_SIZE;
 import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
-import tk.freaxsoftware.ribbon2.core.exception.CoreException;
-import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 
 /**
  * Directory resource REST client.
@@ -56,24 +52,22 @@ public class DirectoryRestClient {
     /**
      * Get all directories sorted for tree.
      * @param jwtKey raw JWT key;
-     * @return rest result with page of directories;
+     * @return page of directories;
+     * @throws java.net.URISyntaxException
+     * @throws java.io.IOException
      */
-    public RestResult<DirectoryPage> getDirectories(String jwtKey) {
-        try {
-            HttpGet request = new HttpGet(new URIBuilder(baseUrl).addParameter(PARAM_PAGE, "0").addParameter(PARAM_SIZE, "10000").build());
-            request.addHeader("x-ribbon2-auth", jwtKey);
-            HttpResponse response = clientBuilder.build().execute(request);
-            return RestResult.ofResponse(response, new TypeToken<DirectoryPage>() {});
-        } catch (Exception ex) {
-            return (RestResult) RestResult.ofException(ex);
-        }
+    public DirectoryPage getDirectories(String jwtKey) throws URISyntaxException, IOException {
+        HttpGet request = new HttpGet(new URIBuilder(baseUrl).addParameter(PARAM_PAGE, "0").addParameter(PARAM_SIZE, "10000").build());
+        request.addHeader("x-ribbon2-auth", jwtKey);
+        HttpResponse response = clientBuilder.build().execute(request);
+        return ResponseUtil.handleResponse(response, new TypeToken<DirectoryPage>() {});
     }
     
     /**
      * Get all permissions available to user by directory.
      * @param jwtKey raw JWT key;
      * @param dirPath path to directory;
-     * @return list of permission names which current user can use in specified directory;
+     * @return set of permission names which current user can use in specified directory;
      * @throws URISyntaxException
      * @throws IOException 
      */
@@ -81,18 +75,14 @@ public class DirectoryRestClient {
         HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/access/permission/current/" + dirPath).build());
         request.addHeader("x-ribbon2-auth", jwtKey);
         HttpResponse response = clientBuilder.build().execute(request);
-        if (response.getStatusLine().getStatusCode() == 200) {
-            return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), Set.class);
-        } else {
-            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Permissions request by directory failed with status: " + response.getStatusLine().toString());
-        }
+        return ResponseUtil.handleResponse(response, new TypeToken<Set<String>>() {});
     }
     
     /**
-     * Get list of directories which can be accessed by curent user with specified permission.
+     * Get set of directories which can be accessed by curent user with specified permission.
      * @param jwtKey raw JWT key;
      * @param permission name of the permission;
-     * @return list of directories;
+     * @return set of directories;
      * @throws URISyntaxException
      * @throws IOException 
      */
@@ -100,11 +90,7 @@ public class DirectoryRestClient {
         HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/permission/" + permission).build());
         request.addHeader("x-ribbon2-auth", jwtKey);
         HttpResponse response = clientBuilder.build().execute(request);
-        if (response.getStatusLine().getStatusCode() == 200) {
-            return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), new TypeToken<Set<DirectoryModel>>() {}.getType());
-        } else {
-            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Directory request by permission failed with status: " + response.getStatusLine().toString());
-        }
+        return ResponseUtil.handleResponse(response, new TypeToken<Set<DirectoryModel>>() {});
     }
 
 }

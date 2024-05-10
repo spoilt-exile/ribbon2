@@ -65,19 +65,17 @@ public class MessageRestClient {
      * @param directory directory for loading messages from;
      * @param pageSize size of page;
      * @param page number of page;
-     * @return rest result with page of messages;
+     * @return page of messages;
+     * @throws java.net.URISyntaxException
+     * @throws java.io.IOException
      */
-    public RestResult<DefaultPage<MessageModel>> getMessages(String jwtKey, String directory, int pageSize, int page) {
-        try {
-            HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/" + directory)
-                    .addParameter(PARAM_PAGE, String.valueOf(page))
-                    .addParameter(PARAM_SIZE, String.valueOf(pageSize)).build());
-            request.addHeader("x-ribbon2-auth", jwtKey);
-            HttpResponse response = clientBuilder.build().execute(request);
-            return RestResult.ofResponse(response, new TypeToken<DefaultPage<MessageModel>>() {});
-        } catch (Exception ex) {
-            return (RestResult) RestResult.ofException(ex);
-        }
+    public DefaultPage<MessageModel> getMessages(String jwtKey, String directory, int pageSize, int page) throws URISyntaxException, IOException {
+        HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/" + directory)
+                .addParameter(PARAM_PAGE, String.valueOf(page))
+                .addParameter(PARAM_SIZE, String.valueOf(pageSize)).build());
+        request.addHeader("x-ribbon2-auth", jwtKey);
+        HttpResponse response = clientBuilder.build().execute(request);
+        return ResponseUtil.handleResponse(response, new TypeToken<DefaultPage<MessageModel>>() {});
     }
     
     /**
@@ -86,16 +84,14 @@ public class MessageRestClient {
      * @param uid message uid;
      * @param directory directory for loading message from;
      * @return rest result with message model with content;
+     * @throws java.net.URISyntaxException
+     * @throws java.io.IOException
      */
-    public RestResult<MessageModel> getMessageByUid(String jwtKey, String uid, String directory) {
-        try {
-            HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/" + uid + "/dir/" + directory).build());
-            request.addHeader("x-ribbon2-auth", jwtKey);
-            HttpResponse response = clientBuilder.build().execute(request);
-            return RestResult.ofResponse(response, new TypeToken<MessageModel>() {});
-        } catch (Exception ex) {
-            return (RestResult) RestResult.ofException(ex);
-        }
+    public MessageModel getMessageByUid(String jwtKey, String uid, String directory) throws URISyntaxException, IOException {
+        HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/" + uid + "/dir/" + directory).build());
+        request.addHeader("x-ribbon2-auth", jwtKey);
+        HttpResponse response = clientBuilder.build().execute(request);
+        return ResponseUtil.handleResponse(response, new TypeToken<MessageModel>() {});
     }
     
     /**
@@ -111,11 +107,7 @@ public class MessageRestClient {
         request.addHeader("x-ribbon2-auth", jwtKey);
         request.setEntity(new StringEntity(gson.toJson(message), ContentType.APPLICATION_JSON));
         HttpResponse response = clientBuilder.build().execute(request);
-        if (response.getStatusLine().getStatusCode() == 200) {
-            return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), MessageModel.class);
-        } else {
-            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Create message request failed with status: " + response.getStatusLine().toString());
-        }
+        return ResponseUtil.handleResponse(response, new TypeToken<MessageModel>() {});
     }
     
     /**
@@ -131,13 +123,16 @@ public class MessageRestClient {
         request.addHeader("x-ribbon2-auth", jwtKey);
         request.setEntity(new StringEntity(gson.toJson(message), ContentType.APPLICATION_JSON));
         HttpResponse response = clientBuilder.build().execute(request);
-        if (response.getStatusLine().getStatusCode() == 200) {
-            return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), MessageModel.class);
-        } else {
-            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Update message request failed with status: " + response.getStatusLine().toString());
-        }
+        return ResponseUtil.handleResponse(response, new TypeToken<MessageModel>() {});
     }
     
+    /**
+     * Delete message by uid.
+     * @param jwtKey raw JWT key;
+     * @param messageUid message uid;
+     * @throws URISyntaxException
+     * @throws IOException 
+     */
     public void deleteMessage(String jwtKey, String messageUid) throws URISyntaxException, IOException {
         HttpDelete request = new HttpDelete(baseUrl + "/" + messageUid);
         request.addHeader("x-ribbon2-auth", jwtKey);
@@ -151,16 +146,14 @@ public class MessageRestClient {
      * Get all registered property types.
      * @param jwtKey raw JWT key;
      * @return list of property types with tags;
+     * @throws java.net.URISyntaxException
+     * @throws java.io.IOException
      */
     public Set<MessagePropertyTagged> getAllPropertyTypes(String jwtKey) throws URISyntaxException, IOException {
         HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/property/all").build());
         request.addHeader("x-ribbon2-auth", jwtKey);
         HttpResponse response = clientBuilder.build().execute(request);
-        if (response.getStatusLine().getStatusCode() == 200) {
-            return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), new TypeToken<Set<MessagePropertyTagged>>(){}.getType());
-        } else {
-            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Property types request failed with status: " + response.getStatusLine().toString());
-        }
+        return ResponseUtil.handleResponse(response, new TypeToken<Set<MessagePropertyTagged>>() {});
     }
 
 }

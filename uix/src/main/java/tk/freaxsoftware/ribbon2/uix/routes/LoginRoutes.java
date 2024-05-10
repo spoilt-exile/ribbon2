@@ -41,7 +41,7 @@ public class LoginRoutes {
                 logined = ctx.sessionAttribute(USER_SESSION_KEY);
             } else if (ctx.cookie(Uix.config.getHttp().getAuthCookieName()) != null) {
                 UserModel user = gatewayService.getAuthRestClient().getAccount(
-                        ctx.cookie(Uix.config.getHttp().getAuthCookieName())).getResult();
+                        ctx.cookie(Uix.config.getHttp().getAuthCookieName()));
                 logined = UserSessionModel.ofUserModelAndJwtKey(user, ctx.cookie(Uix.config.getHttp().getAuthCookieName()));
                 if (logined != null) {
                     ctx.sessionAttribute(USER_SESSION_KEY, logined);
@@ -69,14 +69,9 @@ public class LoginRoutes {
         app.post("/login", ctx -> {
             final String login = ctx.formParam("login");
             final String password = ctx.formParam("password");
-            gatewayService.getAuthRestClient().auth(login, password)
-                    .onSuccess(token -> {
-                        ctx.cookie(Uix.config.getHttp().getAuthCookieName(), token, Uix.config.getHttp().authTokenMaxAge());
-                        ctx.header("HX-Redirect", "/");
-                    })
-                    .onError(error -> {
-                        ctx.result(error.renderError());
-                    });
+            final String token = gatewayService.getAuthRestClient().auth(login, password);
+            ctx.cookie(Uix.config.getHttp().getAuthCookieName(), token, Uix.config.getHttp().authTokenMaxAge());
+            ctx.header("HX-Redirect", "/");
         });
         
         app.post("/logout", ctx -> {
