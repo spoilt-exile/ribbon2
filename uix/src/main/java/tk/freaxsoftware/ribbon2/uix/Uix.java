@@ -89,6 +89,11 @@ public class Uix {
         LoginRoutes.init(app, gatewayService);
         MainRoutes.init(app, gatewayService);
         
+        app.exception(Exception.class, (ex, ctx) -> {
+            LOGGER.error("Error occurred:", ex);
+            ctx.result(String.format("<div class=\"alert alert-danger\" role=\"alert\">%s</div>", ex.getMessage()));
+        });
+        
         app.start(config.getHttp().getPort());
     }
     
