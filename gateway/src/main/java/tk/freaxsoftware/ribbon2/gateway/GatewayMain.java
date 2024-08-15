@@ -26,9 +26,9 @@ import static io.javalin.apibuilder.ApiBuilder.path;
 import static io.javalin.apibuilder.ApiBuilder.post;
 import static io.javalin.apibuilder.ApiBuilder.put;
 import io.javalin.openapi.ApiKeyAuth;
-import io.javalin.openapi.plugin.OpenApiConfiguration;
+import io.javalin.openapi.plugin.OpenApiPluginConfiguration;
 import io.javalin.openapi.plugin.OpenApiPlugin;
-import io.javalin.openapi.plugin.SecurityConfiguration;
+import io.javalin.openapi.plugin.SecurityComponentConfiguration;
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration;
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin;
 import java.io.IOException;
@@ -79,7 +79,7 @@ public class GatewayMain {
     /**
      * Current application config;
      */
-    public static ApplicationConfig config;
+    public static ApplicationConfig appConfig;
     
     /**
      * Available thread pool for various needs;
@@ -91,135 +91,141 @@ public class GatewayMain {
      */
     public static void main(String[] args) throws IOException {
         LOGGER.info("\n{}", IOUtils.toString(GatewayMain.class.getClassLoader().getResourceAsStream("header"), Charset.defaultCharset()));
-        config = gson.fromJson(IOUtils.toString(GatewayMain.class.getClassLoader().getResourceAsStream("appconfig.json"), Charset.defaultCharset()), ApplicationConfig.class);
-        processConfig(config);
-        LOGGER.info("Gateway started, config: {}", config);
+        appConfig = gson.fromJson(IOUtils.toString(GatewayMain.class.getClassLoader().getResourceAsStream("appconfig.json"), Charset.defaultCharset()), ApplicationConfig.class);
+        processConfig(appConfig);
+        LOGGER.info("Gateway started, config: {}", appConfig);
         DirectoryRoutes.initWatchdog();
         MessageRoutes.initWatchdog();
         IORoutes.initWatchdog();
         Javalin app = Javalin.create(javalinConfig -> {
-            OpenApiConfiguration openApiConfiguration = new OpenApiConfiguration();
-            openApiConfiguration.getInfo().setTitle("Ribbon2 System API");
-            openApiConfiguration.setSecurity(new SecurityConfiguration().withSecurityScheme("ribbonToken", new ApiKeyAuth(config.getHttp().getAuthType().name().toLowerCase(), config.getHttp().getAuthTokenName())));
-            javalinConfig.plugins.register(new OpenApiPlugin(openApiConfiguration));
-            javalinConfig.plugins.register(new SwaggerPlugin(new SwaggerConfiguration()));
+            OpenApiPluginConfiguration openApiConfiguration = new OpenApiPluginConfiguration();
+            //openApiConfiguration.getInfo().setTitle("Ribbon2 System API");
+            //openApiConfiguration.setSecurity(new SecurityComponentConfiguration().withSecurityScheme("ribbonToken", new ApiKeyAuth(config.getHttp().getAuthType().name().toLowerCase(), config.getHttp().getAuthTokenName())));
+            javalinConfig.registerPlugin(new OpenApiPlugin(config -> {
+                config.withDefinitionConfiguration((version, definition) -> {
+                    definition.withInfo(info -> info.setTitle("Ribbon2 System API"));
+                    definition.withSecurity(new SecurityComponentConfiguration().withSecurityScheme("ribbonToken", new ApiKeyAuth(appConfig.getHttp().getAuthType().name().toLowerCase(), appConfig.getHttp().getAuthTokenName())));
+                });
+            }));
+            javalinConfig.registerPlugin(new SwaggerPlugin());
             javalinConfig.jsonMapper(new GsonMapper());
-        }).routes(() -> {
-            //Main auth method
-            path("/auth", () -> {
-                post(AuthRoutes::auth);
+            javalinConfig.router.apiBuilder(() -> {
+                //Main auth method
+                path("/auth", () -> {
+                    post(AuthRoutes::auth);
+                });
+                //Root of api (authorized only)
+                path("/api", () -> {
+                    //Get current account
+                    path("/account", () -> {
+                        get(AuthRoutes::account);
+                    });
+
+                    //User routes
+                    path("/user", () -> {
+                        post(UserRoutes::createUser);
+                        put(UserRoutes::updateUser);
+                        get(UserRoutes::getUserPage);
+                        path("/{id}", () -> {
+                            get(UserRoutes::getUser);
+                            delete(UserRoutes::deleteUser);
+                        }); 
+                    });
+
+                    //Group routes
+                    path("/group", () -> {
+                        post(GroupRoutes::createGroup);
+                        put(GroupRoutes::updateGroup);
+                        get(GroupRoutes::getGroupPage);
+                        path("/{id}", () -> {
+                            get(GroupRoutes::getGroup);
+                            delete(GroupRoutes::deleteGroup);
+                        }); 
+                    });
+
+                    //Directory routes
+                    path("/directory", () -> {
+                        post(DirectoryRoutes::createDirectory);
+                        put(DirectoryRoutes::updateDirectory);
+                        get(DirectoryRoutes::getDirectoryPage);
+                        path("/{path}", () -> {
+                            get(DirectoryRoutes::getDirectory);
+                            delete(DirectoryRoutes::deleteDirectory);
+                        }); 
+                        path("/access/{path}", () -> {
+                            get(DirectoryRoutes::getDirectoryAccess);
+                            post(DirectoryRoutes::editDirectoryAccess);
+                        });
+                        path("/access/permission/all", () -> {
+                            get(DirectoryRoutes::getAllDirectoriesPermissions);
+                        });
+                        path("/permission/{permission}", () -> {
+                            get(DirectoryRoutes::getDirectoriesByPermission);
+                        });
+                        path("/access/permission/current/{path}", () -> {
+                            get(DirectoryRoutes::getCurrentPermissionsByDirectory);
+                        });
+                    });
+
+                    //Message routes
+                    path("/message", () -> {
+                        post(MessageRoutes::createMesage);
+                        put(MessageRoutes::updateMessage);
+                        path("/{uid}", () -> {
+                            delete(MessageRoutes::deleteMessage);
+                        });
+                        path("/{dir}", () -> {
+                            get(MessageRoutes::getMessagePage);
+                        });
+                        path("/{uid}/dir/{dir}", () -> {
+                            get(MessageRoutes::getMessage);
+                        });
+                        path("/property/all", () -> {
+                            get(MessageRoutes::getMessageProperties);
+                        });
+                        path("/property/{uid}", () -> {
+                            post(MessageRoutes::addMessageProperty);
+                        });
+                    });
+
+                    //IO routes
+                    path("io", () -> {
+                        path("/protocol", () -> {
+                            get(IORoutes::getProtocols);
+                        });
+                        path("/scheme", () -> {
+                            post(IORoutes::saveScheme);
+                            get(IORoutes::getSchemes);
+                        });
+                        path("/scheme/{type}/{protocol}/{name}", () -> {
+                            get(IORoutes::getScheme);
+                            delete(IORoutes::deleteScheme);
+                        });
+                        path("/export/scheme/{protocol}/{name}/assign/{dir}", () -> {
+                            post(IORoutes::assignExportScheme);
+                        });
+                        path("/export/scheme/{protocol}/{name}/dismiss/{dir}", () -> {
+                            delete(IORoutes::dismissExportScheme);
+                        });
+                        path("/export/scheme/{dirName}", () -> {
+                            get(IORoutes::getExportSchemesByDirectory);
+                        });
+                    });
+
+                    path("watchdog", () -> {
+                        path("/statusByTopic/{topic}", () -> {
+                            get(WatchdogRoutes::getWatchByTopic);
+                        });
+                        path("/status", () -> {
+                            get(WatchdogRoutes::getWatch);
+                        });
+                    });
+                });
             });
-            //Root of api (authorized only)
-            path("/api", () -> {
-                //Get current account
-                path("/account", () -> {
-                    get(AuthRoutes::account);
-                });
-                
-                //User routes
-                path("/user", () -> {
-                    post(UserRoutes::createUser);
-                    put(UserRoutes::updateUser);
-                    get(UserRoutes::getUserPage);
-                    path("/{id}", () -> {
-                        get(UserRoutes::getUser);
-                        delete(UserRoutes::deleteUser);
-                    }); 
-                });
-                
-                //Group routes
-                path("/group", () -> {
-                    post(GroupRoutes::createGroup);
-                    put(GroupRoutes::updateGroup);
-                    get(GroupRoutes::getGroupPage);
-                    path("/{id}", () -> {
-                        get(GroupRoutes::getGroup);
-                        delete(GroupRoutes::deleteGroup);
-                    }); 
-                });
-                
-                //Directory routes
-                path("/directory", () -> {
-                    post(DirectoryRoutes::createDirectory);
-                    put(DirectoryRoutes::updateDirectory);
-                    get(DirectoryRoutes::getDirectoryPage);
-                    path("/{path}", () -> {
-                        get(DirectoryRoutes::getDirectory);
-                        delete(DirectoryRoutes::deleteDirectory);
-                    }); 
-                    path("/access/{path}", () -> {
-                        get(DirectoryRoutes::getDirectoryAccess);
-                        post(DirectoryRoutes::editDirectoryAccess);
-                    });
-                    path("/access/permission/all", () -> {
-                        get(DirectoryRoutes::getAllDirectoriesPermissions);
-                    });
-                    path("/permission/{permission}", () -> {
-                        get(DirectoryRoutes::getDirectoriesByPermission);
-                    });
-                    path("/access/permission/current/{path}", () -> {
-                        get(DirectoryRoutes::getCurrentPermissionsByDirectory);
-                    });
-                });
-                
-                //Message routes
-                path("/message", () -> {
-                    post(MessageRoutes::createMesage);
-                    put(MessageRoutes::updateMessage);
-                    path("/{uid}", () -> {
-                        delete(MessageRoutes::deleteMessage);
-                    });
-                    path("/{dir}", () -> {
-                        get(MessageRoutes::getMessagePage);
-                    });
-                    path("/{uid}/dir/{dir}", () -> {
-                        get(MessageRoutes::getMessage);
-                    });
-                    path("/property/all", () -> {
-                        get(MessageRoutes::getMessageProperties);
-                    });
-                    path("/property/{uid}", () -> {
-                        post(MessageRoutes::addMessageProperty);
-                    });
-                });
-                
-                //IO routes
-                path("io", () -> {
-                    path("/protocol", () -> {
-                        get(IORoutes::getProtocols);
-                    });
-                    path("/scheme", () -> {
-                        post(IORoutes::saveScheme);
-                        get(IORoutes::getSchemes);
-                    });
-                    path("/scheme/{type}/{protocol}/{name}", () -> {
-                        get(IORoutes::getScheme);
-                        delete(IORoutes::deleteScheme);
-                    });
-                    path("/export/scheme/{protocol}/{name}/assign/{dir}", () -> {
-                        post(IORoutes::assignExportScheme);
-                    });
-                    path("/export/scheme/{protocol}/{name}/dismiss/{dir}", () -> {
-                        delete(IORoutes::dismissExportScheme);
-                    });
-                    path("/export/scheme/{dirName}", () -> {
-                        get(IORoutes::getExportSchemesByDirectory);
-                    });
-                });
-                
-                path("watchdog", () -> {
-                    path("/statusByTopic/{topic}", () -> {
-                        get(WatchdogRoutes::getWatchByTopic);
-                    });
-                    path("/status", () -> {
-                        get(WatchdogRoutes::getWatch);
-                    });
-                });
-            });
-        }).start(config.getHttp().getPort());
-        Init.init(config);
-        AuthRoutes.init(app, config.getHttp());;
-        WatchdogRoutes.init(new WatchdogService(config.getWatchdog()));
+        }).start(appConfig.getHttp().getPort());
+        Init.init(appConfig);
+        AuthRoutes.init(app, appConfig.getHttp());;
+        WatchdogRoutes.init(new WatchdogService(appConfig.getWatchdog()));
         
         AnnotationUtil.subscribeReceiverInstance(IOService.getInstance());
         

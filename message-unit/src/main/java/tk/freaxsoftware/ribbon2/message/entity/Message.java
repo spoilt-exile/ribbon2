@@ -24,9 +24,9 @@ import io.ebean.annotation.DbJsonB;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Lob;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 
 /**

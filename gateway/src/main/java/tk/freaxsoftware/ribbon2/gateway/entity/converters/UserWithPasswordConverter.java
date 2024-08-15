@@ -20,7 +20,7 @@ package tk.freaxsoftware.ribbon2.gateway.entity.converters;
 
 import io.ebean.DB;
 import java.util.Set;
-import liquibase.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import tk.freaxsoftware.ribbon2.core.data.convert.Converter;
 import tk.freaxsoftware.ribbon2.core.data.UserWithPassword;
 import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;

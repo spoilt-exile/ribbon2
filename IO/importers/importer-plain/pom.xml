@@ -9,8 +9,8 @@
     <artifactId>importer-plain</artifactId>
     <packaging>jar</packaging>
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
     </properties>
     <name>Ribbon2 IO Importer Plain</name>
     <description>Plain text importer (for debug purpose);</description>

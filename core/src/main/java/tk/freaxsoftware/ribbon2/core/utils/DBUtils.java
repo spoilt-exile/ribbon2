@@ -59,9 +59,9 @@ public class DBUtils {
                 .setMaxRows(pageRequest.getSize());
         
         if (pageRequest.getDirection() == PaginationRequest.Order.ASC) {
-            query = query.order().asc(pageRequest.getOrderBy());
+            query = query.orderBy().asc(pageRequest.getOrderBy());
         } else {
-            query = query.order().desc(pageRequest.getOrderBy());
+            query = query.orderBy().desc(pageRequest.getOrderBy());
         }
         
         return query.findPagedList();

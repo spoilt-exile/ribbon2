@@ -9,33 +9,33 @@
     <artifactId>gateway</artifactId>
     <packaging>jar</packaging>
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
     </properties>
     <developers>
         <developer>
             <id>spoilt</id>
             <name>Stanislav Nepochatov</name>
             <organization>Freax Software</organization>
-            <organizationUrl>freaxsoftware.tk</organizationUrl>
-            <email>spoilt@blackstarfilm.com</email>
+            <organizationUrl>freaksoftware.tk</organizationUrl>
+            <email>spoilt.exile@gmail.com</email>
         </developer>
     </developers>
     <dependencies>
         <dependency>
             <groupId>io.javalin</groupId>
             <artifactId>javalin-bundle</artifactId>
-            <version>5.2.0</version>
+            <version>6.2.0</version>
         </dependency>
         <dependency>
             <groupId>io.javalin.community.openapi</groupId>
             <artifactId>javalin-openapi-plugin</artifactId>
-            <version>5.2.0</version>
+            <version>6.2.0</version>
         </dependency>
         <dependency>
             <groupId>io.javalin.community.openapi</groupId>
             <artifactId>javalin-swagger-plugin</artifactId>
-            <version>5.2.0</version>
+            <version>6.2.0</version>
         </dependency>
         <dependency>
             <groupId>tk.freaxsoftware.ribbon2</groupId>
@@ -50,50 +50,50 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.11</version>
+            <version>42.7.3</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.10.3</version>
+            <version>2.17.2</version>
         </dependency>
         <dependency>
             <groupId>io.ebean</groupId>
             <artifactId>ebean</artifactId>
-            <version>12.2.3</version>
+           <version>15.5.0</version>
         </dependency>
         <dependency>
             <groupId>io.ebean</groupId>
             <artifactId>querybean-generator</artifactId>
-            <version>12.2.3</version>
+            <version>15.5.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
-            <version>0.11.1</version>
+            <version>0.12.6</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
-            <version>0.11.1</version>
+            <version>0.12.6</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
-            <version>0.11.1</version>
+            <version>0.12.6</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>3.8.9</version>
+            <version>4.29.1</version>
         </dependency>
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-cdi</artifactId>
-            <version>3.8.9</version>
+            <version>4.29.1</version>
         </dependency>
         <dependency>
             <groupId>tk.freaxsoftware.ribbon2.io</groupId>
@@ -103,7 +103,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
+            <version>3.16.0</version>
         </dependency>
         
         <dependency>
@@ -123,8 +123,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.10.1</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>21</source>
+                    <target>21</target>
                     <annotationProcessorPaths>
                         <annotationProcessorPath>
                             <groupId>io.javalin.community.openapi</groupId>
@@ -137,7 +137,7 @@
             <plugin>
               <groupId>io.ebean</groupId>
               <artifactId>ebean-maven-plugin</artifactId>
-              <version>12.2.4</version>
+              <version>15.5.0</version>
               <executions>
                 <execution>
                   <id>main</id>

@@ -19,9 +19,9 @@
 package tk.freaxsoftware.ribbon2.message.entity;
 
 import io.ebean.Model;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 /**
  * Directory entity (copy).

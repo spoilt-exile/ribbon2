@@ -23,7 +23,6 @@ import freemarker.template.Configuration;
 import static freemarker.template.Configuration.VERSION_2_3_32;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
-import io.javalin.rendering.JavalinRenderer;
 import io.javalin.rendering.template.JavalinFreemarker;
 import java.io.File;
 import java.io.IOException;
@@ -72,19 +71,18 @@ public class Uix {
         
         GatewayService gatewayService = new GatewayService(config.getGatewayUrl());
         
+        Configuration freeMarkerConfiguration = new Configuration(VERSION_2_3_32);
+        freeMarkerConfiguration.setDirectoryForTemplateLoading(new File("web"));
+        freeMarkerConfiguration.setObjectWrapper(new Java8ObjectWrapper(VERSION_2_3_32));
+        
         Javalin app = Javalin.create(javalinConfig -> {
             javalinConfig.staticFiles.add((statConfig) -> {
                 statConfig.hostedPath = "/web";
                 statConfig.directory = "web";
                 statConfig.location = Location.EXTERNAL;
             });
+            javalinConfig.fileRenderer(new JavalinFreemarker(freeMarkerConfiguration));
         });
-        
-        Configuration freeMarkerConfiguration = new Configuration(VERSION_2_3_32);
-        freeMarkerConfiguration.setDirectoryForTemplateLoading(new File("web"));
-        freeMarkerConfiguration.setObjectWrapper(new Java8ObjectWrapper(VERSION_2_3_32));
-        
-        JavalinRenderer.register(new JavalinFreemarker(freeMarkerConfiguration), ".html");
         
         LoginRoutes.init(app, gatewayService);
         MainRoutes.init(app, gatewayService);
