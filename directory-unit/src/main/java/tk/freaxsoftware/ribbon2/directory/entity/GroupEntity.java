@@ -20,10 +20,10 @@ package tk.freaxsoftware.ribbon2.directory.entity;
 
 import io.ebean.Model;
 import java.util.Set;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 
 /**
  * Group compact entity.

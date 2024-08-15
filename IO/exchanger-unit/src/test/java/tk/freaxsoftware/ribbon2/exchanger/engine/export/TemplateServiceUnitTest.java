@@ -18,7 +18,6 @@
  */
 package tk.freaxsoftware.ribbon2.exchanger.engine.export;
 
-import com.google.common.collect.Sets;
 import freemarker.template.TemplateException;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -28,7 +27,9 @@ import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -77,11 +78,13 @@ public class TemplateServiceUnitTest {
         message.setUid("28969eab-f9f8-4d1d-9028-a464ef623740");
         message.setCreatedBy("root");
         message.setCreated(staticDate);
-        message.setDirectories(Sets.newHashSet("System.Test"));
+        message.setDirectories(Set.of("System.Test"));
         message.setHeader("Test header");
         message.setContent("This is basic content of test message.\n\nMessage will be exported.");
-        message.setTags(Sets.newHashSet("test", "system", "ribbon", "export"));
-        message.setProperties(Sets.newHashSet(new MessagePropertyModel("COPYRIGHT", "Ukrinform")));
+        Set<String> tags = new HashSet();
+        tags.addAll(Set.of("test", "system", "ribbon", "export"));
+        message.setTags(tags);
+        message.setProperties(Set.of(new MessagePropertyModel("COPYRIGHT", "Ukrinform")));
         return message;
     }
     

@@ -1,6 +1,6 @@
 UID: 28969eab-f9f8-4d1d-9028-a464ef623740
 HEADER: Test header
-TAGS: RIBBON-SYSTEM-TEST-EXPORT
+TAGS: SYSTEM-TEST-RIBBON-EXPORT
 
 This is basic content of test message.
 

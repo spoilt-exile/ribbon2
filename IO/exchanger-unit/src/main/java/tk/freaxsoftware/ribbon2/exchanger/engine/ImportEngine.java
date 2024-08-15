@@ -18,8 +18,6 @@
  */
 package tk.freaxsoftware.ribbon2.exchanger.engine;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -123,7 +121,7 @@ public class ImportEngine extends IOEngine<Importer> {
     public IOScheme saveScheme(IOScheme scheme, String username) {
         LOGGER.info("Saving scheme {} with protocol {}", scheme.getName(), scheme.getProtocol());
         if (scheme.getConfig().containsKey(GENERAL_DIRECTORY_KEY)) {
-            checkDirectoryAccess(username, ImmutableSet.of((String) scheme.getConfig().get(GENERAL_DIRECTORY_KEY)), PERMISSION_CAN_ASSIGN_IMPORT);
+            checkDirectoryAccess(username, Set.of((String) scheme.getConfig().get(GENERAL_DIRECTORY_KEY)), PERMISSION_CAN_ASSIGN_IMPORT);
         }
         if (scheme.getConfig().containsKey(GENERAL_TIMEOUT_KEY)) {
             Double timeout = (Double) scheme.getConfig().get(GENERAL_TIMEOUT_KEY);
@@ -177,7 +175,7 @@ public class ImportEngine extends IOEngine<Importer> {
     
     private void launchSchemeAndSendUpdate(ModuleWrapper<Importer> wrapper, Scheme scheme) {
         SchemeInstance instance = launchScheme(wrapper, scheme);
-        sendSchemeStatusUpdate(Sets.newHashSet(buildStatusUpdateNotification(wrapper, instance, type, scheme.getName())));
+        sendSchemeStatusUpdate(Set.of(buildStatusUpdateNotification(wrapper, instance, type, scheme.getName())));
     }
     
     private SchemeInstance stopScheme(ModuleWrapper<Importer> wrapper, Scheme scheme) {
@@ -190,7 +188,7 @@ public class ImportEngine extends IOEngine<Importer> {
     private void stopSchemeAndSendUpdate(ModuleWrapper<Importer> wrapper, Scheme scheme) {
         SchemeInstance instance = stopScheme(wrapper, scheme);
         instance.setStatus(SchemeInstance.Status.DELETED);
-        sendSchemeStatusUpdate(Sets.newHashSet(buildStatusUpdateNotification(wrapper, instance, type, scheme.getName())));
+        sendSchemeStatusUpdate(Set.of(buildStatusUpdateNotification(wrapper, instance, type, scheme.getName())));
     }
     
     private Boolean isConfigValid(Map<String,Object> config, String[] requiredConfigKeys) {
@@ -304,7 +302,7 @@ public class ImportEngine extends IOEngine<Importer> {
                     scheme.getType(), scheme.getProtocol(), scheme.getName(), 
                     instance.getStatus(), instance.getErrorDescription(), 
                     instance.getRaisingAdminError(), null);
-            sendSchemeStatusUpdate(Sets.newHashSet(update));
+            sendSchemeStatusUpdate(Set.of(update));
         }
         
         private MessageModel processMessage(IOScheme scheme, ImportMessage message) {

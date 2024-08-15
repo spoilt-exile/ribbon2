@@ -21,9 +21,9 @@ package tk.freaxsoftware.ribbon2.gateway.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import java.security.Key;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
@@ -39,7 +39,7 @@ public class JWTTokenService {
     /**
      * Security key for JWT signing.
      */
-    private final Key jwtKey;
+    private final SecretKey jwtKey;
     
     /**
      * Valid days of JWT token.
@@ -72,7 +72,7 @@ public class JWTTokenService {
      * @return claims instance;
      */
     public Claims decryptToken(String tokenValue) {
-        return Jwts.parser().setSigningKey(jwtKey).parseClaimsJws(tokenValue).getBody();
+        return Jwts.parser().verifyWith(jwtKey).build().parseSignedClaims(tokenValue).getPayload();
     }
     
     /**
@@ -81,7 +81,7 @@ public class JWTTokenService {
      */
     public static JWTTokenService getInstance() {
         if (instance == null) {
-            instance = new JWTTokenService(GatewayMain.config.getHttp().getAuthTokenSecret(), GatewayMain.config.getHttp().getAuthTokenValidDays());
+            instance = new JWTTokenService(GatewayMain.appConfig.getHttp().getAuthTokenSecret(), GatewayMain.appConfig.getHttp().getAuthTokenValidDays());
         }
         return instance;
     }

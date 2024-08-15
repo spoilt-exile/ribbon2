@@ -22,6 +22,7 @@ import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -76,7 +77,7 @@ public class RSSImportSource implements ImportSource {
     public List<ImportMessage> getUnreadMessages() {
         LOGGER.info("Fetching RSS feed from {}", scheme.getConfig().get("rssUrl"));
         try {
-            URL feedSource = new URL((String) scheme.getConfig().get("rssUrl"));
+            URL feedSource = URI.create((String) scheme.getConfig().get("rssUrl")).toURL();
             SyndFeedInput input = new SyndFeedInput();
             SyndFeed feed = input.build(new XmlReader(feedSource));
             List<SyndEntry> entries = feed.getEntries();

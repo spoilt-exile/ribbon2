@@ -19,8 +19,8 @@
 package tk.freaxsoftware.ribbon2.exchanger.entity;
 
 import io.ebean.Model;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 /**
  * Directory entity (copy).

@@ -20,9 +20,9 @@ package tk.freaxsoftware.ribbon2.exchanger.entity;
 
 import io.ebean.Model;
 import java.time.ZonedDateTime;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 /**
  * Register holds basic records for all imported/exported messages. Used 

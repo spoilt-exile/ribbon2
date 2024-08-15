@@ -20,13 +20,13 @@ package tk.freaxsoftware.ribbon2.core.data.messagestorage;
 
 import io.ebean.Model;
 import io.ebean.annotation.DbJsonB;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Map;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.MessageStatus;
 

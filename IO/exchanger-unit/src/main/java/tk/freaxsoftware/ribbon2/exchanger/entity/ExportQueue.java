@@ -21,10 +21,10 @@ package tk.freaxsoftware.ribbon2.exchanger.entity;
 import io.ebean.Model;
 import io.ebean.annotation.DbJsonB;
 import java.time.ZonedDateTime;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 
 /**

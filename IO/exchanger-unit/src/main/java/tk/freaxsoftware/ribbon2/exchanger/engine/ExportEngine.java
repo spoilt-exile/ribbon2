@@ -18,8 +18,6 @@
  */
 package tk.freaxsoftware.ribbon2.exchanger.engine;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import freemarker.template.TemplateException;
 import java.io.IOException;
 import java.time.ZonedDateTime;
@@ -210,7 +208,7 @@ public class ExportEngine extends IOEngine<Exporter>{
         ModuleWrapper<Exporter> wrapper = moduleMap.get(saved.getProtocol());
         SchemeInstance instance = saved.buildInstance();
         wrapper.getSchemes().put(saved.getName(), instance);
-        sendSchemeStatusUpdate(Sets.newHashSet(buildStatusUpdateNotification(wrapper, instance, type, scheme.getName())));
+        sendSchemeStatusUpdate(Set.of(buildStatusUpdateNotification(wrapper, instance, type, scheme.getName())));
         return schemeConverter.convert(saved);
     }
 
@@ -235,7 +233,7 @@ public class ExportEngine extends IOEngine<Exporter>{
             SchemeInstance instance = existingScheme.buildInstance();
             wrapper.getSchemes().remove(existingScheme.getName());
             instance.setStatus(SchemeInstance.Status.DELETED);
-            sendSchemeStatusUpdate(Sets.newHashSet(buildStatusUpdateNotification(wrapper, instance, type, existingScheme.getName())));
+            sendSchemeStatusUpdate(Set.of(buildStatusUpdateNotification(wrapper, instance, type, existingScheme.getName())));
             return existingScheme.delete();
         }
         LOGGER.error("Scheme by name {} not found", name);
@@ -254,7 +252,7 @@ public class ExportEngine extends IOEngine<Exporter>{
     }
     
     private Boolean innerSchemeExportListProcess(String name, String dirName, String username, Consumer<Set<String>> op) {
-        checkDirectoryAccess(username, ImmutableSet.of(dirName), PERMISSION_CAN_ASSIGN_EXPORT);
+        checkDirectoryAccess(username, Set.of(dirName), PERMISSION_CAN_ASSIGN_EXPORT);
         Scheme scheme = schemeRepository.findByName(name);
         if (scheme == null) {
             throw new CoreException(IO_SCHEME_NOT_FOUND, 
@@ -273,7 +271,7 @@ public class ExportEngine extends IOEngine<Exporter>{
         ModuleWrapper<Exporter> wrapper = moduleMap.get(scheme.getProtocol());
         SchemeInstance instance = scheme.buildInstance();
         wrapper.getSchemes().put(scheme.getName(), instance);
-        sendSchemeStatusUpdate(Sets.newHashSet(buildStatusUpdateNotification(wrapper, instance, type, scheme.getName())));
+        sendSchemeStatusUpdate(Set.of(buildStatusUpdateNotification(wrapper, instance, type, scheme.getName())));
         return true;
     }
 

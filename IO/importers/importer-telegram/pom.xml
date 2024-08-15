@@ -9,8 +9,8 @@
     <artifactId>importer-telegram</artifactId>
     <packaging>jar</packaging>
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
     </properties>
     <name>Ribbon2 IO Importer Telegram</name>
     <description>Importer via telegram bot</description>
@@ -33,12 +33,12 @@
         <dependency>
             <groupId>org.telegram</groupId>
             <artifactId>telegrambots</artifactId>
-            <version>5.0.1</version>
+            <version>6.9.7.1</version>
         </dependency>
         <dependency>
             <groupId>org.telegram</groupId>
             <artifactId>telegrambotsextensions</artifactId>
-            <version>5.0.1</version>
+            <version>6.9.7.1</version>
         </dependency>
     </dependencies>
 </project>
