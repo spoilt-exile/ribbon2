@@ -14,9 +14,9 @@
         <#list user.groups as group>
             <li>${group}</li>
         </#list>
-        <!--<div id="dirs" hx-trigger="load, every 30s" hx-get="/directories">
+        <div id="dirs" hx-trigger="load, every 30s" hx-get="/directories">
             
-        </div>-->
+        </div>
         
         <div id="messages" hx-trigger="load" hx-get="/messages/System.Test?page=0&amp;pageSize=30">
             

@@ -36,6 +36,7 @@ import tk.freaxsoftware.ribbon2.core.config.EnvironmentOverrider;
 import tk.freaxsoftware.ribbon2.uix.config.UixConfig;
 import tk.freaxsoftware.ribbon2.uix.config.UixConfig.HttpConfig;
 import tk.freaxsoftware.ribbon2.uix.rest.GatewayService;
+import tk.freaxsoftware.ribbon2.uix.rest.dummy.GatewayServiceDummy;
 import tk.freaxsoftware.ribbon2.uix.routes.LoginRoutes;
 import tk.freaxsoftware.ribbon2.uix.routes.MainRoutes;
 
@@ -69,7 +70,7 @@ public class Uix {
         processConfig(config);
         LOGGER.info("UIX started, config: {}", config);
         
-        GatewayService gatewayService = new GatewayService(config.getGatewayUrl());
+        GatewayService gatewayService = new GatewayServiceDummy(config.getGatewayUrl());
         
         Configuration freeMarkerConfiguration = new Configuration(VERSION_2_3_32);
         freeMarkerConfiguration.setDirectoryForTemplateLoading(new File("web"));
