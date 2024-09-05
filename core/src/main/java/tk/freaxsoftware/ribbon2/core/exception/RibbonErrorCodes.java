@@ -29,6 +29,7 @@ public enum RibbonErrorCodes {
     CALL_ERROR(504),
     
     ACCESS_DENIED(401),
+    INVALID_REQUEST(400),
     
     USER_NOT_FOUND(404),
     

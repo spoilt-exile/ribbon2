@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.uix.rest;
 
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -25,8 +26,12 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
+import tk.freaxsoftware.ribbon2.core.data.request.AuthRequest;
 
 /**
  * Auth resource REST client.
@@ -35,6 +40,8 @@ import tk.freaxsoftware.ribbon2.core.data.UserModel;
 public class AuthRestClient {
     
     private final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+    
+    private final Gson gson = GsonUtils.getGson();
     
     private final String baseUrl;
 
@@ -51,7 +58,11 @@ public class AuthRestClient {
      * @throws java.io.IOException
      */
     public String auth(String login, String password) throws URISyntaxException, IOException {
-        HttpPost request = new HttpPost(new URIBuilder(baseUrl + "/auth").addParameter("login", login).addParameter("password", password).build());
+        HttpPost request = new HttpPost(new URIBuilder(baseUrl + "/auth").build());
+        AuthRequest authRequest = new AuthRequest();
+        authRequest.setLogin(login);
+        authRequest.setPassword(password);
+        request.setEntity(new StringEntity(gson.toJson(authRequest), ContentType.APPLICATION_JSON));
         HttpResponse response = clientBuilder.build().execute(request);
         return ResponseUtil.handleResponseRaw(response);
     }

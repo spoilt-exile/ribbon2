@@ -29,7 +29,6 @@ import io.javalin.openapi.ApiKeyAuth;
 import io.javalin.openapi.plugin.OpenApiPluginConfiguration;
 import io.javalin.openapi.plugin.OpenApiPlugin;
 import io.javalin.openapi.plugin.SecurityComponentConfiguration;
-import io.javalin.openapi.plugin.swagger.SwaggerConfiguration;
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -98,9 +97,6 @@ public class GatewayMain {
         MessageRoutes.initWatchdog();
         IORoutes.initWatchdog();
         Javalin app = Javalin.create(javalinConfig -> {
-            OpenApiPluginConfiguration openApiConfiguration = new OpenApiPluginConfiguration();
-            //openApiConfiguration.getInfo().setTitle("Ribbon2 System API");
-            //openApiConfiguration.setSecurity(new SecurityComponentConfiguration().withSecurityScheme("ribbonToken", new ApiKeyAuth(config.getHttp().getAuthType().name().toLowerCase(), config.getHttp().getAuthTokenName())));
             javalinConfig.registerPlugin(new OpenApiPlugin(config -> {
                 config.withDefinitionConfiguration((version, definition) -> {
                     definition.withInfo(info -> info.setTitle("Ribbon2 System API"));

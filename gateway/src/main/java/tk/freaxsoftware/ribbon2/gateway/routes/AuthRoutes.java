@@ -25,16 +25,20 @@ import io.javalin.openapi.HttpMethod;
 import io.javalin.openapi.OpenApi;
 import io.javalin.openapi.OpenApiContent;
 import io.javalin.openapi.OpenApiParam;
+import io.javalin.openapi.OpenApiRequestBody;
 import io.javalin.openapi.OpenApiResponse;
 import io.javalin.openapi.OpenApiSecurity;
 import io.jsonwebtoken.Claims;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
+import tk.freaxsoftware.ribbon2.core.data.request.AuthRequest;
 import tk.freaxsoftware.ribbon2.core.exception.CoreError;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
+import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
 import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.converters.UserConverter;
@@ -75,20 +79,22 @@ public class AuthRoutes {
         path = "/auth",
         methods = HttpMethod.POST,
         tags = {"Auth"},
-        queryParams = {
-            @OpenApiParam(name = "login", required = true),
-            @OpenApiParam(name = "password", required = true)
-        },
+        requestBody = @OpenApiRequestBody(required = true, content = {@OpenApiContent(from = AuthRequest.class)}),
         responses = {
             @OpenApiResponse(status = "200", content = {@OpenApiContent(from = String.class)}),
+            @OpenApiResponse(status = "400", content = {@OpenApiContent(from = CoreError.class)}),
             @OpenApiResponse(status = "401", content = {@OpenApiContent(from = CoreError.class)})
         }
     )
     public static void auth(Context ctx) {
-        UserEntity loginedUser = DB.getDefault().find(UserEntity.class).where().eq("login", ctx.queryParam("login")).findOne();
+        AuthRequest authRequest = GatewayMain.gson.fromJson(ctx.body(), AuthRequest.class);
+        if (!authRequest.valid()) {
+            throw new CoreException(RibbonErrorCodes.INVALID_REQUEST, "Invalid auth request");
+        }
+        UserEntity loginedUser = DB.getDefault().find(UserEntity.class).where().eq("login", authRequest.getLogin()).findOne();
         if (loginedUser != null 
                 && loginedUser.getEnabled()
-                && Objects.equals(SHAHash.hashPassword(ctx.queryParam("password")), loginedUser.getPassword())) {
+                && Objects.equals(SHAHash.hashPassword(authRequest.getPassword()), loginedUser.getPassword())) {
             LOGGER.debug("Proceed JWT auth: " + loginedUser.getLogin());
             JWTTokenService tokenService = JWTTokenService.getInstance();
             String token = tokenService.encryptToken(loginedUser);
