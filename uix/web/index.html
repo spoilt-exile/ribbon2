@@ -5,21 +5,90 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://unpkg.com/htmx.org@1.9.4"></script>
+        <script src="/web/static/color-modes.js"></script>
+        <script src="/web/static/bootstrap.bundle.min.js"></script>
+        <script src="/web/static/sidebars.js"></script>
+        <link href="/web/static/bootstrap.min.css" rel="stylesheet">
+        <link href="/web/static/sidebars.css" rel="stylesheet">
+        <style>
+             /* Remove default bullets */
+            ul, #myUL {
+              list-style-type: none;
+            }
+
+            /* Remove margins and padding from the parent ul */
+            #myUL {
+              margin: 0;
+              padding: 0;
+            }
+
+            /* Style the caret/arrow */
+            .caret {
+              cursor: pointer;
+              user-select: none; /* Prevent text selection */
+            }
+
+            /* Create the caret/arrow with a unicode, and style it */
+            .caret::before {
+              content: "\002B";
+              color: black;
+              display: inline-block;
+              margin-right: 6px;
+            }
+
+            /* Rotate the caret/arrow icon when clicked on (using JavaScript) */
+            .caret-down::before {
+              transform: rotate(90deg);
+            }
+
+            /* Hide the nested list */
+            .nested {
+              display: none;
+            }
+
+            /* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
+            .active {
+              display: block;
+            } 
+        </style>
     </head>
     <body>
+        <!--
         <input type="submit" value="LOGOUT" hx-post="/logout" hx-trigger="click"/>
         Hi, ${user.login}!<br/>
         Email: ${user.email}<br/>
         Groups:<br/>
+        <ul>
         <#list user.groups as group>
             <li>${group}</li>
         </#list>
+        </ul>
         <div id="dirs" hx-trigger="load, every 30s" hx-get="/directories">
             
         </div>
         
         <div id="messages" hx-trigger="load" hx-get="/messages/System.Test?page=0&amp;pageSize=30">
             
+        </div>
+        -->
+        
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col">
+              Ribbon 2 System<br/>
+              Hi, ${user.login}!<br/>
+              <input type="submit" value="LOGOUT" hx-post="/logout" hx-trigger="click"/>
+              <hr>
+              <div id="dirs" hx-trigger="load, every 30s" hx-get="/directories">
+
+              </div>
+            </div>
+            <div class="col-9">
+                <div id="messages" hx-trigger="load" hx-get="/messages/System.Test" style="overflow: scroll; max-height: 28em;">
+
+                </div>
+            </div>
+          </div>
         </div>
     </body>
 </html>
