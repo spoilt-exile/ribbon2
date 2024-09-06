@@ -1,16 +1,16 @@
-<table>
+<table class="table">
     <thead>
         <tr>
-            <th>UID</th>
-            <th>Author</th>
-            <th>Date</th>
-            <th>Header</th>
+            <th scope="col">ID</th>
+            <th scope="col">Author</th>
+            <th scope="col">Date</th>
+            <th scope="col">Header</th>
         </tr>
     </thead>
     <tbody>
         <#list messages.content as message>
         <tr>
-            <td>${message.uid}</td>
+            <td scope="row">${message.id?c}</td>
             <td>${message.createdBy}</td>
             <td>${message.created.format('yyyy MM dd HH:mm:ss')}</td>
             <td>${message.header}</td>

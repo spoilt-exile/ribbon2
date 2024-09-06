@@ -1,16 +1,18 @@
 <#macro dirTreeList dirList>
-    <ul>
-        <#list dirList as childDir>
-            <li>
-                <div>
-                    ${childDir.parentDirectory.name}
-                </div>
-            </li>
-            <#if childDir.directoryChildren??>
+    <#list dirList as childDir>
+        <li>
+            <span class="caret">
+                <a href="#" hx-get="/messages/${childDir.parentDirectory.fullName}" hx-target="#messages">${childDir.parentDirectory.name}</a>
+            </span>
+        </li>
+        <#if childDir.directoryChildren?has_content>
+            <ul class="active">
                 <@dirTreeList childDir.directoryChildren />
-            </#if>
-        </#list>
-    </ul>
+            </ul>
+        </#if>
+    </#list>
 </#macro>
 
+<ul id="myUL">
 <@dirTreeList directories.directoryChildren />
+</ul>

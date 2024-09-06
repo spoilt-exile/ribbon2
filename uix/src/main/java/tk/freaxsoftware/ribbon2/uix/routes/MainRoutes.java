@@ -21,6 +21,7 @@ package tk.freaxsoftware.ribbon2.uix.routes;
 import io.javalin.Javalin;
 import java.util.HashMap;
 import java.util.Map;
+import static java.util.Objects.nonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
@@ -33,7 +34,7 @@ import tk.freaxsoftware.ribbon2.uix.model.PageableUrlWrapper;
 import tk.freaxsoftware.ribbon2.uix.rest.GatewayService;
 
 /**
- * Routes for main UI;
+ * Routes for main window;
  * @author Stanislav Nepochatov
  */
 public class MainRoutes {
@@ -42,18 +43,21 @@ public class MainRoutes {
       
     public static void init(Javalin app, GatewayService gatewayService) {
         app.get("/", (ctx) -> {
+            LOGGER.info("UIX request /");
             ctx.render("index.html", Map.of("user", UserSessionModelContext.getUser()));
         });
         
         app.get("/directories", (ctx) -> {
+            LOGGER.info("UIX request /directories");
             final DirectoryPage page = gatewayService.getDirectoryRestClient().getDirectories(UserSessionModelContext.getUser().getJwtKey());
             ctx.render("directories.html", Map.of("directories", convertToTree(page)));
         });
         
         app.get("/messages/{dir}", (ctx) -> {
+            LOGGER.info("UIX request {}", ctx.url());
             final String dir = ctx.pathParam("dir");
-            final int page = Integer.parseInt(ctx.queryParam("page"));
-            final int pageSize = Integer.parseInt(ctx.queryParam("pageSize"));
+            final int page = nonNull(ctx.queryParam("page")) ? Integer.parseInt(ctx.queryParam("page")) : 0;
+            final int pageSize = nonNull(ctx.queryParam("pageSize")) ? Integer.parseInt(ctx.queryParam("pageSize")) : 30;
             final DefaultPage<MessageModel> messagePage = gatewayService.getMessageRestClient().getMessages(UserSessionModelContext.getUser().getJwtKey(), dir, pageSize, page);
             PageableUrlWrapper<MessageModel> messages = new PageableUrlWrapper(messagePage, String.format("/%s/%s", "messages", dir), pageSize, pageSize);
             ctx.render("messages.html", Map.of("messages", messages));
