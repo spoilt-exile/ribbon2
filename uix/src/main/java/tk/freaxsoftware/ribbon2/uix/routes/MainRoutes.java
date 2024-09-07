@@ -60,7 +60,15 @@ public class MainRoutes {
             final int pageSize = nonNull(ctx.queryParam("pageSize")) ? Integer.parseInt(ctx.queryParam("pageSize")) : 30;
             final DefaultPage<MessageModel> messagePage = gatewayService.getMessageRestClient().getMessages(UserSessionModelContext.getUser().getJwtKey(), dir, pageSize, page);
             PageableUrlWrapper<MessageModel> messages = new PageableUrlWrapper(messagePage, String.format("/%s/%s", "messages", dir), pageSize, pageSize);
-            ctx.render("messages.html", Map.of("messages", messages));
+            ctx.render("messages.html", Map.of("messages", messages, "directory", dir));
+        });
+        
+        app.get("/messsages/{dir}/uid/{uid}", (ctx) -> {
+            LOGGER.info("UIX request {}", ctx.url());
+            final String dir = ctx.pathParam("dir");
+            final String uid = ctx.pathParam("uid");
+            final MessageModel message = gatewayService.getMessageRestClient().getMessageByUid(UserSessionModelContext.getUser().getJwtKey(), uid, dir);
+            ctx.render("content.html", Map.of("message", message));
         });
     }
     
