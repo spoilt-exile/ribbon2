@@ -1,4 +1,4 @@
-<table class="table">
+<table class="table table-dark table-hover">
     <thead>
         <tr>
             <th scope="col">ID</th>
@@ -9,8 +9,10 @@
     </thead>
     <tbody>
         <#list messages.content as message>
-        <tr>
-            <td scope="row">${message.id?c}</td>
+        <tr hx-get="/messsages/${directory}/uid/${message.uid}" hx-target="#content">
+            <td scope="row">
+                ${message.id?c}
+            </td>
             <td>${message.createdBy}</td>
             <td>${message.created.format('yyyy MM dd HH:mm:ss')}</td>
             <td>${message.header}</td>

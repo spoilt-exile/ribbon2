@@ -49,7 +49,9 @@
             /* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
             .active {
               display: block;
-            } 
+            }
+            
+
         </style>
     </head>
     <body>
@@ -84,8 +86,12 @@
               </div>
             </div>
             <div class="col-9">
-                <div id="messages" hx-trigger="load" hx-get="/messages/System.Test" style="overflow: scroll; max-height: 28em;">
-
+                <div id="messages" style="overflow: scroll; max-height: 28em;">
+                    Select directory to display messages.
+                </div>
+                
+                <div id="content" style="overflow: scroll; max-height: 26em;">
+                    
                 </div>
             </div>
           </div>
