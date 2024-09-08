@@ -1,0 +1,84 @@
+<button type="button" class="btn btn-primary" hx-get="/messsages/${directory}/uid/${message.uid}" hx-target="#content">Back</button>
+<h3>Main data</h3>
+<table class="table">
+    <tbody>
+        <tr>
+            <td>Header</td>
+            <td>${message.header}</td>
+        </tr>
+        <tr>
+            <td>ID</td>
+            <td>${message.id?c}</td>
+        </tr>
+        <tr>
+            <td>UID</td>
+            <td>${message.uid}</td>
+        </tr>
+        <tr>
+            <td>Parent UID</td>
+            <td>${message.parentUid!'-'}</td>
+        </tr>
+        <tr>
+            <td>Created by</td>
+            <td>${message.createdBy}</td>
+        </tr>
+        <tr>
+            <td>Created date</td>
+            <td>${message.created.format('yyyy MM dd HH:mm:ss')}</td>
+        </tr>
+        <tr>
+            <td>Updated by</td>
+            <td>${message.updatedBy!'-'}</td>
+        </tr>
+        <tr>
+            <td>Updated date</td>
+            <#if message.updated??>
+                <td>${message.updated.format('yyyy MM dd HH:mm:ss')}</td>
+            <#else>
+                <td>-</td>
+            </#if>
+        </tr>
+        <tr>
+            <td>Directories</td>
+            <td>
+                <#list message.directories as dir>
+                    <span class="badge bg-primary">${dir}</span>
+                </#list>
+            </td>
+        </tr>
+        <tr>
+            <td>Tags</td>
+            <td>
+                <#list message.tags as tag>
+                    <span class="badge bg-secondary">${tag}</span>
+                </#list>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<#if message.properties?has_content>
+    <h3>Message properties</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">UID</th>
+                <th scope="col">Type</th>
+                <th scope="col">Creaed by</th>
+                <th scope="col">Created date</th>
+                <th scope="col">Content</th>
+            </tr>
+        </thead>
+        <tbody>
+            <#list message.properties as prop>
+            <tr>
+                <td scope="row">${prop.uid}</td>
+                <td>${prop.type}</td>
+                <td>${prop.createdBy}</td>
+                <td>${prop.created.format('yyyy MM dd HH:mm:ss')}</td>
+                <td>${prop.content}</td>
+            </tr>
+            </#list>
+        </tbody>
+    </table>
+</#if>

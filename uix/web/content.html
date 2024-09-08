@@ -1,3 +1,3 @@
-<button type="button" class="btn btn-primary">Properties</button>
+<button type="button" class="btn btn-primary" hx-get="/messsages/${directory}/uid/${message.uid}/properties" hx-target="#content">Properties</button>
 <h3>${message.header}</h3>
 <p style="white-space: pre-wrap;">${message.content}</p>

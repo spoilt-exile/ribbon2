@@ -255,6 +255,7 @@ public class GatewayServiceDummy extends GatewayService {
         message.setCreated(ZonedDateTime.now());
         message.setCreatedBy("root");
         message.setContent("Content " + uid);
+        message.setDirectories(Set.of("Dev.Null"));
         message.setTags(Set.of("generated", "random"));
         final MessagePropertyModel copyrightProp = new MessagePropertyModel("COPYRIGHT", "root");
         copyrightProp.setCreatedBy("root");

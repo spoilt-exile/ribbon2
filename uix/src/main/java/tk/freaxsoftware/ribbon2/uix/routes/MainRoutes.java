@@ -43,18 +43,18 @@ public class MainRoutes {
       
     public static void init(Javalin app, GatewayService gatewayService) {
         app.get("/", (ctx) -> {
-            LOGGER.info("UIX request /");
+            LOGGER.info("UIX request {}", ctx.path());
             ctx.render("index.html", Map.of("user", UserSessionModelContext.getUser()));
         });
         
         app.get("/directories", (ctx) -> {
-            LOGGER.info("UIX request /directories");
+            LOGGER.info("UIX request {}", ctx.path());
             final DirectoryPage page = gatewayService.getDirectoryRestClient().getDirectories(UserSessionModelContext.getUser().getJwtKey());
             ctx.render("directories.html", Map.of("directories", convertToTree(page)));
         });
         
         app.get("/messages/{dir}", (ctx) -> {
-            LOGGER.info("UIX request {}", ctx.url());
+            LOGGER.info("UIX request {}", ctx.path());
             final String dir = ctx.pathParam("dir");
             final int page = nonNull(ctx.queryParam("page")) ? Integer.parseInt(ctx.queryParam("page")) : 0;
             final int pageSize = nonNull(ctx.queryParam("pageSize")) ? Integer.parseInt(ctx.queryParam("pageSize")) : 30;
@@ -64,11 +64,19 @@ public class MainRoutes {
         });
         
         app.get("/messsages/{dir}/uid/{uid}", (ctx) -> {
-            LOGGER.info("UIX request {}", ctx.url());
+            LOGGER.info("UIX request {}", ctx.path());
             final String dir = ctx.pathParam("dir");
             final String uid = ctx.pathParam("uid");
             final MessageModel message = gatewayService.getMessageRestClient().getMessageByUid(UserSessionModelContext.getUser().getJwtKey(), uid, dir);
-            ctx.render("content.html", Map.of("message", message));
+            ctx.render("content.html", Map.of("message", message, "directory", dir));
+        });
+        
+        app.get("/messsages/{dir}/uid/{uid}/properties", (ctx) -> {
+            LOGGER.info("UIX request {}", ctx.path());
+            final String dir = ctx.pathParam("dir");
+            final String uid = ctx.pathParam("uid");
+            final MessageModel message = gatewayService.getMessageRestClient().getMessageByUid(UserSessionModelContext.getUser().getJwtKey(), uid, dir);
+            ctx.render("content-properties.html", Map.of("message", message, "directory", dir));
         });
     }
     
