@@ -18,8 +18,6 @@
  */
 package tk.freaxsoftware.ribbon2.uix.model;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.LongStream;
@@ -63,9 +61,8 @@ public class PageableUrlWrapper<T> {
             pagination.add(new UrlPagingEntry(renderUrl(pageNumber - 1, pageSize), "<", true));
         }
         
-        long maxPage = BigDecimal.valueOf(innerPage.getTotalCount())
-                .divide(BigDecimal.valueOf(pageSize))
-                .setScale(0, RoundingMode.CEILING).longValue();
+        long maxPageDiv = innerPage.getTotalCount() % pageSize;
+        long maxPage = (innerPage.getTotalCount() / pageSize) + (maxPageDiv > 0 ? 1 : 0);
         
         //Add array of pages (3 previous and 3 next pages)
         LongStream.rangeClosed(pageNumber - 3, pageNumber + 3)
@@ -76,13 +73,13 @@ public class PageableUrlWrapper<T> {
                                 String.valueOf(lgn + 1), 
                                 lgn != pageNumber)));
         
-        //Add last page link
-        if (maxPage > pageNumber) {
+        //Add next page link
+        if (maxPage - 1 > pageNumber) {
             pagination.add(new UrlPagingEntry(renderUrl(pageNumber + 1, pageSize), ">", true));
         }
         
         //Add last page link
-        if (maxPage > (pageNumber - 1)) {
+        if (maxPage - 2 > pageNumber) {
             pagination.add(new UrlPagingEntry(renderUrl((int) maxPage, pageSize), ">>", true));
         }
         return pagination;
