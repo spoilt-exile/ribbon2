@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.uix.model;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Assert;
@@ -55,6 +56,19 @@ public class PageableUrlWrapperTest {
         assertUrlEntry(pagination, 10, ">>", true, renderUrlTest(baseUrl, 11, pageSize));
     }
     
+    @Test
+    public void wrapSinglePageDivisionError() {
+        final String baseUrl = "/messages";
+        final int page = 0;
+        final int pageSize = 30;
+        final int totalCount = 23;
+        PageableUrlWrapper wrapper = new PageableUrlWrapper(new DummyPage((long) totalCount), baseUrl, pageSize, page);
+        
+        List<PageableUrlWrapper.UrlPagingEntry> pagination = wrapper.getPagination();
+        Assert.assertTrue(pagination.size() == 1);
+        assertUrlEntry(pagination, 0, "1", false, renderUrlTest(baseUrl, 0, pageSize));
+    }
+     
     private void assertUrlEntry(List<PageableUrlWrapper.UrlPagingEntry> pagination, int index, String caption, boolean active, String url) {
         PageableUrlWrapper.UrlPagingEntry pagingEntry = pagination.get(index);
         
