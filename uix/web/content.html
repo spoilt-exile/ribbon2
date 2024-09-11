@@ -1,3 +1,6 @@
 <button type="button" class="btn btn-primary" hx-get="/messsages/${directory}/uid/${message.uid}/properties" hx-target="#content">Properties</button>
+<a class="btn btn-success" href="/editor/RERELEASE?uid=${message.uid}&dir=${directory}" role="button">Re-release</a>
+<a class="btn btn-warning" href="/editor/UPDATE?uid=${message.uid}&dir=${directory}" role="button">Update</a>
+<a class="btn btn-danger" href="#" role="button">Delete</a>
 <h3>${message.header}</h3>
 <p style="white-space: pre-wrap;">${message.content}</p>
