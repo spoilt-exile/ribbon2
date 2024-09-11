@@ -55,31 +55,13 @@
         </style>
     </head>
     <body>
-        <!--
-        <input type="submit" value="LOGOUT" hx-post="/logout" hx-trigger="click"/>
-        Hi, ${user.login}!<br/>
-        Email: ${user.email}<br/>
-        Groups:<br/>
-        <ul>
-        <#list user.groups as group>
-            <li>${group}</li>
-        </#list>
-        </ul>
-        <div id="dirs" hx-trigger="load, every 30s" hx-get="/directories">
-            
-        </div>
-        
-        <div id="messages" hx-trigger="load" hx-get="/messages/System.Test?page=0&amp;pageSize=30">
-            
-        </div>
-        -->
-        
         <div class="container-fluid">
           <div class="row">
             <div class="col">
               Ribbon 2 System<br/>
               Hi, ${user.login}!<br/>
-              <input type="submit" value="LOGOUT" hx-post="/logout" hx-trigger="click"/>
+              <a class="btn btn-success" href="/editor/CREATE" role="button">Create Message</a><br/>
+              <input type="submit" value="Logout" hx-post="/logout" hx-trigger="click" class="btn btn-primary"/>
               <hr>
               <div id="dirs" hx-trigger="load, every 30s" hx-get="/directories">
 

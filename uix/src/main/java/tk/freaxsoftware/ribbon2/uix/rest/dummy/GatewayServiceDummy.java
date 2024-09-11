@@ -175,7 +175,7 @@ public class GatewayServiceDummy extends GatewayService {
 
         @Override
         public Set<DirectoryModel> getDirectoriesByPermission(String jwtKey, String permission) throws URISyntaxException, IOException {
-            return Set.of(createDirecotry("System.Test", "Test"));
+            return Set.of(createDirecotry("System.Test", "Test"), createDirecotry("Dev.Null", "Null"));
         }
 
         @Override

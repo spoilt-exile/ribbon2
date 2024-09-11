@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Ribbon 2 Message Editor</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://unpkg.com/htmx.org@1.9.4"></script>
+        <script src="../web/static/color-modes.js"></script>
+        <script src="../web/static/bootstrap.bundle.min.js"></script>
+        <script src="../web/static/sidebars.js"></script>
+        <link href="../web/static/bootstrap.min.css" rel="stylesheet">
+        <link href="../web/static/sidebars.css" rel="stylesheet">
+  </head>
+  <body>
+      <form hx-post="/editor/submit" hx-target="#message-error">
+          <input type="hidden" id="mode" name="mode" value="${mode}">
+          <#if message.uid??>
+            <input type="hidden" id="uid" name="uid" value="${message.uid}">
+          </#if>
+
+          <div class="mb-3">
+            <label for="header" class="form-label">Header</label>
+            <input type="text" class="form-control" id="header" name="header" aria-describedby="headerHelp" value="${message.header!}" required>
+            <div id="headerHelp" class="form-text">Message header line.</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="tags" class="form-label">Tags</label>
+            <#if message.tags??>
+                <input type="text" class="form-control" id="tags" name="tags" aria-describedby="tagHelp" value="${message.tags?join(", ")}" required>
+            <#else>
+                <input type="text" class="form-control" id="tags" name="tags" aria-describedby="tagHelp" required>
+            </#if>
+            <div id="tagHelp" class="form-text">Common points of message, separeted by comma.</div>
+          </div>
+          
+          <select id="directories" name="directories" class="form-select" multiple aria-label="Select directories">
+            <#list directories as dir>\
+                <#if message.directories?? && message.directories?seq_contains(dir.fullName)>
+                    <option selected value="${dir.fullName}">${dir.fullName}</option>
+                <#else>
+                    <option value="${dir.fullName}">${dir.fullName}</option>
+                </#if>
+            </#list>
+          </select>
+          
+          <div class="mb-3">
+            <label for="content" class="form-label">Content</label>
+            <textarea class="form-control" id="content" name="content" rows="14" required>${message.content!}</textarea>
+          </div>
+          <button class="btn btn-primary" type="submit">${mode}</button>
+      </form>
+      <div id="message-error"></div>
+  </body>
+</html>
