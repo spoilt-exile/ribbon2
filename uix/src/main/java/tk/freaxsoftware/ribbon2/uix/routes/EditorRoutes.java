@@ -19,8 +19,10 @@
 package tk.freaxsoftware.ribbon2.uix.routes;
 
 import io.javalin.Javalin;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
@@ -63,7 +65,26 @@ public class EditorRoutes {
         
         app.post("/editor/submit", (ctx) -> {
             LOGGER.info("UIX request {}", ctx.path());
-            LOGGER.info("DIRS: {}", ctx.formParams("directories"));
+            final EditModes mode = EditModes.valueOf(ctx.formParam("mode"));
+            final String uid = ctx.formParam("uid");
+            final String header = ctx.formParam("header");
+            final Set<String> tags = Arrays.stream(ctx.formParam("tags").split(",")).map(String::trim).collect(Collectors.toSet());
+            final Set<String> directories = ctx.formParams("directories").stream().collect(Collectors.toSet());
+            final String content = ctx.formParam("content");
+            final MessageModel message = new MessageModel();
+            message.setHeader(header);
+            message.setTags(tags);
+            message.setDirectories(directories);
+            message.setContent(content);
+            if (mode == EditModes.UPDATE) {
+                message.setUid(uid);
+                gatewayService.getMessageRestClient().updateMessage(UserSessionModelContext.getUser().getJwtKey(), message);
+            } else {
+                if (mode == EditModes.RERELEASE) {
+                    message.setParentUid(uid);
+                }
+                gatewayService.getMessageRestClient().createMessage(UserSessionModelContext.getUser().getJwtKey(), message);
+            }
             ctx.header("HX-Redirect", "/");
         });
     }
