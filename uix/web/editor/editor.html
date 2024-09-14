@@ -12,6 +12,7 @@
         <link href="../web/static/sidebars.css" rel="stylesheet">
   </head>
   <body>
+      <div id="message-error"></div>
       <form hx-post="/editor/submit" hx-target="#message-error">
           <input type="hidden" id="mode" name="mode" value="${mode}">
           <#if message.uid??>
@@ -21,7 +22,7 @@
           <div class="mb-3">
             <label for="header" class="form-label">Header</label>
             <input type="text" class="form-control" id="header" name="header" aria-describedby="headerHelp" value="${message.header!}" required>
-            <div id="headerHelp" class="form-text">Message header line.</div>
+            <div id="headerHelp" class="form-text">Message header line</div>
           </div>
 
           <div class="mb-3">
@@ -31,7 +32,7 @@
             <#else>
                 <input type="text" class="form-control" id="tags" name="tags" aria-describedby="tagHelp" required>
             </#if>
-            <div id="tagHelp" class="form-text">Common points of message, separeted by comma.</div>
+            <div id="tagHelp" class="form-text">Common points of message, separeted by comma</div>
           </div>
           
           <select id="directories" name="directories" class="form-select" multiple aria-label="Select directories">
@@ -43,6 +44,45 @@
                 </#if>
             </#list>
           </select>
+          <br/>
+          <#if !message.isUrgent()>
+              <div class="mb-3">
+                <input class="form-check-input" type="checkbox" value="" id="urgent" name="urgent">
+                <label class="form-check-label" for="urgent">Urgent</label>
+              </div>
+          </#if>
+          
+          <#if !message.isCopyrighted()>
+              <div class="container-fluid">
+                <div class="row">
+                  <div class="col">
+                    <label for="copyright_select" class="form-label">Copyright</label>
+                    <select id="copyright_select" name="copyright_select" class="form-select" aria-label="Copyright">
+                      <option value="LEAVE" selected>Not copyrighted</option>
+                      <option value="ASSIGN_ME">Assign me as author</option>
+                      <option value="ASSIGN_OTHER">Assign other as author</option>
+                    </select>
+                  </div>
+                  <div class="col">
+                    <label for="copyright_assign" class="form-label">Author</label>
+                    <input type="text" class="form-control" id="copyright_assign" name="copyright_assign" aria-describedby="copyright_assign_help">
+                    <div id="copyright_assign_help" class="form-text">Assigned author of the message</div>
+                  </div>
+                </div>
+              </div>
+          </#if>
+          
+          <#if message.isCopyrighted() && mode.name() == 'RERELEASE'>
+            <input type="hidden" id="copyright_original" name="copyright_original" value="${message.copyright()}">
+          </#if>
+          
+          <#if !message.isUnderEmbargo()>
+              <div class="mb-3">
+                <label for="embargo" class="form-label">Embargo</label>
+                <input type="datetime-local" class="form-control" id="embargo" name="embargo" aria-describedby="embargoHelp">
+                <div id="embargoHelp" class="form-text">Postpone message export till</div>
+              </div>
+          </#if>
           
           <div class="mb-3">
             <label for="content" class="form-label">Content</label>
@@ -50,6 +90,5 @@
           </div>
           <button class="btn btn-primary" type="submit">${mode}</button>
       </form>
-      <div id="message-error"></div>
   </body>
 </html>

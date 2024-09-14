@@ -19,14 +19,21 @@
 package tk.freaxsoftware.ribbon2.uix.routes;
 
 import io.javalin.Javalin;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import static java.util.Objects.nonNull;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
+import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 import tk.freaxsoftware.ribbon2.uix.UserSessionModelContext;
@@ -71,11 +78,52 @@ public class EditorRoutes {
             final Set<String> tags = Arrays.stream(ctx.formParam("tags").split(",")).map(String::trim).collect(Collectors.toSet());
             final Set<String> directories = ctx.formParams("directories").stream().collect(Collectors.toSet());
             final String content = ctx.formParam("content");
+            final Boolean urgent = nonNull(ctx.formParam("urgent"));
+            
+            String copyright = null;
+            if (nonNull(ctx.formParam("copyright_select"))) {
+                final String copyrightSelect = ctx.formParam("copyright_select");
+                switch (copyrightSelect) {
+                    case "ASSIGN_ME":
+                        copyright = UserSessionModelContext.getUser().getLogin();
+                        break;
+                    case "ASSIGN_OTHER": 
+                        if (ctx.formParam("copyright_assign").isBlank()) {
+                            throw new CoreException(RibbonErrorCodes.INVALID_REQUEST, "Author field is empty!");
+                        }
+                        copyright = ctx.formParam("copyright_assign");
+                        break;
+                    default:
+                        break;
+                }
+            }
+            
+            ZonedDateTime embargo = null;
+            if (ctx.formParam("embargo") != null && !ctx.formParam("embargo").isBlank()) {
+                final LocalDateTime embargoLocalDateTime = LocalDateTime.parse(ctx.formParam("embargo"));
+                final ZoneId serverZoneId = ZoneId.systemDefault();
+                embargo = embargoLocalDateTime.atZone(serverZoneId);
+            }
+            
             final MessageModel message = new MessageModel();
             message.setHeader(header);
             message.setTags(tags);
             message.setDirectories(directories);
             message.setContent(content);
+            message.setProperties(new HashSet());
+            
+            if (copyright != null) {
+                addProperty(message, "COPYRIGHT", copyright);
+            }
+            
+            if (urgent) {
+                addProperty(message, "URGENT", null);
+            }
+            
+            if (embargo != null) {
+                addProperty(message, "EMBARGO", embargo.format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
+            }
+            
             if (mode == EditModes.UPDATE) {
                 message.setUid(uid);
                 gatewayService.getMessageRestClient().updateMessage(UserSessionModelContext.getUser().getJwtKey(), message);
@@ -87,6 +135,13 @@ public class EditorRoutes {
             }
             ctx.header("HX-Redirect", "/");
         });
+    }
+    
+    private static void addProperty(MessageModel message, String type, String content) {
+        MessagePropertyModel property = new MessagePropertyModel();
+        property.setType(type);
+        property.setContent(content);
+        message.getProperties().add(property);
     }
     
     /**

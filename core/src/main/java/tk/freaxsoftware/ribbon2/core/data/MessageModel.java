@@ -20,6 +20,9 @@
 package tk.freaxsoftware.ribbon2.core.data;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
+import static java.util.Objects.nonNull;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -159,5 +162,32 @@ public class MessageModel {
 
     public void setProperties(Set<MessagePropertyModel> properties) {
         this.properties = properties;
+    }
+    
+    public boolean isUrgent() {
+        return isPropertyExists("URGENT");
+    }
+    
+    public boolean isCopyrighted() {
+        return isPropertyExists("COPYRIGHT");
+    }
+    
+    public boolean isUnderEmbargo() {
+        return isPropertyExists("EMBARGO");
+    }
+    
+    private boolean isPropertyExists(String propType) {
+        return nonNull(properties) 
+                ? properties.stream()
+                        .anyMatch(pr -> Objects.equals(pr.getType(), propType)) 
+                : false;
+    }
+    
+    public String copyright() {
+        Optional<String> copyrightProperty = properties.stream()
+                .filter(pr -> Objects.equals(pr.getType(), "COPYRIGHT"))
+                .map(MessagePropertyModel::getContent)
+                .findFirst();
+        return copyrightProperty.orElse(null);
     }
 }
