@@ -79,6 +79,7 @@ public class EditorRoutes {
             final Set<String> directories = ctx.formParams("directories").stream().collect(Collectors.toSet());
             final String content = ctx.formParam("content");
             final Boolean urgent = nonNull(ctx.formParam("urgent"));
+            final String mark = ctx.formParam("mark");
             
             String copyright = null;
             if (nonNull(ctx.formParam("copyright_select"))) {
@@ -124,12 +125,19 @@ public class EditorRoutes {
                 addProperty(message, "EMBARGO", embargo.format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
             }
             
+            if (!mark.isBlank()) {
+                addProperty(message, "MARK", mark);
+            }
+            
             if (mode == EditModes.UPDATE) {
                 message.setUid(uid);
                 gatewayService.getMessageRestClient().updateMessage(UserSessionModelContext.getUser().getJwtKey(), message);
             } else {
                 if (mode == EditModes.RERELEASE) {
                     message.setParentUid(uid);
+                    if (nonNull(ctx.formParam("copyright_original"))) {
+                        addProperty(message, "COPYRIGHT", ctx.formParam("copyright_original"));
+                    }
                 }
                 gatewayService.getMessageRestClient().createMessage(UserSessionModelContext.getUser().getJwtKey(), message);
             }
