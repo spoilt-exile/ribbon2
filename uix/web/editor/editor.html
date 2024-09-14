@@ -88,6 +88,13 @@
             <label for="content" class="form-label">Content</label>
             <textarea class="form-control" id="content" name="content" rows="14" required>${message.content!}</textarea>
           </div>
+          
+          <div class="mb-3">
+            <label for="mark" class="form-label">Comment</label>
+            <input type="text" class="form-control" id="mark" name="mark" aria-describedby="markHelp">
+            <div id="markHelp" class="form-text">User comment on message</div>
+          </div>
+          
           <button class="btn btn-primary" type="submit">${mode}</button>
       </form>
   </body>
