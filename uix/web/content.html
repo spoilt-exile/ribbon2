@@ -1,6 +1,24 @@
 <button type="button" class="btn btn-primary" hx-get="/messsages/${directory}/uid/${message.uid}/properties" hx-target="#content">Properties</button>
 <a class="btn btn-success" href="/editor/RERELEASE?uid=${message.uid}&dir=${directory}" role="button">Re-release</a>
 <a class="btn btn-warning" href="/editor/UPDATE?uid=${message.uid}&dir=${directory}" role="button">Update</a>
-<a class="btn btn-danger" href="#" role="button">Delete</a>
+<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteMessageModal">Delete</button>
 <h3>${message.header}</h3>
 <p style="white-space: pre-wrap;">${message.content}</p>
+
+<div class="modal fade" id="deleteMessageModal" tabindex="-1" aria-labelledby="deleteMessageModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteMessageModalLabel">Confirmation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Do you really want to delete message ${message.header}?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" hx-post="/editor/delete/${message.uid}" hx-target="#content">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

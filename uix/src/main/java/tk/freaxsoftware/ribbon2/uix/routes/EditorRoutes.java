@@ -143,6 +143,14 @@ public class EditorRoutes {
             }
             ctx.header("HX-Redirect", "/");
         });
+        
+        app.post("/editor/delete/{messageUid}", (ctx) -> {
+            LOGGER.info("UIX request {}", ctx.path());
+            String uid = ctx.pathParam("messageUid");
+            gatewayService.getMessageRestClient().deleteMessage(UserSessionModelContext.getUser().getJwtKey(), uid);
+            ctx.header("HX-Trigger", "messageDeleted");
+            ctx.result("MESSAGE DELETED");
+        });
     }
     
     private static void addProperty(MessageModel message, String type, String content) {
