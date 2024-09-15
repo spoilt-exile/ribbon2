@@ -26,6 +26,8 @@ public class UixConfig {
     
     private String gatewayUrl;
     
+    private Boolean gatewayDummy;
+    
     private HttpConfig http;
 
     public String getGatewayUrl() {
@@ -34,6 +36,14 @@ public class UixConfig {
 
     public void setGatewayUrl(String gatewayUrl) {
         this.gatewayUrl = gatewayUrl;
+    }
+
+    public Boolean getGatewayDummy() {
+        return gatewayDummy;
+    }
+
+    public void setGatewayDummy(Boolean gatewayDummy) {
+        this.gatewayDummy = gatewayDummy;
     }
 
     public HttpConfig getHttp() {
@@ -46,7 +56,7 @@ public class UixConfig {
 
     @Override
     public String toString() {
-        return "{" + "gatewayUrl=" + gatewayUrl + ", http=" + http + '}';
+        return "{" + "gatewayUrl=" + gatewayUrl + ", gatewayDummy=" + gatewayDummy + ", http=" + http + '}';
     }
     
     public static class HttpConfig {

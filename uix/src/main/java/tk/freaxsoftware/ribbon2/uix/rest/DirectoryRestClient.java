@@ -18,36 +18,17 @@
  */
 package tk.freaxsoftware.ribbon2.uix.rest;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Set;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.HttpClientBuilder;
-import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
-import static tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.PARAM_PAGE;
-import static tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.PARAM_SIZE;
 import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
 
 /**
  * Directory resource REST client.
  * @author Stanislav Nepochatov
  */
-public class DirectoryRestClient {
-    
-    private final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-    
-    private final Gson gson = GsonUtils.getGson();
-    
-    private final String baseUrl;
-
-    public DirectoryRestClient(String baseUrl) {
-        this.baseUrl = baseUrl + "/api/directory";
-    }
+public interface DirectoryRestClient {
     
     /**
      * Get all directories sorted for tree.
@@ -56,12 +37,7 @@ public class DirectoryRestClient {
      * @throws java.net.URISyntaxException
      * @throws java.io.IOException
      */
-    public DirectoryPage getDirectories(String jwtKey) throws URISyntaxException, IOException {
-        HttpGet request = new HttpGet(new URIBuilder(baseUrl).addParameter(PARAM_PAGE, "0").addParameter(PARAM_SIZE, "10000").build());
-        request.addHeader("x-ribbon2-auth", jwtKey);
-        HttpResponse response = clientBuilder.build().execute(request);
-        return ResponseUtil.handleResponse(response, new TypeToken<DirectoryPage>() {});
-    }
+    DirectoryPage getDirectories(String jwtKey) throws URISyntaxException, IOException;
     
     /**
      * Get all permissions available to user by directory.
@@ -71,12 +47,7 @@ public class DirectoryRestClient {
      * @throws URISyntaxException
      * @throws IOException 
      */
-    public Set<String> getDirectoriesPermissions(String jwtKey, String dirPath) throws URISyntaxException, IOException {
-        HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/access/permission/current/" + dirPath).build());
-        request.addHeader("x-ribbon2-auth", jwtKey);
-        HttpResponse response = clientBuilder.build().execute(request);
-        return ResponseUtil.handleResponse(response, new TypeToken<Set<String>>() {});
-    }
+    Set<String> getDirectoriesPermissions(String jwtKey, String dirPath) throws URISyntaxException, IOException;
     
     /**
      * Get set of directories which can be accessed by curent user with specified permission.
@@ -86,11 +57,6 @@ public class DirectoryRestClient {
      * @throws URISyntaxException
      * @throws IOException 
      */
-    public Set<DirectoryModel> getDirectoriesByPermission(String jwtKey, String permission) throws URISyntaxException, IOException {
-        HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/permission/" + permission).build());
-        request.addHeader("x-ribbon2-auth", jwtKey);
-        HttpResponse response = clientBuilder.build().execute(request);
-        return ResponseUtil.handleResponse(response, new TypeToken<Set<DirectoryModel>>() {});
-    }
+    Set<DirectoryModel> getDirectoriesByPermission(String jwtKey, String permission) throws URISyntaxException, IOException;
 
 }

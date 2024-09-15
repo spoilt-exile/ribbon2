@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package tk.freaxsoftware.ribbon2.uix.rest;
+package tk.freaxsoftware.ribbon2.uix.rest.impl;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

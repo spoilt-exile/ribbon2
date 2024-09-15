@@ -20,6 +20,15 @@ package tk.freaxsoftware.ribbon2.uix.rest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tk.freaxsoftware.ribbon2.uix.config.UixConfig;
+import tk.freaxsoftware.ribbon2.uix.rest.dummy.AuthRestClientDummy;
+import tk.freaxsoftware.ribbon2.uix.rest.dummy.DirectoryRestClientDummy;
+import tk.freaxsoftware.ribbon2.uix.rest.dummy.MessageRestClientDummy;
+import tk.freaxsoftware.ribbon2.uix.rest.dummy.UserRestClientDummy;
+import tk.freaxsoftware.ribbon2.uix.rest.impl.AuthRestClientImpl;
+import tk.freaxsoftware.ribbon2.uix.rest.impl.DirectoryRestClientImpl;
+import tk.freaxsoftware.ribbon2.uix.rest.impl.MessageRestClientImpl;
+import tk.freaxsoftware.ribbon2.uix.rest.impl.UserRestClientImpl;
 
 /**
  * Rest client service for communicating with gateway;
@@ -34,13 +43,22 @@ public class GatewayService {
     private final MessageRestClient messageRestClient;
     private final UserRestClient userRestClient;
 
-    public GatewayService(String gatewayUrl) {
-        LOGGER.info("Creating Ribbon2 Gateway clients to connect: {}", gatewayUrl);
-        
-        this.authRestClient = new AuthRestClient(gatewayUrl);
-        this.directoryRestClient = new DirectoryRestClient(gatewayUrl);
-        this.messageRestClient = new MessageRestClient(gatewayUrl);
-        this.userRestClient = new UserRestClient(gatewayUrl);
+    public GatewayService(UixConfig config) {
+        if (!config.getGatewayDummy()) {
+            LOGGER.info("Creating Ribbon2 Gateway clients to connect: {}", config.getGatewayUrl());
+
+            this.authRestClient = new AuthRestClientImpl(config.getGatewayUrl());
+            this.directoryRestClient = new DirectoryRestClientImpl(config.getGatewayUrl());
+            this.messageRestClient = new MessageRestClientImpl(config.getGatewayUrl());
+            this.userRestClient = new UserRestClientImpl(config.getGatewayUrl());
+        } else {
+            LOGGER.info("Creating Ribbon2 Dummy Gateway");
+
+            this.authRestClient = new AuthRestClientDummy();
+            this.directoryRestClient = new DirectoryRestClientDummy();
+            this.messageRestClient = new MessageRestClientDummy();
+            this.userRestClient = new UserRestClientDummy();
+        }
     }
 
     public AuthRestClient getAuthRestClient() {

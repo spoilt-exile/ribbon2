@@ -18,44 +18,18 @@
  */
 package tk.freaxsoftware.ribbon2.uix.rest;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Set;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyTagged;
-import static tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.PARAM_PAGE;
-import static tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.PARAM_SIZE;
 import tk.freaxsoftware.ribbon2.core.data.response.DefaultPage;
-import tk.freaxsoftware.ribbon2.core.exception.CoreException;
-import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 
 /**
  * Message resource REST client.
  * @author Stanislav Nepochatov
  */
-public class MessageRestClient {
-    
-    private final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-    
-    private final Gson gson = GsonUtils.getGson();
-    
-    private final String baseUrl;
-
-    public MessageRestClient(String baseUrl) {
-        this.baseUrl = baseUrl + "/api/message";
-    }
+public interface MessageRestClient {
     
     /**
      * Get messages paged.
@@ -67,14 +41,7 @@ public class MessageRestClient {
      * @throws java.net.URISyntaxException
      * @throws java.io.IOException
      */
-    public DefaultPage<MessageModel> getMessages(String jwtKey, String directory, int pageSize, int page) throws URISyntaxException, IOException {
-        HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/" + directory)
-                .addParameter(PARAM_PAGE, String.valueOf(page))
-                .addParameter(PARAM_SIZE, String.valueOf(pageSize)).build());
-        request.addHeader("x-ribbon2-auth", jwtKey);
-        HttpResponse response = clientBuilder.build().execute(request);
-        return ResponseUtil.handleResponse(response, new TypeToken<DefaultPage<MessageModel>>() {});
-    }
+    DefaultPage<MessageModel> getMessages(String jwtKey, String directory, int pageSize, int page) throws URISyntaxException, IOException;
     
     /**
      * Get full message (with content) by uid.
@@ -85,12 +52,7 @@ public class MessageRestClient {
      * @throws java.net.URISyntaxException
      * @throws java.io.IOException
      */
-    public MessageModel getMessageByUid(String jwtKey, String uid, String directory) throws URISyntaxException, IOException {
-        HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/" + uid + "/dir/" + directory).build());
-        request.addHeader("x-ribbon2-auth", jwtKey);
-        HttpResponse response = clientBuilder.build().execute(request);
-        return ResponseUtil.handleResponse(response, new TypeToken<MessageModel>() {});
-    }
+    MessageModel getMessageByUid(String jwtKey, String uid, String directory) throws URISyntaxException, IOException;
     
     /**
      * Create new message.
@@ -100,13 +62,7 @@ public class MessageRestClient {
      * @throws URISyntaxException
      * @throws IOException 
      */
-    public MessageModel createMessage(String jwtKey, MessageModel message) throws URISyntaxException, IOException {
-        HttpPost request = new HttpPost(baseUrl);
-        request.addHeader("x-ribbon2-auth", jwtKey);
-        request.setEntity(new StringEntity(gson.toJson(message), ContentType.APPLICATION_JSON));
-        HttpResponse response = clientBuilder.build().execute(request);
-        return ResponseUtil.handleResponse(response, new TypeToken<MessageModel>() {});
-    }
+    MessageModel createMessage(String jwtKey, MessageModel message) throws URISyntaxException, IOException;
     
     /**
      * Update existing message.
@@ -116,13 +72,7 @@ public class MessageRestClient {
      * @throws URISyntaxException
      * @throws IOException 
      */
-    public MessageModel updateMessage(String jwtKey, MessageModel message) throws URISyntaxException, IOException {
-        HttpPut request = new HttpPut(baseUrl);
-        request.addHeader("x-ribbon2-auth", jwtKey);
-        request.setEntity(new StringEntity(gson.toJson(message), ContentType.APPLICATION_JSON));
-        HttpResponse response = clientBuilder.build().execute(request);
-        return ResponseUtil.handleResponse(response, new TypeToken<MessageModel>() {});
-    }
+    MessageModel updateMessage(String jwtKey, MessageModel message) throws URISyntaxException, IOException;
     
     /**
      * Delete message by uid.
@@ -131,14 +81,7 @@ public class MessageRestClient {
      * @throws URISyntaxException
      * @throws IOException 
      */
-    public void deleteMessage(String jwtKey, String messageUid) throws URISyntaxException, IOException {
-        HttpDelete request = new HttpDelete(baseUrl + "/" + messageUid);
-        request.addHeader("x-ribbon2-auth", jwtKey);
-        HttpResponse response = clientBuilder.build().execute(request);
-        if (response.getStatusLine().getStatusCode() != 200) {
-            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Delete message request failed with status: " + response.getStatusLine().toString());
-        }
-    }
+    void deleteMessage(String jwtKey, String messageUid) throws URISyntaxException, IOException;
     
     /**
      * Get all registered property types.
@@ -147,11 +90,6 @@ public class MessageRestClient {
      * @throws java.net.URISyntaxException
      * @throws java.io.IOException
      */
-    public Set<MessagePropertyTagged> getAllPropertyTypes(String jwtKey) throws URISyntaxException, IOException {
-        HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/property/all").build());
-        request.addHeader("x-ribbon2-auth", jwtKey);
-        HttpResponse response = clientBuilder.build().execute(request);
-        return ResponseUtil.handleResponse(response, new TypeToken<Set<MessagePropertyTagged>>() {});
-    }
+    Set<MessagePropertyTagged> getAllPropertyTypes(String jwtKey) throws URISyntaxException, IOException;
 
 }

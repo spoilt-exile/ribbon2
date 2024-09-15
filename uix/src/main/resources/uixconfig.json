@@ -1,5 +1,6 @@
 {
     "gatewayUrl": "http://127.0.0.1:9000",
+    "gatewayDummy": false,
     "http": {
         "port": 9999,
         "authCookieName": "R2_AUTH",
