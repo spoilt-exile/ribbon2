@@ -21,6 +21,7 @@ package tk.freaxsoftware.ribbon2.uix.routes;
 import io.javalin.Javalin;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import static java.util.Objects.nonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,9 +59,10 @@ public class MainRoutes {
             final String dir = ctx.pathParam("dir");
             final int page = nonNull(ctx.queryParam("page")) ? Integer.parseInt(ctx.queryParam("page")) : 0;
             final int pageSize = nonNull(ctx.queryParam("pageSize")) ? Integer.parseInt(ctx.queryParam("pageSize")) : 30;
+            final boolean inline = Objects.equals(ctx.queryParam("inline"), "true");
             final DefaultPage<MessageModel> messagePage = gatewayService.getMessageRestClient().getMessages(UserSessionModelContext.getUser().getJwtKey(), dir, pageSize, page);
             PageableUrlWrapper<MessageModel> messages = new PageableUrlWrapper(messagePage, String.format("/%s/%s", "messages", dir), pageSize, page);
-            ctx.render("messages.html", Map.of("messages", messages, "directory", dir));
+            ctx.render("messages.html", Map.of("messages", messages, "directory", dir, "inline", inline, "page", page, "pageSize", pageSize));
         });
         
         app.get("/messsages/{dir}/uid/{uid}", (ctx) -> {

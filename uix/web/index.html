@@ -31,7 +31,7 @@
             /* Create the caret/arrow with a unicode, and style it */
             .caret::before {
               content: "\002B";
-              color: black;
+              color: white;
               display: inline-block;
               margin-right: 6px;
             }
@@ -63,7 +63,7 @@
               <a class="btn btn-success" href="/editor/CREATE" role="button">Create Message</a><br/>
               <input type="submit" value="Logout" hx-post="/logout" hx-trigger="click" class="btn btn-primary"/>
               <hr>
-              <div id="dirs" hx-trigger="load, every 30s" hx-get="/directories">
+              <div id="dirs" hx-trigger="load, every 60s" hx-get="/directories">
 
               </div>
             </div>
