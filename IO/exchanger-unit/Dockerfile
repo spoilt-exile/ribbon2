@@ -1,5 +1,6 @@
-FROM openjdk:11.0.7-jre
-MAINTAINER Stanislav Nepochatov
-COPY target/exchanger-static.jar /home/exchanger-static.jar
+FROM amazoncorretto:21
+LABEL maintainer="spoilt.exile@gmail.com"
+COPY target/exchanger-static.jar /app/exchanger-static.jar
 EXPOSE 9102
-CMD sleep 10 && java -jar /home/exchanger-static.jar
+WORKDIR /app
+CMD ["java", "-jar", "/app/exchanger-static.jar"]

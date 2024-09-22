@@ -20,10 +20,12 @@ package tk.freaxsoftware.ribbon2.directory;
 
 import io.ebean.Database;
 import io.ebean.DatabaseFactory;
+import io.ebean.annotation.Platform;
 import io.ebean.config.AutoTuneConfig;
 import io.ebean.config.AutoTuneMode;
 import io.ebean.config.DatabaseConfig;
 import io.ebean.datasource.DataSourceConfig;
+import io.ebean.platform.postgres.PostgresPlatformProvider;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
@@ -116,6 +118,7 @@ public class Init {
         dataSourceConfig.setDriver(dbConfig.getDriver());
         
         DatabaseConfig config = new DatabaseConfig();
+        config.setDatabasePlatform(new PostgresPlatformProvider().create(Platform.POSTGRES));
         
         config.setDataSourceConfig(dataSourceConfig);
         AutoTuneConfig tuneConfig = new AutoTuneConfig();

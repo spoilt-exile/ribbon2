@@ -1,15 +1,15 @@
 version: '3'
 services:
     
-    ribbon2-ui:
-        image: freax/ribbon2-ui:3.0
+    ribbon2-uix:
+        image: freax/ribbon2-uix:3.0
         environment:
             - GATEWAY_URL=http://ribbon2-gateway:9000
         ports:
-            - 8080:8080
+            - 9999:9999
 
     ribbon2-gateway:
-        image: freax/ribbon2-gateway:2.1
+        image: freax/ribbon2-gateway:3.0
         environment:
             - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-gateway
         depends_on:
@@ -19,7 +19,7 @@ services:
             - 9000:9000
             
     ribbon2-directory:
-        image: freax/ribbon2-directory:2.1
+        image: freax/ribbon2-directory:3.0
         environment:
             - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-directory
             - BRIDGE_CLIENT_ADDRESS=ribbon2-gateway
@@ -27,19 +27,8 @@ services:
             ribbon2-gateway:
                 condition: service_started
             
-    ribbon2-messenger-1:
-        image: freax/ribbon2-messenger:2.1
-        environment:
-            - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-messenger
-            - BRIDGE_CLIENT_ADDRESS=ribbon2-gateway
-        depends_on:
-            ribbon2-gateway:
-                condition: service_started
-            ribbon2-directory:
-                condition: service_started
-
-    ribbon2-messenger-2:
-        image: freax/ribbon2-messenger:2.1
+    ribbon2-messenger:
+        image: freax/ribbon2-messenger:3.0
         environment:
             - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-messenger
             - BRIDGE_CLIENT_ADDRESS=ribbon2-gateway
@@ -49,34 +38,19 @@ services:
             ribbon2-directory:
                 condition: service_started
             
-    ribbon2-exc-import-tg:
-        image: freax/ribbon2-exchanger:1.0
+    ribbon2-exc-import-rss:
+        image: freax/ribbon2-exchanger:3.0
         environment:
             - EXCHANGER_TYPE=IMPORT
-            - EXCHANGER_CLASS=tk.freaxsoftware.ribbon2.io.importer.telegram.TelegramImporter
-            - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-exc-import-tg
+            - EXCHANGER_CLASS=tk.freaxsoftware.ribbon2.io.importer.rss.RSSImporter
+            - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-exc-import-rss
             - BRIDGE_CLIENT_ADDRESS=ribbon2-gateway
         depends_on:
             ribbon2-gateway:
                 condition: service_started
             ribbon2-directory:
                 condition: service_started
-            ribbon2-messenger-1:
-                condition: service_started
-            
-    ribbon2-exc-export-mail:
-        image: freax/ribbon2-exchanger:1.0
-        environment:
-            - EXCHANGER_TYPE=EXPORT
-            - EXCHANGER_CLASS=tk.freaxsoftware.ribbon2.io.exporter.mail.MailExporter
-            - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-exc-export-mail
-            - BRIDGE_CLIENT_ADDRESS=ribbon2-gateway
-        depends_on:
-            ribbon2-gateway:
-                condition: service_started
-            ribbon2-directory:
-                condition: service_started
-            ribbon2-messenger-1:
+            ribbon2-messenger:
                 condition: service_started
 
     ribbon2-postgresql:
@@ -84,7 +58,7 @@ services:
         environment:
             - POSTGRES_USER=ribbon2
             - POSTGRES_PASSWORD=ribbon2
-            - POSTGRES_MULTIPLE_DATABASES="ribbon2-gateway","ribbon2-directory","ribbon2-messenger","ribbon2-exc-import-tg","ribbon2-exc-export-mail"
+            - POSTGRES_MULTIPLE_DATABASES="ribbon2-gateway","ribbon2-directory","ribbon2-messenger","ribbon2-exc-import-rss"
         volumes:
             - ./pg-multiple-db:/docker-entrypoint-initdb.d
         healthcheck:

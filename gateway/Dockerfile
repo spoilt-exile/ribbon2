@@ -1,5 +1,6 @@
-FROM openjdk:11.0.7-jre
-MAINTAINER Stanislav Nepochatov
-COPY target/gateway-static.jar /home/gateway-static.jar
+FROM amazoncorretto:21
+LABEL maintainer="spoilt.exile@gmail.com"
+COPY target/gateway-static.jar /app/gateway-static.jar
 EXPOSE 9000
-CMD sleep 10 && java -jar /home/gateway-static.jar
+WORKDIR /app
+CMD ["java", "-jar", "/app/gateway-static.jar"]
