@@ -45,10 +45,17 @@ public class TelegramImportMessage implements ImportMessage {
     private Set<String> tags;
     private String content;
     private TelegramBot.StatusRecord statusRecord;
+    private boolean urgent;
 
     public TelegramImportMessage(String id, String userName) {
         this.id = id;
         this.userName = userName;
+    }
+    
+    public TelegramImportMessage(String id, String userName, Boolean urgent) {
+        this.id = id;
+        this.userName = userName;
+        this.urgent = urgent;
     }
 
     @Override
@@ -58,7 +65,11 @@ public class TelegramImportMessage implements ImportMessage {
         message.setHeader(header);
         message.setTags(tags);
         message.setContent(content);
-        message.setProperties(new HashSet(Set.of(new MessagePropertyModel("COPYRIGHT", userName))));
+        message.setProperties(new HashSet());
+        message.getProperties().add(new MessagePropertyModel("COPYRIGHT", userName));
+        if (urgent) {
+            message.getProperties().add(new MessagePropertyModel("URGENT", ""));
+        }
         return message;
     }
 

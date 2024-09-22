@@ -1,7 +1,7 @@
 /*
  * This file is part of Ribbon2 news message system.
  * 
- * Copyright (C) 2021 Freax Software
+ * Copyright (C) 2020-2024 Freax Software
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.io.importer.telegram.commands;
 
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.BotCommand;
@@ -25,34 +26,29 @@ import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import tk.freaxsoftware.ribbon2.io.importer.telegram.TelegramBot;
+import tk.freaxsoftware.ribbon2.io.importer.telegram.TelegramImportMessage;
 
 /**
- * Help command.
+ * Command to begin receiving urgent message.
  * @author Stanislav Nepochatov
  */
-public class HelpCommand extends BotCommand {
+public class UrgentMessageCommand extends BotCommand {
     
-    private final static Logger LOGGER = LoggerFactory.getLogger(HelpCommand.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(MessageCommand.class);
     
     private final TelegramBot bot;
-    
-    public static final String HELP_CONTENT = "Ribbon2 news information system importer bot\n\n"
-            + "Commands:\n/help - display help information;\n"
-            + "/urgentmessage - begin to receive urgent message step-by-step;\n"
-            + "/message - begin to recieve message step-by-step;\n"
-            + "/status - show status of your messages;\n"
-            + "/cancel - cancel receiving message;";
-    
-    public HelpCommand(TelegramBot bot) {
-        super("help", "Display help information");
+
+    public UrgentMessageCommand(TelegramBot bot) {
+        super("urgentmessage", "Begin to recieve urgent message");
         this.bot = bot;
     }
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
-        LOGGER.info("Command to display help from chat {}", chat.getId());
         String userName = TelegramBot.getUserName(user);
-        bot.sendAnswer(absSender, chat.getId(), "/help", userName, HELP_CONTENT);
+        LOGGER.info("Start to recieving urgent message from user {} on chat {}", userName, chat.getId());
+        TelegramImportMessage message = new TelegramImportMessage(UUID.randomUUID().toString(), userName);
+        bot.addMessageToQueue(message, chat.getId());
+        bot.sendAnswer(absSender, chat.getId(), "/urgent_message", userName, message.getStatus().getLabel());
     }
-    
 }

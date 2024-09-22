@@ -1,7 +1,7 @@
 /*
  * This file is part of Ribbon2 news message system.
  * 
- * Copyright (C) 2021 Freax Software
+ * Copyright (C) 2020-2024 Freax Software
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,32 +27,25 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 import tk.freaxsoftware.ribbon2.io.importer.telegram.TelegramBot;
 
 /**
- * Help command.
+ * Command to cancel receiving any type of message.
  * @author Stanislav Nepochatov
  */
-public class HelpCommand extends BotCommand {
+public class CancelCommand extends BotCommand {
     
-    private final static Logger LOGGER = LoggerFactory.getLogger(HelpCommand.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(MessageCommand.class);
     
     private final TelegramBot bot;
-    
-    public static final String HELP_CONTENT = "Ribbon2 news information system importer bot\n\n"
-            + "Commands:\n/help - display help information;\n"
-            + "/urgentmessage - begin to receive urgent message step-by-step;\n"
-            + "/message - begin to recieve message step-by-step;\n"
-            + "/status - show status of your messages;\n"
-            + "/cancel - cancel receiving message;";
-    
-    public HelpCommand(TelegramBot bot) {
-        super("help", "Display help information");
+
+    public CancelCommand(TelegramBot bot) {
+        super("cancel", "Cancel sending message");
         this.bot = bot;
     }
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
-        LOGGER.info("Command to display help from chat {}", chat.getId());
         String userName = TelegramBot.getUserName(user);
-        bot.sendAnswer(absSender, chat.getId(), "/help", userName, HELP_CONTENT);
+        LOGGER.info("Cancel receiving message from user {} on chat {}", userName, chat.getId());
+        bot.removeMessageFromQueue(chat.getId());
+        bot.sendAnswer(absSender, chat.getId(), "/cancel", userName, "Sending canceled");
     }
-    
 }

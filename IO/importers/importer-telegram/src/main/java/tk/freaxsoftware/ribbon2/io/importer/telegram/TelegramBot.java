@@ -18,24 +18,29 @@
  */
 package tk.freaxsoftware.ribbon2.io.importer.telegram;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
+import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.extensions.bots.commandbot.commands.BotCommand;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import tk.freaxsoftware.ribbon2.io.importer.telegram.commands.CancelCommand;
 import tk.freaxsoftware.ribbon2.io.importer.telegram.commands.HelpCommand;
 import tk.freaxsoftware.ribbon2.io.importer.telegram.commands.MessageCommand;
 import tk.freaxsoftware.ribbon2.io.importer.telegram.commands.StatusCommand;
+import tk.freaxsoftware.ribbon2.io.importer.telegram.commands.UrgentMessageCommand;
 
 /**
  * Telegram bot for importing messages in Ribbon2 system.
@@ -51,9 +56,9 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
     
     private final TelegramImportSource source;
     
-    private final Map<Long, TelegramImportMessage> messageQueue = new HashMap();
+    private final Map<Long, TelegramImportMessage> messageQueue = new ConcurrentHashMap<>();
     
-    private final Set<StatusRecord> statusRecords = new HashSet();
+    private final Set<StatusRecord> statusRecords = new ConcurrentSkipListSet();
 
     /**
      * Create new telegram importer bot.
@@ -68,9 +73,24 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
         this.botToken = botToken;
         this.source = source;
         
-        register(new HelpCommand(this));
-        register(new StatusCommand(this));
-        register(new MessageCommand(this));
+        final List<BotCommand> commands = (List) List.of(
+                new HelpCommand(this), 
+                new StatusCommand(this), 
+                new MessageCommand(this), 
+                new UrgentMessageCommand(this), 
+                new CancelCommand(this));
+        
+        commands.forEach(cm -> register((BotCommand) cm));
+        
+        SetMyCommands setCommands = new SetMyCommands();
+        setCommands.setCommands(commands.stream()
+                .map(bcm -> new org.telegram.telegrambots.meta.api.objects.commands.BotCommand(bcm.getCommandIdentifier(), bcm.getDescription()))
+                .collect(Collectors.toList()));
+        try {
+            this.execute(setCommands);
+        } catch (TelegramApiException tex) {
+            LOGGER.error("Unable to set commands", tex);
+        }
     }
 
     @Override
@@ -142,6 +162,15 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
         LOGGER.info("Adding message {} to queue from chat {}");
         messageQueue.put(chatId, message);
     }
+
+    /**
+     * Removes message from queue regardless of status.
+     * @param chatId id of the chat;
+     */
+    public void removeMessageFromQueue(Long chatId) {
+        LOGGER.info("Removing message for chat {} (if preset)");
+        messageQueue.remove(chatId);
+    }
     
     /**
      * Gets all status records for specified chat and removes records of imported messages.
@@ -171,7 +200,7 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
     /**
      * Status record of the message. Created after completion of receiving message contnet;
      */
-    public static class StatusRecord {
+    public static class StatusRecord implements Comparable<StatusRecord> {
         
         private Long chatId;
         
@@ -252,6 +281,11 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
         @Override
         public String toString() {
             return "Message id='" + id + ", header='" + header + "', is " + status.getLabel();
+        }
+
+        @Override
+        public int compareTo(StatusRecord o) {
+            return this.chatId.compareTo(o.getChatId());
         }
     }
     
