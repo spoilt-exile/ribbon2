@@ -7,7 +7,7 @@ Current version: **3.0**
  - `directory-unit` - unit for holding tree of directories and permission data;
  - `message-unit` - unit for holding messages;
  - `exchanger-unit` - unit for launcing IO modules;
- - `ui` - experimental web UI unit;
+ - `uix` - basic UI written on HTMX;
 
 ### Key features
  - Docker support;
@@ -23,6 +23,6 @@ Current version: **3.0**
  - Async API for critical operations;
 
 ### Tech stack
-System based on Javalin (REST API provider), MessageBus 5.3, Ebean and JSF with Primefaces.
+System based on Javalin (REST API provider), MessageBus 6.0, Ebean and HTMX.
 
 Source code of Ribbon2 system distributed under terms of the GNU LGPLv3 license.
