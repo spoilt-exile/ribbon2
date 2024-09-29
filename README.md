@@ -11,15 +11,16 @@ Current version: **3.0**
 
 ### Key features
  - Docker support;
+ - Basic UI;
  - High scability;
  - Secure auth;
  - Ability to create tree of directories for messages with transparent access control;
  - Ability to post/edit/delete message in several directories;
- - IO modules for inter-system communication (modules available for plain text and mail protocols);
+ - Import messages from: plain text files, mail, RSS and Telegram;
+ - Export messages to: plain text files and mail;
  - Open API;
 
 ### Planned features
- - Basic UI;
  - Async API for critical operations;
 
 ### Tech stack
