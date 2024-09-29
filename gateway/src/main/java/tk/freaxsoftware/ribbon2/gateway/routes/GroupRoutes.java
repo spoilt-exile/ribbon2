@@ -184,8 +184,9 @@ public class GroupRoutes {
         LOGGER.info("Request to delete Group: {}", ctx.pathParam("id"));
         GroupEntity entity = DB.getDefault().find(GroupEntity.class).where().idEq(Long.parseLong(ctx.pathParam("id"))).findOne();
         if (entity != null) {
+            final GroupModel deletedGroup = new GroupConverter().convert(entity);
             DB.getDefault().delete(entity);
-            MessageBus.fire(GroupModel.NOTIFICATION_GROUP_DELETED, new GroupConverter().convert(entity), 
+            MessageBus.fire(GroupModel.NOTIFICATION_GROUP_DELETED, deletedGroup, 
                     MessageOptions.Builder.newInstance().deliveryNotification(5).build());
         } else {
             throw new CoreException(RibbonErrorCodes.GROUP_NOT_FOUND, 

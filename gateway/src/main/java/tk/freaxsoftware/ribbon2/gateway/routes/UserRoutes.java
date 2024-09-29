@@ -204,8 +204,9 @@ public class UserRoutes {
         UserEntity entity = DB.getDefault().find(UserEntity.class).where().idEq(Long.parseLong(ctx.pathParam("id"))).findOne();
         LOGGER.info("Request to delete User: {}", ctx.pathParam("id"));
         if (entity != null) {
+            final UserModel deletedUser = new UserConverter().convert(entity);
             DB.getDefault().delete(entity);
-            MessageBus.fire(UserModel.NOTIFICATION_USER_DELETED, new UserConverter().convert(entity), 
+            MessageBus.fire(UserModel.NOTIFICATION_USER_DELETED, deletedUser, 
                     MessageOptions.Builder.newInstance().deliveryNotification(5).build());
         } else {
             throw new CoreException(RibbonErrorCodes.USER_NOT_FOUND, 

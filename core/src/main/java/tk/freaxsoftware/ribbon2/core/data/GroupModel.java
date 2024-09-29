@@ -19,8 +19,6 @@
 
 package tk.freaxsoftware.ribbon2.core.data;
 
-import java.util.Set;
-
 /**
  * User group data class.
  * @author Stanislav Nepochatov

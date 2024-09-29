@@ -21,11 +21,13 @@ package tk.freaxsoftware.ribbon2.directory.service;
 import io.ebean.PagedList;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.data.convert.GsonCopier;
 import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.ACCESS_DENIED;
@@ -127,8 +129,9 @@ public class DirectoryService extends AuthService {
         }
         Set<Directory> deleteDirs = directoryRepository.findDirectoriesByPath(fullPath);
         if (!deleteDirs.isEmpty()) {
+            final Set<Directory> deletedCopies = deleteDirs.stream().map(dir -> GsonCopier.copy(dir)).collect(Collectors.toSet());
             directoryRepository.delete(deleteDirs);
-            return deleteDirs;
+            return deletedCopies;
         }
         throw new CoreException(DIRECTORY_NOT_FOUND, "Can't find directory " + fullPath);
     }

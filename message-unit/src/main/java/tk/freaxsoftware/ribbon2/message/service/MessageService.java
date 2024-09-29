@@ -38,6 +38,7 @@ import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
+import tk.freaxsoftware.ribbon2.core.data.convert.GsonCopier;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryCheckAccessRequest;
 import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
 import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
@@ -160,8 +161,9 @@ public class MessageService {
             LOGGER.warn("Deleting message {} from directories: {}", 
                     existingMessage.getUid(), existingMessage.getDirectories());
             checkDirectoryAccess(user, existingMessage.getDirectories(), Message.PERMISSION_CAN_DELETE_MESSAGE);
+            final Message existingCopy = GsonCopier.copy(existingMessage);
             existingMessage.delete();
-            return existingMessage;
+            return existingCopy;
         }
         throw new CoreException(MESSAGE_NOT_FOUND, 
                 String.format("Message by UID %s not found!", uid));
