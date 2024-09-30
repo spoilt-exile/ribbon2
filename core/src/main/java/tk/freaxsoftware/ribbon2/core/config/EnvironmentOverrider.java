@@ -21,6 +21,7 @@ package tk.freaxsoftware.ribbon2.core.config;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,7 @@ public class EnvironmentOverrider {
                 .collect(Collectors.toSet());
         filteredSet.forEach(en -> {
             try {
-                en.getAction().process(config, System.getenv(en.getVariable()));
+                en.getAction().accept(config, System.getenv(en.getVariable()));
                 LOGGER.info("Overriding param {} by environment", en.getVariable());
             } catch (Exception ex) {
                 LOGGER.error("Unable to override param {} by value {}", en.getVariable(), System.getenv(en.getVariable()));
@@ -85,7 +86,7 @@ public class EnvironmentOverrider {
         /**
          * Action which will be executed on overriding.
          */
-        private OverrideAction<C> action;
+        private BiConsumer<C, String> action;
 
         /**
          * Default constructor.
@@ -93,7 +94,7 @@ public class EnvironmentOverrider {
          * @param configClass config class;
          * @param action action to execute;
          */
-        public OverrideEntry(String variable, Class<C> configClass, OverrideAction<C> action) {
+        public OverrideEntry(String variable, Class<C> configClass, BiConsumer<C, String> action) {
             this.variable = variable;
             this.configClass = configClass;
             this.action = action;
@@ -115,27 +116,13 @@ public class EnvironmentOverrider {
             this.configClass = configClass;
         }
 
-        public OverrideAction<C> getAction() {
+        public BiConsumer<C, String> getAction() {
             return action;
         }
 
-        public void setAction(OverrideAction<C> action) {
+        public void setAction(BiConsumer<C, String> action) {
             this.action = action;
         }
-    }
-    
-    /**
-     * Interface for overriding action.
-     * @param <C> config generic type;
-     */
-    public static interface OverrideAction<C> {
-        
-        /**
-         * Execute override of the config.
-         * @param config config to override;
-         * @param property value of the property from environment;
-         */
-        void process(C config, String property);
     }
     
 }
