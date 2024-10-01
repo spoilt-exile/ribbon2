@@ -1,4 +1,4 @@
-# [3.0] - XX.10.2024
+# [3.0] - 01.10.2024
  - Add basic UI based on HTMX (UIX unit);
  - Add Swagger API docs on gateway;
  - Javalin migarion;
