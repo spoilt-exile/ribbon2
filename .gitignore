@@ -14,3 +14,5 @@
 /ui/target/
 /IO/importers/importer-rss/target/
 /uix/target/
+*.class
+**/target/*
