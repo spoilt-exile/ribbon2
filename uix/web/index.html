@@ -24,12 +24,6 @@
 
 <main class="workspace" id="workspace">
     <aside class="pane pane-directories" aria-label="Isle A: directories">
-        <div class="pane-heading">
-            <div>
-                <div class="pane-kicker">Isle A</div>
-                <h1 class="h5 mb-0">Directories</h1>
-            </div>
-        </div>
         <div class="pane-body directory-list" id="dirs" hx-trigger="load, every 60s" hx-get="/directories">
             <div class="text-body-secondary small">Loading directories…</div>
         </div>
@@ -39,12 +33,6 @@
 
     <section class="right-stack" aria-label="Messages and message content">
         <section class="pane pane-messages" aria-label="Isle B: messages">
-            <div class="pane-heading">
-                <div>
-                    <div class="pane-kicker">Isle B</div>
-                    <h2 class="h5 mb-0">Messages</h2>
-                </div>
-            </div>
             <div class="pane-body message-list" id="messages">
                 <div class="empty-state">Select a directory to display its messages.</div>
             </div>
@@ -53,12 +41,6 @@
         <div class="splitter splitter-rows" role="separator" aria-label="Resize message list" aria-orientation="horizontal" tabindex="0" data-resize="rows"></div>
 
         <section class="pane pane-content" aria-label="Isle C: message content">
-            <div class="pane-heading">
-                <div>
-                    <div class="pane-kicker">Isle C</div>
-                    <h2 class="h5 mb-0">Message content</h2>
-                </div>
-            </div>
             <div class="pane-body content-view" id="content">
                 <div class="empty-state">Select a message to read its content.</div>
             </div>
