@@ -1,7 +1,7 @@
 <#if !inline>
-<div id="message-loader" hx-trigger="messageDeleted from:body, every 30s" hx-get="/messages/${directory}?page=${page}&pageSize=${pageSize}&inline=true" hx-swap="innerHTML">
+<div id="message-loader" class="message-results" hx-trigger="messageDeleted from:body, every 30s" hx-get="/messages/${directory}?page=${page}&pageSize=${pageSize}&inline=true" hx-swap="innerHTML">
 </#if>
-<div style="overflow: scroll; max-height: 28em;">
+<div class="message-table-scroll">
 <table class="table table-hover">
     <thead>
         <tr>
@@ -30,7 +30,7 @@
     </tbody>
 </table>
 </div>
-<nav aria-label="Page navigation example">
+<nav class="message-pagination" aria-label="Message pages">
   <ul class="pagination justify-content-center">
     <#list messages.pagination as pagination>
         <#if pagination.active>

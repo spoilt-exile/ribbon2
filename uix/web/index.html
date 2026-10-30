@@ -1,83 +1,69 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>RIBBON 2</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="https://unpkg.com/htmx.org@1.9.4"></script>
-        <script src="/web/static/color-modes.js"></script>
-        <script src="/web/static/bootstrap.bundle.min.js"></script>
-        <script src="/web/static/sidebars.js"></script>
-        <script src="/web/static/modal.js"></script>
-        <link href="/web/static/bootstrap.min.css" rel="stylesheet">
-        <link href="/web/static/sidebars.css" rel="stylesheet">
-        <style>
-             /* Remove default bullets */
-            ul, #myUL {
-              list-style-type: none;
-            }
+<!doctype html>
+<html lang="en">
+<head>
+    <title>RIBBON 2</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://unpkg.com/htmx.org@1.9.4"></script>
+    <script src="/web/static/color-modes.js"></script>
+    <script src="/web/static/bootstrap.bundle.min.js" defer></script>
+    <script src="/web/static/modal.js" defer></script>
+    <script src="/web/static/panes.js" defer></script>
+    <link href="/web/static/bootstrap.min.css" rel="stylesheet">
+    <link href="/web/static/main.css" rel="stylesheet">
+</head>
+<body>
+<header class="app-header navbar navbar-dark bg-dark px-3">
+    <a class="navbar-brand fw-semibold" href="/">Ribbon 2</a>
+    <div class="d-flex align-items-center gap-3">
+        <span class="text-white-50">Hi, ${user.login}!</span>
+        <a class="btn btn-sm btn-success" href="/editor/CREATE" role="button">Create message</a>
+        <button type="button" hx-post="/logout" class="btn btn-sm btn-outline-light">Logout</button>
+    </div>
+</header>
 
-            /* Remove margins and padding from the parent ul */
-            #myUL {
-              margin: 0;
-              padding: 0;
-            }
-
-            /* Style the caret/arrow */
-            .caret {
-              cursor: pointer;
-              user-select: none; /* Prevent text selection */
-            }
-
-            /* Create the caret/arrow with a unicode, and style it */
-            .caret::before {
-              content: "\002B";
-              color: white;
-              display: inline-block;
-              margin-right: 6px;
-            }
-
-            /* Rotate the caret/arrow icon when clicked on (using JavaScript) */
-            .caret-down::before {
-              transform: rotate(90deg);
-            }
-
-            /* Hide the nested list */
-            .nested {
-              display: none;
-            }
-
-            /* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
-            .active {
-              display: block;
-            }
-            
-
-        </style>
-    </head>
-    <body>
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col">
-              <h3>Ribbon 2 System</h3>
-              <h5>Hi, ${user.login}!</h5>
-              <a class="btn btn-success" href="/editor/CREATE" role="button">Create Message</a><br/>
-              <input type="submit" value="Logout" hx-post="/logout" hx-trigger="click" class="btn btn-primary"/>
-              <hr>
-              <div id="dirs" hx-trigger="load, every 60s" hx-get="/directories">
-
-              </div>
+<main class="workspace" id="workspace">
+    <aside class="pane pane-directories" aria-label="Isle A: directories">
+        <div class="pane-heading">
+            <div>
+                <div class="pane-kicker">Isle A</div>
+                <h1 class="h5 mb-0">Directories</h1>
             </div>
-            <div class="col-9">
-                <div id="messages">
-                    Select directory to display messages.
-                </div>
-                
-                <div id="content" style="overflow: scroll; max-height: 26em;">
-                    
-                </div>
-            </div>
-          </div>
         </div>
-    </body>
+        <div class="pane-body directory-list" id="dirs" hx-trigger="load, every 60s" hx-get="/directories">
+            <div class="text-body-secondary small">Loading directories…</div>
+        </div>
+    </aside>
+
+    <div class="splitter splitter-columns" role="separator" aria-label="Resize directory panel" aria-orientation="vertical" tabindex="0" data-resize="columns"></div>
+
+    <section class="right-stack" aria-label="Messages and message content">
+        <section class="pane pane-messages" aria-label="Isle B: messages">
+            <div class="pane-heading">
+                <div>
+                    <div class="pane-kicker">Isle B</div>
+                    <h2 class="h5 mb-0">Messages</h2>
+                </div>
+            </div>
+            <div class="pane-body message-list" id="messages">
+                <div class="empty-state">Select a directory to display its messages.</div>
+            </div>
+        </section>
+
+        <div class="splitter splitter-rows" role="separator" aria-label="Resize message list" aria-orientation="horizontal" tabindex="0" data-resize="rows"></div>
+
+        <section class="pane pane-content" aria-label="Isle C: message content">
+            <div class="pane-heading">
+                <div>
+                    <div class="pane-kicker">Isle C</div>
+                    <h2 class="h5 mb-0">Message content</h2>
+                </div>
+            </div>
+            <div class="pane-body content-view" id="content">
+                <div class="empty-state">Select a message to read its content.</div>
+            </div>
+        </section>
+    </section>
+</main>
+</body>
 </html>

@@ -1,127 +1,213 @@
-/** Body style override **/
+:root {
+    --directory-width: 19rem;
+    --message-height: 43%;
+    --app-header-height: 3.5rem;
+    --pane-border: #d9dee5;
+    --pane-heading: #f7f8fa;
+    --workspace-bg: #edf0f4;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
 body {
-    background-color: #ffffff;
+    background: var(--workspace-bg);
 }
 
-/** Main header style class **/
-.m-header{
+.app-header {
+    height: var(--app-header-height);
+}
+
+.workspace {
+    display: grid;
+    grid-template-columns: minmax(13rem, var(--directory-width)) 7px minmax(0, 1fr);
+    gap: 0;
+    height: calc(100dvh - var(--app-header-height));
+    min-height: 0;
+    padding: .65rem;
+}
+
+.right-stack {
+    display: grid;
+    grid-template-rows: minmax(8rem, var(--message-height)) 7px minmax(8rem, 1fr);
+    min-width: 0;
+    min-height: 0;
+    padding-left: .65rem;
+}
+
+.pane {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--bs-body-bg, #fff);
+    border: 1px solid var(--pane-border);
+    border-radius: .5rem;
+    box-shadow: 0 .1rem .25rem rgb(24 39 75 / 5%);
+}
+
+.pane-heading {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    min-height: 3.8rem;
+    padding: .65rem 1rem;
+    background: var(--pane-heading);
+    border-bottom: 1px solid var(--pane-border);
+}
+
+.pane-kicker {
+    margin-bottom: .1rem;
+    color: #6c757d;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.pane-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
+.directory-list {
+    padding: .5rem;
+}
+
+.message-list,
+.content-view {
+    padding: .85rem 1rem;
+}
+
+#messages {
+    overflow: hidden;
+}
+
+.message-results {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+.message-table-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+
+.message-pagination {
+    flex: 0 0 auto;
+    margin: 0 -.85rem -.85rem;
+    padding: .65rem .85rem .25rem;
+    background: var(--bs-body-bg, #fff);
+    border-top: 1px solid var(--pane-border);
+}
+
+.empty-state {
+    display: grid;
+    min-height: 100%;
+    place-items: center;
+    padding: 2rem;
+    color: #6c757d;
     text-align: center;
-    font-weight: bold;
-    font-size: 22pt;
-    font-family: "PT Sans", "Liberation Sans", "Tahoma", sans-serif;
-    background-color: #5990d9;
-    color: #ffffff;
 }
 
-/** Ordinary header style class **/
-.header{
-    font-weight: bold;
-    font-size: 16pt;
-    font-family: "PT Sans", "Liberation Sans", "Tahoma", sans-serif;
+.splitter {
+    position: relative;
+    z-index: 2;
+    touch-action: none;
+    user-select: none;
 }
 
-/** Main text style class **/
-.main{
-    margin: 12pt;
-    font-size: 12pt;
-    font-family: "PT Sans", "Liberation Sans", "Tahoma", sans-serif;
-    text-align: justify;
+.splitter-columns {
+    cursor: col-resize;
 }
 
-.main-iframe{
-    font-size: 12pt;
-    font-family: "PT Sans", "Liberation Sans", "Tahoma", sans-serif;
-    text-align: justify;
+.splitter-rows {
+    cursor: row-resize;
 }
 
-/** Bold text style class **/
-.strong{
-    font-weight: bold;
+.splitter::after {
+    position: absolute;
+    content: "";
+    background: #c7ced8;
+    border-radius: 1rem;
+    transition: background-color .15s ease;
 }
 
-/** Italic text style class **/
-.select {
-    font-style: italic;
+.splitter-columns::after {
+    inset: 0 2px;
 }
 
-/** Red text **/
-.red-text {
-    color: #b30000;
+.splitter-rows::after {
+    inset: 2px 0;
 }
 
-/** Green text **/
-.green-text {
-    color: #0c5602;
+.splitter:hover::after,
+.splitter:focus-visible::after,
+.splitter.is-dragging::after {
+    background: var(--bs-primary, #0d6efd);
 }
 
-/** Blue text **/
-.blue-text {
-    color: #0048b3;
+.splitter:focus-visible {
+    outline: none;
 }
 
-/** Error class: header **/
-.ribbon_error_header {
-    color: #b30000;
-    font-weight: bold;
-    font-size: 22pt;
-    font-family: "PT Sans", "Liberation Sans", "Tahoma", sans-serif;
+.message-list table {
+    margin-bottom: .75rem;
 }
 
-/** Error class: body **/
-.ribbon_error_body {
-    color: #b30000;
-    font-size: 18pt;
-    font-family: "PT Sans", "Liberation Sans", "Tahoma", sans-serif;
+.message-list tbody tr {
+    cursor: pointer;
 }
 
-.login-frame {
-    width: 250px;
-    color: #ffffff;
-    border: 1px solid #e51e1e;
-    border-radius: 9px;
-    padding: 5px 5px 5px;
-    background-color: #2d69aa;
+.message-list .pagination {
+    margin-bottom: .25rem;
 }
 
-.release-frame {
-    width: 1000px;
-    color: #ffffff;
-    border: 1px solid #e51e1e;
-    border-radius: 9px;
-    padding: 5px 5px 5px;
-    background-color: #2d69aa;
+.content-view > :last-child {
+    margin-bottom: 0;
 }
 
-.config-frame {
-    width: 440px;
-    color: #ffffff;
-    border: 1px solid #e51e1e;
-    border-radius: 9px;
-    padding: 5px 5px 5px;
-    background-color: #2d69aa;
-}
+@media (max-width: 720px) {
+    :root {
+        --directory-width: 13rem;
+        --message-height: 48%;
+    }
 
-.tab-frame {
-    width: 150px;
-    color: #ffffff;
-    border: 1px solid #e51e1e;
-    border-radius: 9px;
-    padding: 5px 5px 5px;
-    background-color: #2d69aa;
-}
+    .workspace {
+        grid-template-columns: minmax(10rem, var(--directory-width)) 7px minmax(0, 1fr);
+        padding: .35rem;
+    }
 
-.tabs {
-    opacity: 0;
-    visibility: hidden;
-}
+    .right-stack {
+        padding-left: .35rem;
+    }
 
-.tab{
-    position:absolute;
-    visibility: hidden;
-    z-index: 10;
-}
+    .pane-heading {
+        padding-inline: .65rem;
+    }
 
-.tabs:target+.tab {
-    opacity: 1;
-    visibility: visible;
+    .message-list,
+    .content-view {
+        padding: .65rem;
+    }
+
+    .message-pagination {
+        margin: 0 -.65rem -.65rem;
+        padding: .55rem .65rem .15rem;
+    }
 }
