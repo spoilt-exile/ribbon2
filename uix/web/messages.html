@@ -13,7 +13,7 @@
     </thead>
     <tbody>
         <#list messages.content as message>
-        <tr hx-get="/messsages/${directory}/uid/${message.uid}" hx-target="#content">
+        <tr data-message-uid="${message.uid}" aria-selected="false" hx-get="/messsages/${directory}/uid/${message.uid}" hx-target="#content">
             <td scope="row">
                 ${message.id?c}
             </td>
