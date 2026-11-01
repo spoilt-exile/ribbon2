@@ -1,6 +1,6 @@
 <button type="button" class="btn btn-primary" hx-get="/messsages/${directory}/uid/${message.uid}/properties" hx-target="#content">Properties</button>
-<a class="btn btn-success" href="/editor/RERELEASE?uid=${message.uid}&dir=${directory}" role="button">Re-release</a>
-<a class="btn btn-warning" href="/editor/UPDATE?uid=${message.uid}&dir=${directory}" role="button">Update</a>
+<a class="btn btn-success" href="/editor/RERELEASE?uid=${message.uid}&dir=${directory}" role="button" data-editor-dialog>Re-release</a>
+<a class="btn btn-warning" href="/editor/UPDATE?uid=${message.uid}&dir=${directory}" role="button" data-editor-dialog>Update</a>
 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteMessageModal">Delete</button>
 <h3>${message.header}</h3>
 <p style="white-space: pre-wrap;">${message.content}</p>

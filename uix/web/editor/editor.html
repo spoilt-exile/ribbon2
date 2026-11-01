@@ -6,6 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://unpkg.com/htmx.org@1.9.4"></script>
         <script src="/web/static/bootstrap.bundle.min.js" defer></script>
+        <script src="/web/static/editor-popup.js" defer></script>
         <link href="/web/static/bootstrap.min.css" rel="stylesheet">
         <link href="/web/static/editor.css" rel="stylesheet">
   </head>
@@ -102,7 +103,7 @@
           </div>
           
           <div class="editor-actions">
-            <a class="btn btn-outline-secondary" href="/">Cancel</a>
+            <a class="btn btn-outline-secondary" href="/" data-editor-cancel>Cancel</a>
             <button class="btn btn-primary" type="submit">${mode}</button>
           </div>
       </form>

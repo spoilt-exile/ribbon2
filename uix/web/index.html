@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://unpkg.com/htmx.org@1.9.4"></script>
     <script src="/web/static/bootstrap.bundle.min.js" defer></script>
-    <script src="/web/static/modal.js" defer></script>
     <script src="/web/static/panes.js" defer></script>
     <script src="/web/static/directories.js" defer></script>
     <script src="/web/static/messages.js" defer></script>
@@ -18,7 +17,7 @@
     <a class="navbar-brand fw-semibold" href="/">Ribbon 2</a>
     <div class="d-flex align-items-center gap-3">
         <span class="text-white-50">Hi, ${user.login}!</span>
-        <a class="btn btn-sm btn-success" href="/editor/CREATE" role="button">Create message</a>
+        <a class="btn btn-sm btn-success" href="/editor/CREATE" role="button" data-editor-dialog>Create message</a>
         <button type="button" hx-post="/logout" class="btn btn-sm btn-outline-light">Logout</button>
     </div>
 </header>
@@ -48,5 +47,7 @@
         </section>
     </section>
 </main>
+
+<script src="/web/static/editor-window.js" defer></script>
 </body>
 </html>
