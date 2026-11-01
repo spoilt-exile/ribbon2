@@ -1,24 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" data-bs-theme="dark">
     <head>
         <title>Ribbon 2 Message Editor</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://unpkg.com/htmx.org@1.9.4"></script>
-        <script src="../web/static/color-modes.js"></script>
-        <script src="../web/static/bootstrap.bundle.min.js"></script>
-        <script src="../web/static/sidebars.js"></script>
-        <link href="../web/static/bootstrap.min.css" rel="stylesheet">
-        <link href="../web/static/sidebars.css" rel="stylesheet">
+        <script src="/web/static/bootstrap.bundle.min.js" defer></script>
+        <link href="/web/static/bootstrap.min.css" rel="stylesheet">
+        <link href="/web/static/editor.css" rel="stylesheet">
   </head>
   <body>
-      <div id="message-error"></div>
-      <form hx-post="/editor/submit" hx-target="#message-error">
+      <header class="editor-header">
+        <a class="editor-brand" href="/">Ribbon 2</a>
+        <span class="editor-mode">${mode}</span>
+      </header>
+      <main class="editor-page">
+      <div id="message-error" role="status" aria-live="polite"></div>
+      <form class="editor-form" hx-post="/editor/submit" hx-target="#message-error">
           <input type="hidden" id="mode" name="mode" value="${mode}">
           <#if message.uid??>
             <input type="hidden" id="uid" name="uid" value="${message.uid}">
           </#if>
 
+          <div class="editor-fields">
           <div class="mb-3">
             <label for="header" class="form-label">Header</label>
             <input type="text" class="form-control" id="header" name="header" aria-describedby="headerHelp" value="${message.header!}" required>
@@ -32,19 +36,22 @@
             <#else>
                 <input type="text" class="form-control" id="tags" name="tags" aria-describedby="tagHelp" required>
             </#if>
-            <div id="tagHelp" class="form-text">Common points of message, separeted by comma</div>
+            <div id="tagHelp" class="form-text">Common points of the message, separated by commas.</div>
           </div>
           
-          <select id="directories" name="directories" class="form-select" multiple aria-label="Select directories">
-            <#list directories as dir>\
+          <div class="mb-3">
+            <label for="directories" class="form-label">Directories</label>
+            <select id="directories" name="directories" class="form-select directory-select" multiple aria-label="Select directories">
+            <#list directories as dir>
                 <#if message.directories?? && message.directories?seq_contains(dir.fullName)>
                     <option selected value="${dir.fullName}">${dir.fullName}</option>
                 <#else>
                     <option value="${dir.fullName}">${dir.fullName}</option>
                 </#if>
             </#list>
-          </select>
-          <br/>
+            </select>
+            <div class="form-text">Select one or more directories for this message.</div>
+          </div>
           <#if !message.isUrgent()>
               <div class="mb-3">
                 <input class="form-check-input" type="checkbox" value="" id="urgent" name="urgent">
@@ -53,9 +60,8 @@
           </#if>
           
           <#if !message.isCopyrighted()>
-              <div class="container-fluid">
-                <div class="row">
-                  <div class="col">
+              <div class="editor-fields editor-fields-two">
+                  <div class="mb-3">
                     <label for="copyright_select" class="form-label">Copyright</label>
                     <select id="copyright_select" name="copyright_select" class="form-select" aria-label="Copyright">
                       <option value="LEAVE" selected>Not copyrighted</option>
@@ -63,12 +69,11 @@
                       <option value="ASSIGN_OTHER">Assign other as author</option>
                     </select>
                   </div>
-                  <div class="col">
+                  <div class="mb-3">
                     <label for="copyright_assign" class="form-label">Author</label>
                     <input type="text" class="form-control" id="copyright_assign" name="copyright_assign" aria-describedby="copyright_assign_help">
                     <div id="copyright_assign_help" class="form-text">Assigned author of the message</div>
                   </div>
-                </div>
               </div>
           </#if>
           
@@ -88,6 +93,7 @@
             <label for="content" class="form-label">Content</label>
             <textarea class="form-control" id="content" name="content" rows="14" required>${message.content!}</textarea>
           </div>
+          </div>
           
           <div class="mb-3">
             <label for="mark" class="form-label">Comment</label>
@@ -95,7 +101,11 @@
             <div id="markHelp" class="form-text">User comment on message</div>
           </div>
           
-          <button class="btn btn-primary" type="submit">${mode}</button>
+          <div class="editor-actions">
+            <a class="btn btn-outline-secondary" href="/">Cancel</a>
+            <button class="btn btn-primary" type="submit">${mode}</button>
+          </div>
       </form>
+      </main>
   </body>
 </html>
