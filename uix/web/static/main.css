@@ -2,9 +2,9 @@
     --directory-width: 19rem;
     --message-height: 43%;
     --app-header-height: 3.5rem;
-    --pane-border: #d9dee5;
-    --pane-heading: #f7f8fa;
-    --workspace-bg: #edf0f4;
+    --pane-border: var(--bs-border-color);
+    --pane-heading: var(--bs-tertiary-bg);
+    --workspace-bg: var(--bs-body-bg);
 }
 
 html, body {
@@ -45,7 +45,7 @@ body {
     min-width: 0;
     min-height: 0;
     overflow: hidden;
-    background: var(--bs-body-bg, #fff);
+    background: var(--bs-body-bg);
     border: 1px solid var(--pane-border);
     border-radius: .5rem;
     box-shadow: 0 .1rem .25rem rgb(24 39 75 / 5%);
@@ -82,7 +82,7 @@ body {
 
 .directory-list {
     padding: .5rem;
-    background: #fff;
+    background: var(--bs-body-bg);
 }
 
 .directory-tree,
@@ -95,7 +95,7 @@ body {
 .directory-tree ul {
     margin-left: .8rem;
     padding-left: .75rem;
-    border-left: 1px solid #e2e6eb;
+    border-left: 1px solid var(--bs-border-color);
 }
 
 .directory-tree li {
@@ -110,7 +110,7 @@ body {
     min-height: 2rem;
     padding: .25rem .55rem;
     overflow: hidden;
-    color: #343a40;
+    color: var(--bs-body-color);
     border-radius: .35rem;
     text-decoration: none;
     text-overflow: ellipsis;
@@ -130,14 +130,14 @@ body {
 }
 
 .directory-link:hover {
-    color: #17365d;
-    background: #f0f3f7;
+    color: var(--bs-emphasis-color);
+    background: var(--bs-tertiary-bg);
 }
 
 .directory-link[aria-current="true"] {
-    color: #084298;
-    background: #cfe2ff;
-    box-shadow: inset 3px 0 #0d6efd;
+    color: var(--bs-emphasis-color);
+    background: var(--bs-primary-bg-subtle);
+    box-shadow: inset 3px 0 var(--bs-primary);
     font-weight: 600;
 }
 
@@ -174,7 +174,7 @@ body {
     flex: 0 0 auto;
     margin: 0 -.85rem -.85rem;
     padding: .65rem .85rem .25rem;
-    background: var(--bs-body-bg, #fff);
+    background: var(--bs-body-bg);
     border-top: 1px solid var(--pane-border);
 }
 
@@ -205,7 +205,7 @@ body {
 .splitter::after {
     position: absolute;
     content: "";
-    background: #c7ced8;
+    background: var(--bs-border-color);
     border-radius: 1rem;
     transition: background-color .15s ease;
 }
@@ -237,8 +237,8 @@ body {
 }
 
 .message-list tbody tr[aria-selected="true"] > * {
-    --bs-table-bg-state: #cfe2ff;
-    --bs-table-color-state: #084298;
+    --bs-table-bg-state: var(--bs-primary-bg-subtle);
+    --bs-table-color-state: var(--bs-emphasis-color);
 }
 
 .message-list .pagination {
