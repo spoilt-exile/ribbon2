@@ -60,9 +60,8 @@ public @interface IOModule {
     String[] requiredConfigKeys();
 
     /** 
-     * Configuration form fields. 
-     * Annotation arrays are supported by Java at compile time. 
-     * */
+     * Configuration form fields.
+     */
     ConfigEntry[] configEntries() default {};
     
 }

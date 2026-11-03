@@ -18,6 +18,8 @@
  */
 package tk.freaxsoftware.ribbon2.exchanger.engine;
 
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME_NOT_FOUND;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +31,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageContextHolder;
 import tk.freaxsoftware.extras.bus.MessageOptions;
@@ -38,10 +42,8 @@ import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
-import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME_NOT_FOUND;
 import tk.freaxsoftware.ribbon2.exchanger.ExchangerUnit;
 import tk.freaxsoftware.ribbon2.exchanger.converters.SchemeConverter;
-import static tk.freaxsoftware.ribbon2.exchanger.engine.IOEngine.sendSchemeStatusUpdate;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Register;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Scheme;
 import tk.freaxsoftware.ribbon2.exchanger.repository.DirectoryRepository;
@@ -49,6 +51,7 @@ import tk.freaxsoftware.ribbon2.exchanger.repository.RegisterRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.SchemeRepository;
 import tk.freaxsoftware.ribbon2.io.core.ErrorHandling;
 import tk.freaxsoftware.ribbon2.io.core.IOExceptionCodes;
+import tk.freaxsoftware.ribbon2.io.core.IOModule.ConfigEntry;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.InputOutputException;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
@@ -107,7 +110,7 @@ public class ImportEngine extends IOEngine<Importer> {
             moduleMap.put(wrapper.getModuleData().protocol(), wrapper);
             for (Scheme scheme: schemes) {
                 LOGGER.info("Processing scheme {}", scheme.getName());
-                if (isConfigValid(scheme.getConfig(), wrapper.getModuleData().requiredConfigKeys())) {
+                if (isConfigValid(scheme.getConfig(), wrapper.getModuleData().configEntries())) {
                     launchScheme(wrapper, scheme);
                 } else {
                     LOGGER.warn("Some config keys are absent in scheme {}, skipping", scheme.getName());
@@ -191,9 +194,9 @@ public class ImportEngine extends IOEngine<Importer> {
         sendSchemeStatusUpdate(Set.of(buildStatusUpdateNotification(wrapper, instance, type, scheme.getName())));
     }
     
-    private Boolean isConfigValid(Map<String,Object> config, String[] requiredConfigKeys) {
-        for (String configKey: requiredConfigKeys) {
-            if (!config.containsKey(configKey)) {
+    private Boolean isConfigValid(Map<String,Object> config, ConfigEntry[] configEntries) {
+        for (ConfigEntry configEntry: configEntries) {
+            if (!config.containsKey(configEntry.name()) && configEntry.required()) {
                 return false;
             }
         }
