@@ -18,6 +18,10 @@
  */
 package tk.freaxsoftware.ribbon2.io.importer.telegram;
 
+import java.util.List;
+
+import tk.freaxsoftware.ribbon2.io.core.ConfigurableModule.ConfigEntry;
+import tk.freaxsoftware.ribbon2.io.core.ConfigurableModule.EntryType;
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportSource;
@@ -35,5 +39,15 @@ public class TelegramImporter implements Importer {
     public ImportSource createSource(IOScheme scheme) {
         return new TelegramImportSource(scheme);
     }
-    
+
+    @Override 
+    public List<ConfigEntry> getConfigEntries() {
+        return List.of(
+            new ConfigEntry("tgBotName", EntryType.TEXT, true),
+            new ConfigEntry("tgBotToken", EntryType.SECRET, true),
+            new ConfigEntry("generelDirectory", EntryType.DIRECTORY, true),
+            new ConfigEntry("generalTimeout", EntryType.NUMBER, false)
+        );
+    }
+
 }

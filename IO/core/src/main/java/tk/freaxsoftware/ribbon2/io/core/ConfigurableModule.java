@@ -58,6 +58,8 @@ public interface ConfigurableModule {
      * Enumeration of config entry types.
      */
     public static enum EntryType {
+        /** Drop list of directories. Single select. */
+        DIRECTORY,
         /** Simple boolean flag */
         BOOLEAN,
         /** Chunk of short text */

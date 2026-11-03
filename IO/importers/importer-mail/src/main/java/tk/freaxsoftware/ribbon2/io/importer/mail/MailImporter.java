@@ -18,6 +18,8 @@
  */
 package tk.freaxsoftware.ribbon2.io.importer.mail;
 
+import java.util.List;
+
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportSource;
@@ -34,6 +36,32 @@ public class MailImporter implements Importer {
     @Override
     public ImportSource createSource(IOScheme scheme) {
         return new MailImportSource(scheme);
+    }
+
+    @Override 
+    public List<ConfigEntry> getConfigEntries() {
+        return List.of(
+            new ConfigEntry("mailPop3Address", EntryType.TEXT, true),
+            new ConfigEntry("mailPop3Port", EntryType.NUMBER, false),
+            new ConfigEntry("mailPop3Login", EntryType.TEXT, true),
+            new ConfigEntry("mailPop3Password", EntryType.SECRET, true),
+            new ConfigEntry("mailPop3Security", EntryType.TEXT, false),
+            new ConfigEntry("mailPop3Debug", EntryType.BOOLEAN, false),
+            new ConfigEntry("mailPop3PostAction", EntryType.TEXT, false),
+            new ConfigEntry("mailReadFromList", EntryType.TEXT, false),
+            new ConfigEntry("mailDirectoryList", EntryType.TEXT, false),
+            new ConfigEntry("mailCopyright", EntryType.TEXT, false),
+            new ConfigEntry("mailSendReportBack", EntryType.BOOLEAN, false),
+            new ConfigEntry("mailReportAdminAddress", EntryType.TEXT, false),
+            new ConfigEntry("mailSmtpAddress", EntryType.TEXT, false),
+            new ConfigEntry("mailSmtpLogin", EntryType.TEXT, false),
+            new ConfigEntry("mailSmtpPassword", EntryType.SECRET, false),
+            new ConfigEntry("mailSmtpPort", EntryType.NUMBER, false),
+            new ConfigEntry("mailSmtpSecurity", EntryType.TEXT, false),
+            new ConfigEntry("mailSmtpFrom", EntryType.TEXT, false),
+            new ConfigEntry("generelDirectory", EntryType.DIRECTORY, false),
+            new ConfigEntry("generalTimeout", EntryType.NUMBER, false)
+        );
     }
     
 }

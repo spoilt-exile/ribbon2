@@ -18,6 +18,8 @@
  */
 package tk.freaxsoftware.ribbon2.io.importer.rss;
 
+import java.util.List;
+
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportSource;
@@ -36,4 +38,12 @@ public class RSSImporter implements Importer {
         return new RSSImportSource(scheme);
     }
     
+    @Override 
+    public List<ConfigEntry> getConfigEntries() {
+        return List.of(
+            new ConfigEntry("rssUrl", EntryType.TEXT, true),
+            new ConfigEntry("generelDirectory", EntryType.DIRECTORY, true),
+            new ConfigEntry("generalTimeout", EntryType.NUMBER, false)
+        );
+    }
 }
