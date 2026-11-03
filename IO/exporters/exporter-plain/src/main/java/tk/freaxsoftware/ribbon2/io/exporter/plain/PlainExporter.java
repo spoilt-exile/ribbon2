@@ -23,6 +23,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import tk.freaxsoftware.ribbon2.io.core.ConfigEntryType;
 import tk.freaxsoftware.ribbon2.io.core.IOExceptionCodes;
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
 import tk.freaxsoftware.ribbon2.io.core.InputOutputException;
@@ -34,7 +36,11 @@ import tk.freaxsoftware.ribbon2.io.core.exporter.Exporter;
  * @author Stanislav Nepochatov
  */
 @IOModule(id = "export:plain", name = "Plain text plain", 
-        protocol = "plain", requiredConfigKeys = {"plainFolderPath", "plainFileExtension"})
+        protocol = "plain", requiredConfigKeys = {"plainFolderPath", "plainFileExtension"},
+        configEntries = {
+            @IOModule.ConfigEntry(name = "plainFolderPath", type = ConfigEntryType.TEXT, required = true),
+            @IOModule.ConfigEntry(name = "plainFileExtension", type = ConfigEntryType.TEXT, required = true)
+        })
 public class PlainExporter implements Exporter {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(PlainExporter.class);

@@ -26,6 +26,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import tk.freaxsoftware.ribbon2.io.core.ConfigEntryType;
 import tk.freaxsoftware.ribbon2.io.core.IOExceptionCodes;
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
 import tk.freaxsoftware.ribbon2.io.core.InputOutputException;
@@ -37,7 +39,17 @@ import tk.freaxsoftware.ribbon2.io.core.exporter.Exporter;
  * @author Stanislav Nepochatov
  */
 @IOModule(id = "export:mail", name = "Mail message exporter by SMTP protocol", 
-        protocol = "mail", requiredConfigKeys = {"mailSmtpToList", "mailSmtpAddress", "mailSmtpLogin", "mailSmtpPassword", "mailSmtpFrom"})
+        protocol = "mail", requiredConfigKeys = {"mailSmtpToList", "mailSmtpAddress", "mailSmtpLogin", "mailSmtpPassword", "mailSmtpFrom"},
+        configEntries = {
+            @IOModule.ConfigEntry(name = "mailSmtpToList", type = ConfigEntryType.TEXT),
+            @IOModule.ConfigEntry(name = "mailSmtpAddress", type = ConfigEntryType.TEXT),
+            @IOModule.ConfigEntry(name = "mailSmtpLogin", type = ConfigEntryType.TEXT),
+            @IOModule.ConfigEntry(name = "mailSmtpPassword", type = ConfigEntryType.SECRET),
+            @IOModule.ConfigEntry(name = "mailSmtpPort", type = ConfigEntryType.NUMBER),
+            @IOModule.ConfigEntry(name = "mailSmtpSecurity", type = ConfigEntryType.TEXT, defaultValue = "NONE"),
+            @IOModule.ConfigEntry(name = "mailSmtpFrom", type = ConfigEntryType.TEXT),
+            @IOModule.ConfigEntry(name = "mailSmtpDebug", type = ConfigEntryType.BOOLEAN, defaultValue = "false")
+        })
 public class MailExporter implements Exporter {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(MailExporter.class);
