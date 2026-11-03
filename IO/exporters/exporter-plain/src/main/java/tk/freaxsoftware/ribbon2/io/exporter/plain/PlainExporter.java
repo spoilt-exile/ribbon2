@@ -36,7 +36,7 @@ import tk.freaxsoftware.ribbon2.io.core.exporter.Exporter;
  * @author Stanislav Nepochatov
  */
 @IOModule(id = "export:plain", name = "Plain text plain", 
-        protocol = "plain", requiredConfigKeys = {"plainFolderPath", "plainFileExtension"},
+        protocol = "plain",
         configEntries = {
             @IOModule.ConfigEntry(name = "plainFolderPath", type = ConfigEntryType.TEXT, required = true),
             @IOModule.ConfigEntry(name = "plainFileExtension", type = ConfigEntryType.TEXT, required = true)

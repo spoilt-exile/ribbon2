@@ -39,15 +39,15 @@ import tk.freaxsoftware.ribbon2.io.core.exporter.Exporter;
  * @author Stanislav Nepochatov
  */
 @IOModule(id = "export:mail", name = "Mail message exporter by SMTP protocol", 
-        protocol = "mail", requiredConfigKeys = {"mailSmtpToList", "mailSmtpAddress", "mailSmtpLogin", "mailSmtpPassword", "mailSmtpFrom"},
+        protocol = "mail",
         configEntries = {
-            @IOModule.ConfigEntry(name = "mailSmtpToList", type = ConfigEntryType.TEXT),
-            @IOModule.ConfigEntry(name = "mailSmtpAddress", type = ConfigEntryType.TEXT),
-            @IOModule.ConfigEntry(name = "mailSmtpLogin", type = ConfigEntryType.TEXT),
-            @IOModule.ConfigEntry(name = "mailSmtpPassword", type = ConfigEntryType.SECRET),
+            @IOModule.ConfigEntry(name = "mailSmtpToList", type = ConfigEntryType.TEXT, required = true),
+            @IOModule.ConfigEntry(name = "mailSmtpAddress", type = ConfigEntryType.TEXT, required = true),
+            @IOModule.ConfigEntry(name = "mailSmtpLogin", type = ConfigEntryType.TEXT, required = true),
+            @IOModule.ConfigEntry(name = "mailSmtpPassword", type = ConfigEntryType.SECRET, required = true),
             @IOModule.ConfigEntry(name = "mailSmtpPort", type = ConfigEntryType.NUMBER),
             @IOModule.ConfigEntry(name = "mailSmtpSecurity", type = ConfigEntryType.TEXT, defaultValue = "NONE"),
-            @IOModule.ConfigEntry(name = "mailSmtpFrom", type = ConfigEntryType.TEXT),
+            @IOModule.ConfigEntry(name = "mailSmtpFrom", type = ConfigEntryType.TEXT, required = true),
             @IOModule.ConfigEntry(name = "mailSmtpDebug", type = ConfigEntryType.BOOLEAN, defaultValue = "false")
         })
 public class MailExporter implements Exporter {

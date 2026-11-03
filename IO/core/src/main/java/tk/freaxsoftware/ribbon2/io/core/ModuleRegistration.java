@@ -18,7 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.io.core;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -34,7 +34,7 @@ public class ModuleRegistration {
     
     private String protocol;
     
-    private String[] requiredConfigKeys;
+    private List<ConfigEntry> configEntries;
     
     private Map<String, SchemeInstance> schemes;
 
@@ -42,11 +42,11 @@ public class ModuleRegistration {
     }
 
     public ModuleRegistration(String id, ModuleType type, String protocol, 
-            String[] requiredConfigKeys, Map<String, SchemeInstance> schemes) {
+            List<ConfigEntry> configEntries, Map<String, SchemeInstance> schemes) {
         this.id = id;
         this.type = type;
         this.protocol = protocol;
-        this.requiredConfigKeys = requiredConfigKeys;
+        this.configEntries = configEntries;
         this.schemes = schemes;
     }
 
@@ -74,12 +74,12 @@ public class ModuleRegistration {
         this.protocol = protocol;
     }
 
-    public String[] getRequiredConfigKeys() {
-        return requiredConfigKeys;
+    public List<ConfigEntry> getConfigEntries() {
+        return configEntries;
     }
 
-    public void setRequiredConfigKeys(String[] requiredConfigKeys) {
-        this.requiredConfigKeys = requiredConfigKeys;
+    public void setConfigEntries(List<ConfigEntry> configEntries) {
+        this.configEntries = configEntries;
     }
 
     public Map<String, SchemeInstance> getSchemes() {
@@ -121,7 +121,7 @@ public class ModuleRegistration {
         hash = 73 * hash + Objects.hashCode(this.id);
         hash = 73 * hash + Objects.hashCode(this.type);
         hash = 73 * hash + Objects.hashCode(this.protocol);
-        hash = 73 * hash + Arrays.deepHashCode(this.requiredConfigKeys);
+        hash = 73 * hash + Objects.hashCode(this.configEntries);
         return hash;
     }
 

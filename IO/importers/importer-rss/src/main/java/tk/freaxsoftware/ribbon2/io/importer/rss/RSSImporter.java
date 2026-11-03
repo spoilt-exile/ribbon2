@@ -29,7 +29,7 @@ import tk.freaxsoftware.ribbon2.io.core.importer.Importer;
  * @author Stanislav Nepochatov
  */
 @IOModule(id = "import:rss", name = "RSS feed importer by HTTP/S", 
-        protocol = "rss", requiredConfigKeys = {"rssUrl"},
+        protocol = "rss",
         configEntries = {
             @IOModule.ConfigEntry(name = "rssUrl", type = ConfigEntryType.TEXT, required = true),
             @IOModule.ConfigEntry(name = "generalDirectory", type = ConfigEntryType.DIRECTORY, required = true),

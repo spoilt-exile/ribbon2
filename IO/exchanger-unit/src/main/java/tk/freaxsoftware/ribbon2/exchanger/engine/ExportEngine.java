@@ -18,7 +18,10 @@
  */
 package tk.freaxsoftware.ribbon2.exchanger.engine;
 
-import freemarker.template.TemplateException;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.DIRECTORY_NOT_FOUND;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME_CONFIG_ERROR;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME_NOT_FOUND;
+
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -39,8 +42,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import freemarker.template.TemplateException;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageContextHolder;
 import tk.freaxsoftware.extras.bus.MessageOptions;
@@ -49,14 +55,9 @@ import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.data.request.MessagePropertyRegistrationRequest;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
-import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.DIRECTORY_NOT_FOUND;
-import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME_NOT_FOUND;
 import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
 import tk.freaxsoftware.ribbon2.exchanger.ExchangerUnit;
 import tk.freaxsoftware.ribbon2.exchanger.converters.SchemeConverter;
-import static tk.freaxsoftware.ribbon2.exchanger.engine.IOEngine.buildStatusUpdateNotification;
-import static tk.freaxsoftware.ribbon2.exchanger.engine.IOEngine.postErrorMessage;
-import static tk.freaxsoftware.ribbon2.exchanger.engine.IOEngine.sendSchemeStatusUpdate;
 import tk.freaxsoftware.ribbon2.exchanger.engine.export.DefaultExportMessage;
 import tk.freaxsoftware.ribbon2.exchanger.engine.export.TemplateService;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Directory;
@@ -204,6 +205,9 @@ public class ExportEngine extends IOEngine<Exporter>{
     @Override
     public IOScheme saveScheme(IOScheme scheme, String username) {
         LOGGER.info("Saving scheme {} with protocol {}", scheme.getName(), scheme.getProtocol());
+        if (!isConfigValid(scheme.getConfig(), scheme.getProtocol())) {
+            throw new CoreException(IO_SCHEME_CONFIG_ERROR, String.format("Schema %s is invalid, check required fields.", scheme.getName()));
+        }
         Scheme saved = schemeRepository.save(schemeConverter.convertBack(scheme));
         ModuleWrapper<Exporter> wrapper = moduleMap.get(saved.getProtocol());
         SchemeInstance instance = saved.buildInstance();

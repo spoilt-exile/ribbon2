@@ -54,11 +54,6 @@ public @interface IOModule {
      */
     String protocol();
     
-    /**
-     * Required keys to config this module.
-     */
-    String[] requiredConfigKeys();
-
     /** 
      * Configuration form fields.
      */

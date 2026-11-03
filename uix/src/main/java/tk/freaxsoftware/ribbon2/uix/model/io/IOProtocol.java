@@ -18,6 +18,8 @@
  */
 package tk.freaxsoftware.ribbon2.uix.model.io;
 
+import java.util.List;
+import tk.freaxsoftware.ribbon2.io.core.ConfigEntry;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
 
 /**
@@ -32,7 +34,7 @@ public class IOProtocol {
     
     private String protocol;
     
-    private String[] requiredConfigKeys;
+    private List<ConfigEntry> configEntries;
 
     public String getId() {
         return id;
@@ -61,12 +63,12 @@ public class IOProtocol {
         return this;
     }
 
-    public String[] getRequiredConfigKeys() {
-        return requiredConfigKeys;
+    public List<ConfigEntry> getConfigEntries() {
+        return configEntries;
     }
 
-    public IOProtocol setRequiredConfigKeys(String[] requiredConfigKeys) {
-        this.requiredConfigKeys = requiredConfigKeys;
+    public IOProtocol setConfigEntries(List<ConfigEntry> configEntries) {
+        this.configEntries = configEntries;
         return this;
     }
 }

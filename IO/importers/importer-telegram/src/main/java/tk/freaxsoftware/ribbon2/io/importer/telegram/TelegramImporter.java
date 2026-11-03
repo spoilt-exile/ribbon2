@@ -29,7 +29,7 @@ import tk.freaxsoftware.ribbon2.io.core.importer.Importer;
  * @author Stanislav Nepochatov
  */
 @IOModule(id = "import:telegram", name = "Telegram bot importer", 
-        protocol = "telegram", requiredConfigKeys = {"tgBotName", "tgBotToken", "generalDirectory"},
+        protocol = "telegram",
         configEntries = {
             @IOModule.ConfigEntry(name = "tgBotName", type = ConfigEntryType.TEXT, required = true),
             @IOModule.ConfigEntry(name = "tgBotToken", type = ConfigEntryType.SECRET, required = true),

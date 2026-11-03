@@ -29,7 +29,7 @@ import tk.freaxsoftware.ribbon2.io.core.importer.Importer;
  * @author Stanislav Nepochatov
  */
 @IOModule(id = "import:mail", name = "Mail message importer by POP3 protocol", 
-        protocol = "mail", requiredConfigKeys = {"mailPop3Address", "mailPop3Login", "mailPop3Password"},
+        protocol = "mail",
         configEntries = {
             @IOModule.ConfigEntry(name = "mailPop3Address", type = ConfigEntryType.TEXT, required = true),
             @IOModule.ConfigEntry(name = "mailPop3Port", type = ConfigEntryType.NUMBER),

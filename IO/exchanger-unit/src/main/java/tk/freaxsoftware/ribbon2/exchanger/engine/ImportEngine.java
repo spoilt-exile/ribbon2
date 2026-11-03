@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.exchanger.engine;
 
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME_CONFIG_ERROR;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.IO_SCHEME_NOT_FOUND;
 
 import java.util.HashMap;
@@ -51,7 +52,6 @@ import tk.freaxsoftware.ribbon2.exchanger.repository.RegisterRepository;
 import tk.freaxsoftware.ribbon2.exchanger.repository.SchemeRepository;
 import tk.freaxsoftware.ribbon2.io.core.ErrorHandling;
 import tk.freaxsoftware.ribbon2.io.core.IOExceptionCodes;
-import tk.freaxsoftware.ribbon2.io.core.IOModule.ConfigEntry;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.InputOutputException;
 import tk.freaxsoftware.ribbon2.io.core.ModuleType;
@@ -110,7 +110,7 @@ public class ImportEngine extends IOEngine<Importer> {
             moduleMap.put(wrapper.getModuleData().protocol(), wrapper);
             for (Scheme scheme: schemes) {
                 LOGGER.info("Processing scheme {}", scheme.getName());
-                if (isConfigValid(scheme.getConfig(), wrapper.getModuleData().configEntries())) {
+                if (isConfigValid(scheme.getConfig(), wrapper.getModuleData().protocol())) {
                     launchScheme(wrapper, scheme);
                 } else {
                     LOGGER.warn("Some config keys are absent in scheme {}, skipping", scheme.getName());
@@ -123,6 +123,9 @@ public class ImportEngine extends IOEngine<Importer> {
     @Override
     public IOScheme saveScheme(IOScheme scheme, String username) {
         LOGGER.info("Saving scheme {} with protocol {}", scheme.getName(), scheme.getProtocol());
+        if (!isConfigValid(scheme.getConfig(), scheme.getProtocol())) {
+            throw new CoreException(IO_SCHEME_CONFIG_ERROR, String.format("Schema %s is invalid, check required fields.", scheme.getName()));
+        }
         if (scheme.getConfig().containsKey(GENERAL_DIRECTORY_KEY)) {
             checkDirectoryAccess(username, Set.of((String) scheme.getConfig().get(GENERAL_DIRECTORY_KEY)), PERMISSION_CAN_ASSIGN_IMPORT);
         }
@@ -192,18 +195,6 @@ public class ImportEngine extends IOEngine<Importer> {
         SchemeInstance instance = stopScheme(wrapper, scheme);
         instance.setStatus(SchemeInstance.Status.DELETED);
         sendSchemeStatusUpdate(Set.of(buildStatusUpdateNotification(wrapper, instance, type, scheme.getName())));
-    }
-    
-    private Boolean isConfigValid(Map<String,Object> config, ConfigEntry[] configEntries) {
-        for (ConfigEntry configEntry: configEntries) {
-            if (!config.containsKey(configEntry.name()) && configEntry.required()) {
-                return false;
-            }
-        }
-        if (!config.containsKey(GENERAL_TIMEOUT_KEY)) {
-            return false;
-        }
-        return true;
     }
     
     @Override

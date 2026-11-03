@@ -29,7 +29,7 @@ import tk.freaxsoftware.ribbon2.io.core.importer.Importer;
  * @author Stanislav Nepochatov
  */
 @IOModule(id = "import:plain", name = "Plain text importer", 
-        protocol = "plain", requiredConfigKeys = {"plainFolderPath", "plainFileMask"},
+        protocol = "plain",
         configEntries = {
             @IOModule.ConfigEntry(name = "plainFolderPath", type = ConfigEntryType.TEXT, required = true),
             @IOModule.ConfigEntry(name = "plainFileMask", type = ConfigEntryType.TEXT, required = true),

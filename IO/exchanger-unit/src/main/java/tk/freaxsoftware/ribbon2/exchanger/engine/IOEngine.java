@@ -55,6 +55,7 @@ import tk.freaxsoftware.ribbon2.exchanger.ExchangerUnit;
 import tk.freaxsoftware.ribbon2.exchanger.entity.Directory;
 import tk.freaxsoftware.ribbon2.exchanger.repository.DirectoryRepository;
 import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
+import tk.freaxsoftware.ribbon2.io.core.ConfigEntry;
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.ModuleRegistration;
@@ -187,7 +188,8 @@ public abstract class IOEngine<T> {
      */
     protected ModuleRegistration sendRegistration(ModuleWrapper<T> wrapper, ModuleType type, Map<String, SchemeInstance> schemes) {
         ModuleRegistration registration = new ModuleRegistration(wrapper.getModuleData().id(), 
-                type, wrapper.getModuleData().protocol(), wrapper.getModuleData().requiredConfigKeys(), 
+                type, wrapper.getModuleData().protocol(), Arrays.stream(wrapper.getModuleData().configEntries())
+                        .map(ConfigEntry::new).collect(Collectors.toList()),
                 wrapper.getSchemes());
         MessageBus.fire(IOLocalIds.IO_REGISTER_TOPIC, registration, 
                 MessageOptions.Builder.newInstance().deliveryNotification()
@@ -359,6 +361,27 @@ public abstract class IOEngine<T> {
                         .header(UserModel.AUTH_HEADER_USERNAME, "root")
                         .header(UserModel.AUTH_HEADER_FULLNAME, "root")
                         .deliveryNotification().build());
+    }
+
+    /**
+     * Universal method to check basic validity of IO schema config.
+     * @param config config of the IO schema to validate;
+     * @param protocol name of the IO protocol;
+     * @return true - if schema config is valid and protocol is supported, false if whether config is invalid or protocol is unknown;
+     */
+    protected Boolean isConfigValid(Map<String,Object> config, String protocol) {
+        Optional<ModuleWrapper<T>> wrapper = modules.stream()
+            .filter(md -> Objects.equals(md.getModuleData().protocol(), protocol))
+            .findAny();
+        if (wrapper.isEmpty()) {
+            return false;
+        }
+        for (IOModule.ConfigEntry configEntry: wrapper.get().getModuleData().configEntries()) {
+            if (!config.containsKey(configEntry.name()) && configEntry.required()) {
+                return false;
+            }
+        }
+        return true;
     }
     
     /**
