@@ -18,8 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.io.importer.telegram;
 
-import java.util.List;
-
+import tk.freaxsoftware.ribbon2.io.core.ConfigEntryType;
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportSource;
@@ -30,22 +29,18 @@ import tk.freaxsoftware.ribbon2.io.core.importer.Importer;
  * @author Stanislav Nepochatov
  */
 @IOModule(id = "import:telegram", name = "Telegram bot importer", 
-        protocol = "telegram", requiredConfigKeys = {"tgBotName", "tgBotToken", "generalDirectory"})
+        protocol = "telegram", requiredConfigKeys = {"tgBotName", "tgBotToken", "generalDirectory"},
+        configEntries = {
+            @IOModule.ConfigEntry(name = "tgBotName", type = ConfigEntryType.TEXT, required = true),
+            @IOModule.ConfigEntry(name = "tgBotToken", type = ConfigEntryType.SECRET, required = true),
+            @IOModule.ConfigEntry(name = "generalDirectory", type = ConfigEntryType.DIRECTORY, required = true),
+            @IOModule.ConfigEntry(name = "generalTimeout", type = ConfigEntryType.NUMBER, defaultValue = "5")
+        })
 public class TelegramImporter implements Importer {
 
     @Override
     public ImportSource createSource(IOScheme scheme) {
         return new TelegramImportSource(scheme);
-    }
-
-    @Override 
-    public List<ConfigEntry> getConfigEntries() {
-        return List.of(
-            new ConfigEntry("tgBotName", EntryType.TEXT, true, null),
-            new ConfigEntry("tgBotToken", EntryType.SECRET, true, null),
-            new ConfigEntry("generelDirectory", EntryType.DIRECTORY, true, null),
-            new ConfigEntry("generalTimeout", EntryType.NUMBER, false, "5")
-        );
     }
 
 }

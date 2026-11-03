@@ -18,8 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.io.importer.rss;
 
-import java.util.List;
-
+import tk.freaxsoftware.ribbon2.io.core.ConfigEntryType;
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportSource;
@@ -30,7 +29,12 @@ import tk.freaxsoftware.ribbon2.io.core.importer.Importer;
  * @author Stanislav Nepochatov
  */
 @IOModule(id = "import:rss", name = "RSS feed importer by HTTP/S", 
-        protocol = "rss", requiredConfigKeys = {"rssUrl"})
+        protocol = "rss", requiredConfigKeys = {"rssUrl"},
+        configEntries = {
+            @IOModule.ConfigEntry(name = "rssUrl", type = ConfigEntryType.TEXT, required = true),
+            @IOModule.ConfigEntry(name = "generalDirectory", type = ConfigEntryType.DIRECTORY, required = true),
+            @IOModule.ConfigEntry(name = "generalTimeout", type = ConfigEntryType.NUMBER, defaultValue = "5")
+        })
 public class RSSImporter implements Importer {
 
     @Override
@@ -38,12 +42,4 @@ public class RSSImporter implements Importer {
         return new RSSImportSource(scheme);
     }
     
-    @Override 
-    public List<ConfigEntry> getConfigEntries() {
-        return List.of(
-            new ConfigEntry("rssUrl", EntryType.TEXT, true, null),
-            new ConfigEntry("generelDirectory", EntryType.DIRECTORY, true, null),
-            new ConfigEntry("generalTimeout", EntryType.NUMBER, false, "5")
-        );
-    }
 }

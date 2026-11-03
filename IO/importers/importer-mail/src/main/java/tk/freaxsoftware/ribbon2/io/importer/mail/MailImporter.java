@@ -18,8 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.io.importer.mail;
 
-import java.util.List;
-
+import tk.freaxsoftware.ribbon2.io.core.ConfigEntryType;
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportSource;
@@ -30,7 +29,29 @@ import tk.freaxsoftware.ribbon2.io.core.importer.Importer;
  * @author Stanislav Nepochatov
  */
 @IOModule(id = "import:mail", name = "Mail message importer by POP3 protocol", 
-        protocol = "mail", requiredConfigKeys = {"mailPop3Address", "mailPop3Login", "mailPop3Password"})
+        protocol = "mail", requiredConfigKeys = {"mailPop3Address", "mailPop3Login", "mailPop3Password"},
+        configEntries = {
+            @IOModule.ConfigEntry(name = "mailPop3Address", type = ConfigEntryType.TEXT, required = true),
+            @IOModule.ConfigEntry(name = "mailPop3Port", type = ConfigEntryType.NUMBER),
+            @IOModule.ConfigEntry(name = "mailPop3Login", type = ConfigEntryType.TEXT, required = true),
+            @IOModule.ConfigEntry(name = "mailPop3Password", type = ConfigEntryType.SECRET, required = true),
+            @IOModule.ConfigEntry(name = "mailPop3Security", type = ConfigEntryType.TEXT, defaultValue = "NONE"),
+            @IOModule.ConfigEntry(name = "mailPop3Debug", type = ConfigEntryType.BOOLEAN, defaultValue = "false"),
+            @IOModule.ConfigEntry(name = "mailPop3PostAction", type = ConfigEntryType.TEXT, defaultValue = "DELETE"),
+            @IOModule.ConfigEntry(name = "mailReadFromList", type = ConfigEntryType.TEXT),
+            @IOModule.ConfigEntry(name = "mailDirectoryList", type = ConfigEntryType.TEXT),
+            @IOModule.ConfigEntry(name = "mailCopyright", type = ConfigEntryType.TEXT),
+            @IOModule.ConfigEntry(name = "mailSendReportBack", type = ConfigEntryType.BOOLEAN, defaultValue = "false"),
+            @IOModule.ConfigEntry(name = "mailReportAdminAddress", type = ConfigEntryType.TEXT),
+            @IOModule.ConfigEntry(name = "mailSmtpAddress", type = ConfigEntryType.TEXT),
+            @IOModule.ConfigEntry(name = "mailSmtpLogin", type = ConfigEntryType.TEXT),
+            @IOModule.ConfigEntry(name = "mailSmtpPassword", type = ConfigEntryType.SECRET),
+            @IOModule.ConfigEntry(name = "mailSmtpPort", type = ConfigEntryType.NUMBER),
+            @IOModule.ConfigEntry(name = "mailSmtpSecurity", type = ConfigEntryType.TEXT, defaultValue = "NONE"),
+            @IOModule.ConfigEntry(name = "mailSmtpFrom", type = ConfigEntryType.TEXT),
+            @IOModule.ConfigEntry(name = "generalDirectory", type = ConfigEntryType.DIRECTORY),
+            @IOModule.ConfigEntry(name = "generalTimeout", type = ConfigEntryType.NUMBER, defaultValue = "5")
+        })
 public class MailImporter implements Importer {
 
     @Override
@@ -38,30 +59,4 @@ public class MailImporter implements Importer {
         return new MailImportSource(scheme);
     }
 
-    @Override 
-    public List<ConfigEntry> getConfigEntries() {
-        return List.of(
-            new ConfigEntry("mailPop3Address", EntryType.TEXT, true, null),
-            new ConfigEntry("mailPop3Port", EntryType.NUMBER, false, null),
-            new ConfigEntry("mailPop3Login", EntryType.TEXT, true, null),
-            new ConfigEntry("mailPop3Password", EntryType.SECRET, true, null),
-            new ConfigEntry("mailPop3Security", EntryType.TEXT, false, "NONE"),
-            new ConfigEntry("mailPop3Debug", EntryType.BOOLEAN, false, "false"),
-            new ConfigEntry("mailPop3PostAction", EntryType.TEXT, false, "DELETE"),
-            new ConfigEntry("mailReadFromList", EntryType.TEXT, false, null),
-            new ConfigEntry("mailDirectoryList", EntryType.TEXT, false, null),
-            new ConfigEntry("mailCopyright", EntryType.TEXT, false, null),
-            new ConfigEntry("mailSendReportBack", EntryType.BOOLEAN, false, "false"),
-            new ConfigEntry("mailReportAdminAddress", EntryType.TEXT, false, null),
-            new ConfigEntry("mailSmtpAddress", EntryType.TEXT, false, null),
-            new ConfigEntry("mailSmtpLogin", EntryType.TEXT, false, null),
-            new ConfigEntry("mailSmtpPassword", EntryType.SECRET, false, null),
-            new ConfigEntry("mailSmtpPort", EntryType.NUMBER, false, null),
-            new ConfigEntry("mailSmtpSecurity", EntryType.TEXT, false, "NONE"),
-            new ConfigEntry("mailSmtpFrom", EntryType.TEXT, false, null),
-            new ConfigEntry("generelDirectory", EntryType.DIRECTORY, false, null),
-            new ConfigEntry("generalTimeout", EntryType.NUMBER, false, "5")
-        );
-    }
-    
 }

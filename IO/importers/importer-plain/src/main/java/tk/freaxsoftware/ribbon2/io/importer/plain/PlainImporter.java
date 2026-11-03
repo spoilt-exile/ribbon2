@@ -18,8 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.io.importer.plain;
 
-import java.util.List;
-
+import tk.freaxsoftware.ribbon2.io.core.ConfigEntryType;
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportSource;
@@ -30,7 +29,13 @@ import tk.freaxsoftware.ribbon2.io.core.importer.Importer;
  * @author Stanislav Nepochatov
  */
 @IOModule(id = "import:plain", name = "Plain text importer", 
-        protocol = "plain", requiredConfigKeys = {"plainFolderPath", "plainFileMask"})
+        protocol = "plain", requiredConfigKeys = {"plainFolderPath", "plainFileMask"},
+        configEntries = {
+            @IOModule.ConfigEntry(name = "plainFolderPath", type = ConfigEntryType.TEXT, required = true),
+            @IOModule.ConfigEntry(name = "plainFileMask", type = ConfigEntryType.TEXT, required = true),
+            @IOModule.ConfigEntry(name = "generalDirectory", type = ConfigEntryType.DIRECTORY, required = true),
+            @IOModule.ConfigEntry(name = "generalTimeout", type = ConfigEntryType.NUMBER, defaultValue = "5")
+        })
 public class PlainImporter implements Importer {
 
     @Override
@@ -38,14 +43,4 @@ public class PlainImporter implements Importer {
         return new PlainImportSource(scheme);
     }
 
-    @Override 
-    public List<ConfigEntry> getConfigEntries() {
-        return List.of(
-            new ConfigEntry("plainFolderPath", EntryType.TEXT, true, null),
-            new ConfigEntry("plainFolderPath", EntryType.TEXT, true, null),
-            new ConfigEntry("generelDirectory", EntryType.DIRECTORY, true, null),
-            new ConfigEntry("generalTimeout", EntryType.NUMBER, false, "5")
-        );
-    }
-    
 }

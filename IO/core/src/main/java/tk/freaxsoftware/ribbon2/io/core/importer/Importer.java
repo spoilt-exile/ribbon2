@@ -18,14 +18,13 @@
  */
 package tk.freaxsoftware.ribbon2.io.core.importer;
 
-import tk.freaxsoftware.ribbon2.io.core.ConfigurableModule;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 
 /**
  * Importer methods inteface.
  * @author Stanislav Nepochatov
  */
-public interface Importer extends ConfigurableModule {
+public interface Importer {
     
     /**
      * Creats source for specified import scheme.

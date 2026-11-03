@@ -30,6 +30,14 @@ import java.lang.annotation.Target;
 @Target(value=ElementType.TYPE)
 @Retention(value= RetentionPolicy.RUNTIME)
 public @interface IOModule {
+
+    /** A single configuration field exposed by this module. */
+    @interface ConfigEntry {
+        String name();
+        ConfigEntryType type();
+        boolean required() default false;
+        String defaultValue() default "";
+    }
     
     /**
      * Id of the module.
@@ -50,5 +58,11 @@ public @interface IOModule {
      * Required keys to config this module.
      */
     String[] requiredConfigKeys();
+
+    /** 
+     * Configuration form fields. 
+     * Annotation arrays are supported by Java at compile time. 
+     * */
+    ConfigEntry[] configEntries() default {};
     
 }
