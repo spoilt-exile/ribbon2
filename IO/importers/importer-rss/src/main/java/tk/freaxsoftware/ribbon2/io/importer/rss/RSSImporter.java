@@ -41,9 +41,9 @@ public class RSSImporter implements Importer {
     @Override 
     public List<ConfigEntry> getConfigEntries() {
         return List.of(
-            new ConfigEntry("rssUrl", EntryType.TEXT, true),
-            new ConfigEntry("generelDirectory", EntryType.DIRECTORY, true),
-            new ConfigEntry("generalTimeout", EntryType.NUMBER, false)
+            new ConfigEntry("rssUrl", EntryType.TEXT, true, null),
+            new ConfigEntry("generelDirectory", EntryType.DIRECTORY, true, null),
+            new ConfigEntry("generalTimeout", EntryType.NUMBER, false, "5")
         );
     }
 }

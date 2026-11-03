@@ -35,10 +35,16 @@ public interface ConfigurableModule {
          */
         private Boolean required;
 
-        public ConfigEntry(String name, EntryType type, Boolean required) {
+        /**
+         * Default value filled when required is false.
+         */
+        private String defaultValue;
+
+        public ConfigEntry(String name, EntryType type, Boolean required, String defaultValue) {
             this.name = name;
             this.type = type;
             this.required = required;
+            this.defaultValue = defaultValue;
         }
 
         public String getName() {
@@ -51,6 +57,26 @@ public interface ConfigurableModule {
 
         public Boolean isRequired() {
             return required;
+        }
+
+        public String getDefaultValue() {
+            return defaultValue;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public void setType(EntryType type) {
+            this.type = type;
+        }
+
+        public void setRequired(Boolean required) {
+            this.required = required;
+        }
+
+        public void setDefaultValue(String defaultValue) {
+            this.defaultValue = defaultValue;
         }
     }
 

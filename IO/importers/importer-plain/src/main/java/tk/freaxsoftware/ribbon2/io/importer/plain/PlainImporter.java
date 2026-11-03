@@ -20,8 +20,6 @@ package tk.freaxsoftware.ribbon2.io.importer.plain;
 
 import java.util.List;
 
-import tk.freaxsoftware.ribbon2.io.core.ConfigurableModule.ConfigEntry;
-import tk.freaxsoftware.ribbon2.io.core.ConfigurableModule.EntryType;
 import tk.freaxsoftware.ribbon2.io.core.IOModule;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
 import tk.freaxsoftware.ribbon2.io.core.importer.ImportSource;
@@ -43,10 +41,10 @@ public class PlainImporter implements Importer {
     @Override 
     public List<ConfigEntry> getConfigEntries() {
         return List.of(
-            new ConfigEntry("plainFolderPath", EntryType.TEXT, true),
-            new ConfigEntry("plainFolderPath", EntryType.TEXT, true),
-            new ConfigEntry("generelDirectory", EntryType.DIRECTORY, true),
-            new ConfigEntry("generalTimeout", EntryType.NUMBER, false)
+            new ConfigEntry("plainFolderPath", EntryType.TEXT, true, null),
+            new ConfigEntry("plainFolderPath", EntryType.TEXT, true, null),
+            new ConfigEntry("generelDirectory", EntryType.DIRECTORY, true, null),
+            new ConfigEntry("generalTimeout", EntryType.NUMBER, false, "5")
         );
     }
     

@@ -41,26 +41,26 @@ public class MailImporter implements Importer {
     @Override 
     public List<ConfigEntry> getConfigEntries() {
         return List.of(
-            new ConfigEntry("mailPop3Address", EntryType.TEXT, true),
-            new ConfigEntry("mailPop3Port", EntryType.NUMBER, false),
-            new ConfigEntry("mailPop3Login", EntryType.TEXT, true),
-            new ConfigEntry("mailPop3Password", EntryType.SECRET, true),
-            new ConfigEntry("mailPop3Security", EntryType.TEXT, false),
-            new ConfigEntry("mailPop3Debug", EntryType.BOOLEAN, false),
-            new ConfigEntry("mailPop3PostAction", EntryType.TEXT, false),
-            new ConfigEntry("mailReadFromList", EntryType.TEXT, false),
-            new ConfigEntry("mailDirectoryList", EntryType.TEXT, false),
-            new ConfigEntry("mailCopyright", EntryType.TEXT, false),
-            new ConfigEntry("mailSendReportBack", EntryType.BOOLEAN, false),
-            new ConfigEntry("mailReportAdminAddress", EntryType.TEXT, false),
-            new ConfigEntry("mailSmtpAddress", EntryType.TEXT, false),
-            new ConfigEntry("mailSmtpLogin", EntryType.TEXT, false),
-            new ConfigEntry("mailSmtpPassword", EntryType.SECRET, false),
-            new ConfigEntry("mailSmtpPort", EntryType.NUMBER, false),
-            new ConfigEntry("mailSmtpSecurity", EntryType.TEXT, false),
-            new ConfigEntry("mailSmtpFrom", EntryType.TEXT, false),
-            new ConfigEntry("generelDirectory", EntryType.DIRECTORY, false),
-            new ConfigEntry("generalTimeout", EntryType.NUMBER, false)
+            new ConfigEntry("mailPop3Address", EntryType.TEXT, true, null),
+            new ConfigEntry("mailPop3Port", EntryType.NUMBER, false, null),
+            new ConfigEntry("mailPop3Login", EntryType.TEXT, true, null),
+            new ConfigEntry("mailPop3Password", EntryType.SECRET, true, null),
+            new ConfigEntry("mailPop3Security", EntryType.TEXT, false, "NONE"),
+            new ConfigEntry("mailPop3Debug", EntryType.BOOLEAN, false, "false"),
+            new ConfigEntry("mailPop3PostAction", EntryType.TEXT, false, "DELETE"),
+            new ConfigEntry("mailReadFromList", EntryType.TEXT, false, null),
+            new ConfigEntry("mailDirectoryList", EntryType.TEXT, false, null),
+            new ConfigEntry("mailCopyright", EntryType.TEXT, false, null),
+            new ConfigEntry("mailSendReportBack", EntryType.BOOLEAN, false, "false"),
+            new ConfigEntry("mailReportAdminAddress", EntryType.TEXT, false, null),
+            new ConfigEntry("mailSmtpAddress", EntryType.TEXT, false, null),
+            new ConfigEntry("mailSmtpLogin", EntryType.TEXT, false, null),
+            new ConfigEntry("mailSmtpPassword", EntryType.SECRET, false, null),
+            new ConfigEntry("mailSmtpPort", EntryType.NUMBER, false, null),
+            new ConfigEntry("mailSmtpSecurity", EntryType.TEXT, false, "NONE"),
+            new ConfigEntry("mailSmtpFrom", EntryType.TEXT, false, null),
+            new ConfigEntry("generelDirectory", EntryType.DIRECTORY, false, null),
+            new ConfigEntry("generalTimeout", EntryType.NUMBER, false, "5")
         );
     }
     
