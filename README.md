@@ -1,6 +1,6 @@
 Ribbon2 is concept of news message system for journalism and news agencies. It based on older Ribbon system but with complete new tech stack. System now built around micro-service architecture.
 
-Current version: **3.0**
+Current version: **3.3**
 
 ### List of units
  - `gateway` - REST api facade for units and also holder or user/group data;
@@ -22,6 +22,10 @@ Current version: **3.0**
 
 ### Planned features
  - Async API for critical operations;
+
+### Known issues
+ - Weak password hashing algorithm;
+ - Absent validation of error dir. Directory specified in config should be already created or present in list of directories for creation;
 
 ### Tech stack
 System based on Javalin (REST API provider), MessageBus 6.0, Ebean and HTMX.
