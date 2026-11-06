@@ -28,7 +28,6 @@ import io.javalin.openapi.OpenApiResponse;
 import io.javalin.openapi.OpenApiSecurity;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,13 +37,11 @@ import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.exception.CoreError;
-import tk.freaxsoftware.ribbon2.core.exception.CoreException;
-import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
-import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
 import tk.freaxsoftware.ribbon2.gateway.io.data.IOModuleScheme;
 import tk.freaxsoftware.ribbon2.gateway.io.data.IOProtocol;
 import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
+import tk.freaxsoftware.ribbon2.gateway.utils.AdminAuthorization;
 import tk.freaxsoftware.ribbon2.gateway.watchdog.WatchdogRegistry;
 import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
@@ -89,7 +86,7 @@ public class IORoutes {
         }
     )
     public static void getProtocols(Context ctx) {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         LOGGER.info("Request to get IO protocols.");
         ctx.json(IOService.getInstance().getRegistrations().stream()
                 .map(reg -> IOProtocol.ofModuleRegistration(reg))
@@ -111,7 +108,7 @@ public class IORoutes {
         }
     )
     public static void getSchemes(Context ctx) {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         LOGGER.info("Request to get IO schemes.");
         List<IOModuleScheme> moduleSchemes = new ArrayList<>();
         IOService.getInstance().getRegistrations().forEach(reg -> {
@@ -138,7 +135,7 @@ public class IORoutes {
         }
     )
     public static void getExportSchemesByDirectory(Context ctx) {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         String dirName = ctx.pathParam("dirName");
         LOGGER.info("Request to get export IO schemes by directory {}", dirName);
         ctx.json(IOService.getInstance().getSchemesByExportDirectiry(dirName));
@@ -164,7 +161,7 @@ public class IORoutes {
         }
     )
     public static void getScheme(Context ctx) throws Exception {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         String type = ctx.pathParam("type");
         String protocol = ctx.pathParam("protocol");
         String name = ctx.pathParam("name");
@@ -194,7 +191,7 @@ public class IORoutes {
         }
     )
     public static void saveScheme(Context ctx) throws Exception {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         IOScheme scheme = GatewayMain.gson.fromJson(ctx.body(), IOScheme.class);
         LOGGER.info("Request to save IO scheme {} for protocol {} with type {}.", scheme.getName(), scheme.getProtocol(), scheme.getType());
         IOScheme saved = MessageBus.fireCall(String.format("%s.%s.%s", IOLocalIds.IO_SCHEME_SAVE_TOPIC, 
@@ -225,7 +222,7 @@ public class IORoutes {
         }
     )
     public static void deleteScheme(Context ctx) throws Exception {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         String type = ctx.pathParam("type");
         String protocol = ctx.pathParam("protocol");
         String name = ctx.pathParam("name");
@@ -262,7 +259,7 @@ public class IORoutes {
         }
     )
     public static void assignExportScheme(Context ctx) throws Exception {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         String dir = ctx.pathParam("dir");
         String protocol = ctx.pathParam("protocol");
         String name = ctx.pathParam("name");
@@ -300,7 +297,7 @@ public class IORoutes {
         }
     )
     public static void dismissExportScheme(Context ctx) throws Exception {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         String dir = ctx.pathParam("dir");
         String protocol = ctx.pathParam("protocol");
         String name = ctx.pathParam("name");
@@ -318,13 +315,9 @@ public class IORoutes {
         }
     }
     
+    /** Kept for existing callers; new code should use AdminAuthorization directly. */
     public static void isAdmin() {
-        for (GroupEntity group: UserContext.getUser().getGroups()) {
-            if (Objects.equals(group.getName(), GroupEntity.ADMIN_GROUP)) {
-                return;
-            }
-        }
-        throw new CoreException(RibbonErrorCodes.ACCESS_DENIED, "User not added to admin group!");
+        AdminAuthorization.requireAdmin();
     }
     
 }

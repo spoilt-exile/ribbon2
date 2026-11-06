@@ -20,6 +20,7 @@ package tk.freaxsoftware.ribbon2.uix.routes;
 
 import io.javalin.Javalin;
 import java.util.Map;
+import tk.freaxsoftware.ribbon2.core.data.GroupModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.uix.Uix;
 import tk.freaxsoftware.ribbon2.uix.UserSessionModelContext;
@@ -55,6 +56,14 @@ public class LoginRoutes {
                 }
             } else {
                 UserSessionModelContext.setUser(logined);
+                if (ctx.req().getPathInfo().equals("/admin")
+                        || ctx.req().getPathInfo().startsWith("/admin/")) {
+                    if (logined.getGroups() == null
+                            || !logined.getGroups().contains(GroupModel.ADMIN_GROUP)) {
+                        ctx.redirect("/");
+                        return;
+                    }
+                }
             }
         });
         

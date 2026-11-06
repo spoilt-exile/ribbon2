@@ -24,6 +24,9 @@ package tk.freaxsoftware.ribbon2.core.data;
  * @author Stanislav Nepochatov
  */
 public class GroupModel {
+
+    /** Canonical name of the system administrator group. */
+    public static final String ADMIN_GROUP = "Admins";
     
     public final static String NOTIFICATION_GROUP_CREATED = "Ribbon.Global.Notification.GroupCreated";
     public final static String NOTIFICATION_GROUP_UPDATED = "Ribbon.Global.Notification.GroupUpdated";

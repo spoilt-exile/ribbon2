@@ -40,7 +40,7 @@ import tk.freaxsoftware.ribbon2.core.data.response.MessagePage;
 import tk.freaxsoftware.ribbon2.core.data.response.MessagePropertyTaggedHolder;
 import tk.freaxsoftware.ribbon2.core.exception.CoreError;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
-import static tk.freaxsoftware.ribbon2.gateway.io.routes.IORoutes.isAdmin;
+import tk.freaxsoftware.ribbon2.gateway.utils.AdminAuthorization;
 import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
 import tk.freaxsoftware.ribbon2.gateway.watchdog.WatchdogRegistry;
 
@@ -257,7 +257,7 @@ public class MessageRoutes {
         }
     )
     public static void addMessageProperty(Context ctx) throws Exception {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         MessagePropertyModel model = GatewayMain.gson.fromJson(ctx.body(), MessagePropertyModel.class);
         LOGGER.info("Request to add message property {} with content {}", model.getType(), model.getContent());
         MessagePropertyModel saved = MessageBus.fireCall(MessagePropertyModel.CALL_ADD_PROPERTY, model, MessageOptions.Builder.newInstance()

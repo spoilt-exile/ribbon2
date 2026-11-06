@@ -31,7 +31,7 @@ import jakarta.persistence.ManyToMany;
  */
 @Entity
 public class GroupEntity extends Model {
-    
+
     /**
      * Entity id.
      */

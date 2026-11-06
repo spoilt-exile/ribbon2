@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tk.freaxsoftware.ribbon2.core.data.GroupModel;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryEditAccessRequest;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
@@ -169,7 +170,8 @@ public class AuthService {
      * @return set of directory access model;
      */
     public Set<DirectoryAccessModel> getDirAccess(String path, String userLogin) {
-        if (!checkDirAccess(userLogin, path, DirectoryEditAccessRequest.PERMISSION_CAN_EDIT_DIR_ACCESS)) {
+        if (!isAdmin(userLogin)
+                && !checkDirAccess(userLogin, path, DirectoryEditAccessRequest.PERMISSION_CAN_EDIT_DIR_ACCESS)) {
             throw new CoreException(ACCESS_DENIED, "User doesn't have sufficient permission");
         }
         Directory finded = directoryRepository.findDirectoryByPath(path);
@@ -186,7 +188,8 @@ public class AuthService {
      * @return boolean result of operation;
      */
     public boolean editDirAccess(DirectoryEditAccessRequest request, String userLogin) {
-        if (checkDirAccess(userLogin, request.getDirectoryPath(), DirectoryEditAccessRequest.PERMISSION_CAN_EDIT_DIR_ACCESS)) {
+        if (isAdmin(userLogin)
+                || checkDirAccess(userLogin, request.getDirectoryPath(), DirectoryEditAccessRequest.PERMISSION_CAN_EDIT_DIR_ACCESS)) {
             Directory finded = directoryRepository.findDirectoryByPath(request.getDirectoryPath());
             if (finded == null) {
                 throw new CoreException(DIRECTORY_NOT_FOUND, "Can't find directory " + request.getDirectoryPath());
@@ -198,6 +201,12 @@ public class AuthService {
             throw new CoreException(ACCESS_DENIED, "User doesn't have sufficient permission");
         }
         return true;
+    }
+
+    private boolean isAdmin(String userLogin) {
+        UserEntity user = userRespository.findByLogin(userLogin);
+        return user != null && user.getGroups() != null && user.getGroups().stream()
+                .anyMatch(group -> group != null && Objects.equals(group.getName(), GroupModel.ADMIN_GROUP));
     }
     
     private void validateAccessEntries(Set<DirectoryAccessModel> access) {

@@ -46,7 +46,7 @@ import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.converters.UserConverter;
 import tk.freaxsoftware.ribbon2.gateway.entity.converters.UserWithPasswordConverter;
-import static tk.freaxsoftware.ribbon2.gateway.io.routes.IORoutes.isAdmin;
+import tk.freaxsoftware.ribbon2.gateway.utils.AdminAuthorization;
 import tk.freaxsoftware.ribbon2.gateway.utils.SHAHash;
 
 /**
@@ -73,7 +73,7 @@ public class UserRoutes {
         }
     )
     public static void createUser(Context ctx) {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         UserWithPassword user = GatewayMain.gson.fromJson(ctx.body(), UserWithPassword.class);
         LOGGER.info("Request to create User");
         user.setId(null);
@@ -101,7 +101,7 @@ public class UserRoutes {
         }
     )
     public static void updateUser(Context ctx) {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         UserWithPassword user = GatewayMain.gson.fromJson(ctx.body(), UserWithPassword.class);
         UserEntity updateUser = DB.getDefault().find(UserEntity.class).where().idEq(user.getId()).findOne();
         LOGGER.info("Request to update User: {}", user.getId());
@@ -148,7 +148,7 @@ public class UserRoutes {
         }
     )
     public static void getUserPage(Context ctx) {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         PaginationRequest request = PaginationRequest.ofRequest(ctx.queryParamMap());
         LOGGER.info("Request to get all users {}", request);
         ctx.json(new DefaultConvertablePage(DBUtils.findPaginatedEntity(request, UserEntity.class), new UserConverter()));
@@ -172,7 +172,7 @@ public class UserRoutes {
         }
     )
     public static void getUser(Context ctx) {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         LOGGER.info("Request to get User: {}", ctx.pathParam("id"));
         UserEntity entity = DB.getDefault().find(UserEntity.class).where().idEq(Long.parseLong(ctx.pathParam("id"))).findOne();
         if (entity == null) {
@@ -200,7 +200,7 @@ public class UserRoutes {
         }
     )
     public static void deleteUser(Context ctx) {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         UserEntity entity = DB.getDefault().find(UserEntity.class).where().idEq(Long.parseLong(ctx.pathParam("id"))).findOne();
         LOGGER.info("Request to delete User: {}", ctx.pathParam("id"));
         if (entity != null) {

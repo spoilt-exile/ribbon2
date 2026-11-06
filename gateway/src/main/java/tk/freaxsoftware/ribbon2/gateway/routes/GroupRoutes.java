@@ -42,7 +42,7 @@ import tk.freaxsoftware.ribbon2.core.utils.DBUtils;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.converters.GroupConverter;
-import static tk.freaxsoftware.ribbon2.gateway.io.routes.IORoutes.isAdmin;
+import tk.freaxsoftware.ribbon2.gateway.utils.AdminAuthorization;
 
 /**
  * Routes for CRUD operations with user groups.
@@ -68,7 +68,7 @@ public class GroupRoutes {
         }
     )
     public static void createGroup(Context ctx) {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         GroupModel group = GatewayMain.gson.fromJson(ctx.body(), GroupModel.class);
         LOGGER.info("Request to create Group");
         group.setId(null);
@@ -96,7 +96,7 @@ public class GroupRoutes {
         }
     )
     public static void updateGroup(Context ctx) {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         GroupModel group = GatewayMain.gson.fromJson(ctx.body(), GroupModel.class);
         LOGGER.info("Request to update Group: {}", group.getId());
         GroupEntity updateGroup = new GroupConverter().convertBack(group);
@@ -128,7 +128,7 @@ public class GroupRoutes {
         }
     )
     public static void getGroupPage(Context ctx) {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         PaginationRequest request = PaginationRequest.ofRequest(ctx.queryParamMap());
         LOGGER.info("Request to get all groups {}", request);
         ctx.json(new DefaultConvertablePage(DBUtils.findPaginatedEntity(request, GroupEntity.class), new GroupConverter()));
@@ -152,7 +152,7 @@ public class GroupRoutes {
         }
     )
     public static void getGroup(Context ctx) {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         LOGGER.info("Request to get Group: {}", ctx.pathParam("id"));
         GroupEntity entity = DB.getDefault().find(GroupEntity.class).where().idEq(Long.parseLong(ctx.pathParam("id"))).findOne();
         if (entity == null) {
@@ -180,7 +180,7 @@ public class GroupRoutes {
         }
     )
     public static void deleteGroup(Context ctx) {
-        isAdmin();
+        AdminAuthorization.requireAdmin();
         LOGGER.info("Request to delete Group: {}", ctx.pathParam("id"));
         GroupEntity entity = DB.getDefault().find(GroupEntity.class).where().idEq(Long.parseLong(ctx.pathParam("id"))).findOne();
         if (entity != null) {

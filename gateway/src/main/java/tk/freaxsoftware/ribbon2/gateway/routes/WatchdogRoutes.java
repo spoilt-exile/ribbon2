@@ -26,7 +26,7 @@ import io.javalin.openapi.OpenApiParam;
 import io.javalin.openapi.OpenApiResponse;
 import io.javalin.openapi.OpenApiSecurity;
 import java.util.Optional;
-import tk.freaxsoftware.ribbon2.gateway.io.routes.IORoutes;
+import tk.freaxsoftware.ribbon2.gateway.utils.AdminAuthorization;
 import tk.freaxsoftware.ribbon2.gateway.watchdog.WatchdogService;
 import tk.freaxsoftware.ribbon2.gateway.watchdog.data.WatchdogSystemStatus;
 import tk.freaxsoftware.ribbon2.gateway.watchdog.data.WatchdogTopic;
@@ -61,7 +61,7 @@ public class WatchdogRoutes {
         }
     )
     public static void getWatchByTopic(Context ctx) throws Exception {
-        IORoutes.isAdmin();
+        AdminAuthorization.requireAdmin();
         String topic = ctx.pathParam("topic");
         Optional<WatchdogTopic> topicOpt = watchdogService.getWatchByTopic(topic);
         if (topicOpt.isPresent()) {
@@ -85,7 +85,7 @@ public class WatchdogRoutes {
         }
     )
     public static void getWatch(Context ctx) throws Exception {
-        IORoutes.isAdmin();
+        AdminAuthorization.requireAdmin();
         ctx.json(watchdogService.getWatchdogStatus());
     }
 }

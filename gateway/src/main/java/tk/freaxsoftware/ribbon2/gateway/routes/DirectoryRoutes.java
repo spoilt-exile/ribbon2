@@ -45,6 +45,7 @@ import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPermissionTaggedHold
 import tk.freaxsoftware.ribbon2.core.exception.CoreError;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
+import tk.freaxsoftware.ribbon2.gateway.utils.AdminAuthorization;
 import tk.freaxsoftware.ribbon2.gateway.watchdog.WatchdogRegistry;
 
 /**
@@ -239,6 +240,7 @@ public class DirectoryRoutes {
         }
     )
     public static void getDirectoryAccess(Context ctx) throws Exception {
+        AdminAuthorization.requireAdmin();
         String path = ctx.pathParam("path");
         LOGGER.info("Request to get directory access {}", path);
         Set<DirectoryAccessModel> access = MessageBus.fireCall(DirectoryAccessModel.CALL_GET_DIR_ACCESS, path, MessageOptions.Builder.newInstance()
@@ -268,6 +270,7 @@ public class DirectoryRoutes {
         }
     )
     public static void editDirectoryAccess(Context ctx) throws Exception {
+        AdminAuthorization.requireAdmin();
         Set<DirectoryAccessModel> entries = GatewayMain.gson.fromJson(ctx.body(), new TypeToken<Set<DirectoryAccessModel>>(){}.getType());
         String path = ctx.pathParam("path");
         DirectoryEditAccessRequest request = new DirectoryEditAccessRequest(path, entries);
@@ -294,6 +297,7 @@ public class DirectoryRoutes {
         }
     )
     public static void getAllDirectoriesPermissions(Context ctx) throws Exception {
+        AdminAuthorization.requireAdmin();
         LOGGER.info("Request to get all access permissions {}");
         DirectoryPermissionTaggedHolder permissionHolder = MessageBus.fireCall(DirectoryPermissionTaggedModel.CALL_GET_PERMISSIONS, null, MessageOptions.Builder.newInstance()
                 .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")

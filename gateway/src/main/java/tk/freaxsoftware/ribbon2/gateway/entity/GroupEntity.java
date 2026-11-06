@@ -33,8 +33,6 @@ import jakarta.persistence.ManyToMany;
 @Entity
 public class GroupEntity extends Model implements Serializable {
     
-    public static final String ADMIN_GROUP = "Admins";
-    
     /**
      * Group id.
      */
