@@ -22,7 +22,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionTaggedModel;
+import tk.freaxsoftware.ribbon2.core.data.DirectorySecurityModel;
 import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
 import tk.freaxsoftware.ribbon2.uix.rest.DirectoryRestClient;
 
@@ -64,6 +67,26 @@ public class DirectoryRestClientDummy implements DirectoryRestClient {
                 createDirecotry("Edit.Release.UA", "UA")
         ));
         return dirPage;
+    }
+
+    @Override
+    public DirectorySecurityModel getDirectorySecurity(String jwtKey, String dirPath) throws URISyntaxException, IOException {
+        DirectorySecurityModel security = new DirectorySecurityModel();
+        security.setDirectoryPath(dirPath);
+        security.setAccessMode(DirectorySecurityModel.AccessMode.INHERIT);
+        security.setAccessEntries(null);
+        security.setAccessSourcePath(dirPath.contains(".") ? dirPath.substring(0, dirPath.lastIndexOf('.')) : null);
+        return security;
+    }
+
+    @Override
+    public List<DirectoryPermissionTaggedModel> getDirectoryPermissionCatalog(String jwtKey) throws URISyntaxException, IOException {
+        return List.of();
+    }
+
+    @Override
+    public Boolean saveDirectoryAccess(String jwtKey, String dirPath, Set<DirectoryAccessModel> entries) throws URISyntaxException, IOException {
+        return true;
     }
     
     private static DirectoryModel createDirecotry(String path, String name) {

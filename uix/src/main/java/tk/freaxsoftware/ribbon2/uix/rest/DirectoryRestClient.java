@@ -21,7 +21,11 @@ package tk.freaxsoftware.ribbon2.uix.rest;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Set;
+import java.util.List;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionTaggedModel;
+import tk.freaxsoftware.ribbon2.core.data.DirectorySecurityModel;
 import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
 
 /**
@@ -38,6 +42,15 @@ public interface DirectoryRestClient {
      * @throws java.io.IOException
      */
     DirectoryPage getDirectories(String jwtKey) throws URISyntaxException, IOException;
+
+    /** Read the directory's local access mode and inheritance source (admin API). */
+    DirectorySecurityModel getDirectorySecurity(String jwtKey, String dirPath) throws URISyntaxException, IOException;
+
+    /** Get the permission catalog used by directory access rules (admin API). */
+    List<DirectoryPermissionTaggedModel> getDirectoryPermissionCatalog(String jwtKey) throws URISyntaxException, IOException;
+
+    /** Replace local access rules; null entries mean inherit from parent (admin API). */
+    Boolean saveDirectoryAccess(String jwtKey, String dirPath, Set<DirectoryAccessModel> entries) throws URISyntaxException, IOException;
     
     /**
      * Get all permissions available to user by directory.

@@ -45,6 +45,7 @@ Use HTMX for loading fragments, saving forms, deleting schemes, and assigning/di
 
 ### IO scheme editor
 
+- Keep the UIX IO client and editor models protocol-neutral: select modules from `IOProtocol` metadata and address a scheme by `(type, protocol, name)`. Do not add protocol-specific methods or route branches for individual modules.
 - List scheme identity (`type`, `protocol`, `name`), status, error/admin alert state, and assigned export directories.
 - On create, choose module type and protocol from `GET /api/io/protocol`; then render fields from its `configEntries`. Apply type-aware inputs (text, secret/password, boolean, number, etc. according to `ConfigEntryType`), required flags, defaults, and server-side validation messages.
 - On edit, fetch full `IOScheme` using the existing detail endpoint, populate module config, and submit the complete scheme through the existing save API.

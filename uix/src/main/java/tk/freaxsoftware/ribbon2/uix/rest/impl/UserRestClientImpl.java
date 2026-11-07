@@ -18,23 +18,17 @@
  */
 package tk.freaxsoftware.ribbon2.uix.rest.impl;
 
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
-import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import static tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.PARAM_PAGE;
 import static tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.PARAM_SIZE;
 import tk.freaxsoftware.ribbon2.core.data.response.DefaultPage;
-import tk.freaxsoftware.ribbon2.core.exception.CoreException;
-import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 import tk.freaxsoftware.ribbon2.uix.rest.UserRestClient;
 
 /**
@@ -44,8 +38,6 @@ import tk.freaxsoftware.ribbon2.uix.rest.UserRestClient;
 public class UserRestClientImpl implements UserRestClient {
     
     private final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-    
-    private final Gson gson = GsonUtils.getGson();
     
     private final String baseUrl;
 
@@ -66,10 +58,6 @@ public class UserRestClientImpl implements UserRestClient {
                 .addParameter(PARAM_SIZE, String.valueOf(pageSize)).build());
         request.addHeader("x-ribbon2-auth", jwtKey);
         HttpResponse response = clientBuilder.build().execute(request);
-        if (response.getStatusLine().getStatusCode() == 200) {
-            return gson.fromJson(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()), new TypeToken<DefaultPage<UserModel>>(){}.getType());
-        } else {
-            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Messages request failed with status: " + response.getStatusLine().toString());
-        }
+        return ResponseUtil.handleResponse(response, new TypeToken<DefaultPage<UserModel>>() {});
     }
 }

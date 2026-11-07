@@ -23,13 +23,20 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionTaggedModel;
+import tk.freaxsoftware.ribbon2.core.data.DirectorySecurityModel;
 import static tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.PARAM_PAGE;
 import static tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.PARAM_SIZE;
 import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
@@ -79,6 +86,31 @@ public class DirectoryRestClientImpl implements DirectoryRestClient {
             pageNumber++;
         } while (combined.getContent().size() < combined.getTotalCount());
         return combined;
+    }
+
+    @Override
+    public DirectorySecurityModel getDirectorySecurity(String jwtKey, String dirPath) throws URISyntaxException, IOException {
+        HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/access/security/" + dirPath).build());
+        request.addHeader("x-ribbon2-auth", jwtKey);
+        HttpResponse response = clientBuilder.build().execute(request);
+        return ResponseUtil.handleResponse(response, new TypeToken<DirectorySecurityModel>() {});
+    }
+
+    @Override
+    public List<DirectoryPermissionTaggedModel> getDirectoryPermissionCatalog(String jwtKey) throws URISyntaxException, IOException {
+        HttpGet request = new HttpGet(baseUrl + "/access/permission/all");
+        request.addHeader("x-ribbon2-auth", jwtKey);
+        HttpResponse response = clientBuilder.build().execute(request);
+        return ResponseUtil.handleResponse(response, new TypeToken<List<DirectoryPermissionTaggedModel>>() {});
+    }
+
+    @Override
+    public Boolean saveDirectoryAccess(String jwtKey, String dirPath, Set<DirectoryAccessModel> entries) throws URISyntaxException, IOException {
+        HttpPost request = new HttpPost(new URIBuilder(baseUrl + "/access/" + dirPath).build());
+        request.addHeader("x-ribbon2-auth", jwtKey);
+        request.setEntity(new StringEntity(gson.toJson(entries), ContentType.APPLICATION_JSON));
+        HttpResponse response = clientBuilder.build().execute(request);
+        return ResponseUtil.handleResponse(response, new TypeToken<Boolean>() {});
     }
     
     @Override

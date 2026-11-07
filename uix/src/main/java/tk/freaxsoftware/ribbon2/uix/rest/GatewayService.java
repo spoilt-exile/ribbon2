@@ -24,11 +24,13 @@ import tk.freaxsoftware.ribbon2.uix.config.UixConfig;
 import tk.freaxsoftware.ribbon2.uix.rest.dummy.AuthRestClientDummy;
 import tk.freaxsoftware.ribbon2.uix.rest.dummy.DirectoryRestClientDummy;
 import tk.freaxsoftware.ribbon2.uix.rest.dummy.IORestClientDummy;
+import tk.freaxsoftware.ribbon2.uix.rest.dummy.GroupRestClientDummy;
 import tk.freaxsoftware.ribbon2.uix.rest.dummy.MessageRestClientDummy;
 import tk.freaxsoftware.ribbon2.uix.rest.dummy.UserRestClientDummy;
 import tk.freaxsoftware.ribbon2.uix.rest.impl.AuthRestClientImpl;
 import tk.freaxsoftware.ribbon2.uix.rest.impl.DirectoryRestClientImpl;
 import tk.freaxsoftware.ribbon2.uix.rest.impl.IORestClientImpl;
+import tk.freaxsoftware.ribbon2.uix.rest.impl.GroupRestClientImpl;
 import tk.freaxsoftware.ribbon2.uix.rest.impl.MessageRestClientImpl;
 import tk.freaxsoftware.ribbon2.uix.rest.impl.UserRestClientImpl;
 
@@ -45,6 +47,7 @@ public class GatewayService {
     private final MessageRestClient messageRestClient;
     private final UserRestClient userRestClient;
     private final IORestClient ioRestClient;
+    private final GroupRestClient groupRestClient;
 
     public GatewayService(UixConfig config) {
         if (!config.getGatewayDummy()) {
@@ -55,6 +58,7 @@ public class GatewayService {
             this.messageRestClient = new MessageRestClientImpl(config.getGatewayUrl());
             this.userRestClient = new UserRestClientImpl(config.getGatewayUrl());
             this.ioRestClient = new IORestClientImpl(config.getGatewayUrl());
+            this.groupRestClient = new GroupRestClientImpl(config.getGatewayUrl());
         } else {
             LOGGER.info("Creating Ribbon2 Dummy Gateway");
 
@@ -63,6 +67,7 @@ public class GatewayService {
             this.messageRestClient = new MessageRestClientDummy();
             this.userRestClient = new UserRestClientDummy();
             this.ioRestClient = new IORestClientDummy();
+            this.groupRestClient = new GroupRestClientDummy();
         }
     }
 
@@ -84,5 +89,9 @@ public class GatewayService {
 
     public IORestClient getIoRestClient() {
         return ioRestClient;
+    }
+
+    public GroupRestClient getGroupRestClient() {
+        return groupRestClient;
     }
 }
