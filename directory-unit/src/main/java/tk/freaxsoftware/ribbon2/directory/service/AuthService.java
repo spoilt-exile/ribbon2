@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.core.data.GroupModel;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
+import tk.freaxsoftware.ribbon2.core.data.DirectorySecurityModel;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryEditAccessRequest;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.ACCESS_DENIED;
@@ -93,6 +94,9 @@ public class AuthService {
         if (user == null) {
             throw new CoreException(USER_NOT_FOUND, "Can't find user " + userLogin);
         }
+        if (isAdmin(user)) {
+            return true;
+        }
         Permission permissionEntry = permissionRepository.findByKey(permission);
         if (permissionEntry == null) {
             throw new CoreException(PERMISSION_NOT_FOUND, "Can't find permission " + permission);
@@ -111,7 +115,25 @@ public class AuthService {
     
     private Optional<Directory> getDirectoryWithAccess(String dirFullName) {
         return directoryRepository.findDirByPathsReverse(preparePathChunks(dirFullName, ""))
-                .stream().filter(dir -> dir.getAccessEntries() != null).findFirst();
+                .stream().filter(dir -> dir.getAccessEntries() != null)
+                .max(Comparator.comparingInt(dir -> dir.getFullName().length()));
+    }
+
+    /** Returns local access mode and the nearest directory that provides access rules. */
+    public DirectorySecurityModel getDirectorySecurity(String path) {
+        Directory directory = directoryRepository.findDirectoryByPath(path);
+        if (directory == null) {
+            throw new CoreException(DIRECTORY_NOT_FOUND, "Can't find directory " + path);
+        }
+        Optional<Directory> source = getDirectoryWithAccess(path);
+        DirectorySecurityModel model = new DirectorySecurityModel();
+        model.setDirectoryPath(path);
+        model.setAccessMode(directory.getAccessEntries() == null
+                ? DirectorySecurityModel.AccessMode.INHERIT
+                : DirectorySecurityModel.AccessMode.CUSTOM);
+        model.setAccessEntries(directory.getAccessEntries());
+        model.setAccessSourcePath(source.map(Directory::getFullName).orElse(null));
+        return model;
     }
     
     private Boolean checkAccessAgainstDirectoryAccess(Directory directory, Permission permission, UserEntity user) {
@@ -204,15 +226,25 @@ public class AuthService {
     }
 
     private boolean isAdmin(String userLogin) {
-        UserEntity user = userRespository.findByLogin(userLogin);
+        return isAdmin(userRespository.findByLogin(userLogin));
+    }
+
+    private boolean isAdmin(UserEntity user) {
         return user != null && user.getGroups() != null && user.getGroups().stream()
                 .anyMatch(group -> group != null && Objects.equals(group.getName(), GroupModel.ADMIN_GROUP));
     }
     
     private void validateAccessEntries(Set<DirectoryAccessModel> access) {
-        Boolean allDetected = false;
+        if (access == null) {
+            return; // null clears the local rules and restores inheritance
+        }
+        boolean allDetected = false;
+        Set<String> principals = new HashSet<>();
         Set<String> permissions = permissionRepository.findAllPermissionNames();
         for (DirectoryAccessModel accessEntry: access) {
+            if (accessEntry == null || accessEntry.getType() == null) {
+                throw new CoreException(PERMISSION_VALIDATION_FAILED, "Every access entry must specify a principal type.");
+            }
             switch (accessEntry.getType()) {
                 case ALL:
                     if (allDetected) {
@@ -223,6 +255,7 @@ public class AuthService {
                     LOGGER.warn("Assign to ALL permissions: {}", accessEntry.getPermissions());
                     break;
                 case USER:
+                    validatePrincipal(accessEntry, principals);
                     UserEntity findedUser = userRespository.findByLogin(accessEntry.getName());
                     if (findedUser == null) {
                         throw new CoreException(USER_NOT_FOUND, 
@@ -231,6 +264,7 @@ public class AuthService {
                     LOGGER.warn("Assign to user {} permissions: {}", findedUser.getLogin(), accessEntry.getPermissions());
                     break;
                 case GROUP:
+                    validatePrincipal(accessEntry, principals);
                     GroupEntity findedGroup = groupRepository.findGroupByName(accessEntry.getName());
                     if (findedGroup == null) {
                         throw new CoreException(GROUP_NOT_FOUND, 
@@ -239,7 +273,21 @@ public class AuthService {
                     LOGGER.warn("Assign to group {} permissions: {}", findedGroup.getName(), accessEntry.getPermissions());
                     break;
             }
+            if (accessEntry.getPermissions() == null) {
+                throw new CoreException(PERMISSION_VALIDATION_FAILED, "Permissions map is required for each access entry.");
+            }
             validatePermissions(accessEntry.getPermissions(), permissions);
+        }
+    }
+
+    private void validatePrincipal(DirectoryAccessModel entry, Set<String> principals) {
+        if (entry.getName() == null || entry.getName().isBlank()) {
+            throw new CoreException(PERMISSION_VALIDATION_FAILED, "User and group access entries require a name.");
+        }
+        String key = entry.getType().name() + ":" + entry.getName();
+        if (!principals.add(key)) {
+            throw new CoreException(PERMISSION_VALIDATION_FAILED,
+                    String.format("Duplicate %s access entry for '%s'.", entry.getType(), entry.getName()));
         }
     }
     
@@ -247,9 +295,13 @@ public class AuthService {
         Set<String> accessPermissions = permissions.entrySet().stream()
                 .map(entry -> entry.getKey()).collect(Collectors.toSet());
         for (String accessPermission: accessPermissions) {
-            if (!presentPermissions.contains(accessPermission)) {
+            if (accessPermission == null || !presentPermissions.contains(accessPermission)) {
                 throw new CoreException(PERMISSION_NOT_FOUND, 
                         String.format("Can't assign %s permission since it doesn't exist.", accessPermission));
+            }
+            if (permissions.get(accessPermission) == null) {
+                throw new CoreException(PERMISSION_VALIDATION_FAILED,
+                        String.format("Permission '%s' requires an explicit true or false value.", accessPermission));
             }
         }
     }
@@ -294,7 +346,7 @@ public class AuthService {
     private Map<String, Boolean> checkDirectoryAccessBatch(Set<Directory> directories, UserEntity user, Permission permission) {
         Map<String, Boolean> checkMap = new HashMap();
         for (Directory dir: directories) {
-            if (Objects.equals(user.getLogin(), ROOT_LOGIN)) {
+            if (Objects.equals(user.getLogin(), ROOT_LOGIN) || isAdmin(user)) {
                 checkMap.put(dir.getFullName(), true);
             } else if (dir.getAccessEntries() != null) {
                 checkMap.put(dir.getFullName(), checkAccessAgainstDirectoryAccess(dir, permission, user));
@@ -328,10 +380,15 @@ public class AuthService {
         }
         Optional<Directory> accessDirectoryOpt = getDirectoryWithAccess(dirPath);
         Set<Permission> permissions = permissionRepository.findAllPermissions();
+        if (Objects.equals(user.getLogin(), ROOT_LOGIN) || isAdmin(user)) {
+            return permissions;
+        }
         Set<Permission> result = new HashSet();
         for (Permission permission: permissions) {
-            Boolean checkResult = accessDirectoryOpt.isPresent() ? checkAccessAgainstDirectoryAccess(accessDirectoryOpt.get(), permission, user) : permission.getDefaultValue();
-            if (checkResult || Objects.equals(user.getLogin(), ROOT_LOGIN)) {
+            Boolean checkResult = accessDirectoryOpt.isPresent()
+                    ? checkAccessAgainstDirectoryAccess(accessDirectoryOpt.get(), permission, user)
+                    : permission.getDefaultValue();
+            if (checkResult) {
                 result.add(permission);
             }
         }

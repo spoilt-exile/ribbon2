@@ -28,6 +28,7 @@ import tk.freaxsoftware.extras.bus.bridge.http.LocalHttpCons;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionTaggedModel;
+import tk.freaxsoftware.ribbon2.core.data.DirectorySecurityModel;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryEditAccessRequest;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryCheckAccessRequest;
 import tk.freaxsoftware.ribbon2.core.utils.MessageUtils;
@@ -65,6 +66,12 @@ public class DirectoryAccessFacade {
         getCall.setResponse(new ResponseHolder());
         getCall.getResponse().getHeaders().put(LocalHttpCons.L_HTTP_NODE_REGISTERED_TYPE_HEADER, DirectoryAccessModel.DIRECTORY_ACCESS_MODEL_SET_TYPE_NAME);
         getCall.getResponse().setContent(access);
+    }
+
+    @Receive(DirectorySecurityModel.CALL_GET_DIRECTORY_SECURITY)
+    public void getDirectorySecurity(MessageHolder<String> getCall) {
+        getCall.setResponse(new ResponseHolder());
+        getCall.getResponse().setContent(authService.getDirectorySecurity(getCall.getContent()));
     }
     
     @Receive(DirectoryEditAccessRequest.CALL_EDIT_DIR_ACCESS)

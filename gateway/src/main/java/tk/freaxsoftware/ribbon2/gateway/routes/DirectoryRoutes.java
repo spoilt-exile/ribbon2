@@ -37,6 +37,7 @@ import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionTaggedModel;
+import tk.freaxsoftware.ribbon2.core.data.DirectorySecurityModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryEditAccessRequest;
 import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
@@ -68,6 +69,8 @@ public class DirectoryRoutes {
         WatchdogRegistry.registerTopic(DirectoryModel.CALL_DELETE_DIRECTORY, "Delete directory by path", 
                 WatchdogRegistry.SeverityLevel.WARNING, WatchdogRegistry.Node.DIRECTORY);
         WatchdogRegistry.registerTopic(DirectoryAccessModel.CALL_GET_DIR_ACCESS, "Get directory access by path", 
+                WatchdogRegistry.SeverityLevel.WARNING, WatchdogRegistry.Node.DIRECTORY);
+        WatchdogRegistry.registerTopic(DirectorySecurityModel.CALL_GET_DIRECTORY_SECURITY, "Get directory security configuration",
                 WatchdogRegistry.SeverityLevel.WARNING, WatchdogRegistry.Node.DIRECTORY);
         WatchdogRegistry.registerTopic(DirectoryEditAccessRequest.CALL_EDIT_DIR_ACCESS, "Edit directory access by path", 
                 WatchdogRegistry.SeverityLevel.WARNING, WatchdogRegistry.Node.DIRECTORY);
@@ -249,6 +252,39 @@ public class DirectoryRoutes {
                 .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
                 .deliveryCall().build(), Set.class);
         ctx.json(access);
+    }
+
+    @OpenApi(
+        summary = "Get directory local and inherited security configuration",
+        operationId = "getDirectorySecurity",
+        path = "/api/directory/access/security/{path}",
+        methods = HttpMethod.GET,
+        tags = {"Directory"},
+        security = {
+            @OpenApiSecurity(name = "ribbonToken")
+        },
+        pathParams = {
+            @OpenApiParam(name = "path", required = true, type = String.class)
+        },
+        responses = {
+            @OpenApiResponse(status = "200", content = {@OpenApiContent(from = DirectorySecurityModel.class)}),
+            @OpenApiResponse(status = "401", content = {@OpenApiContent(from = CoreError.class)})
+        }
+    )
+    public static void getDirectorySecurity(Context ctx) throws Exception {
+        AdminAuthorization.requireAdmin();
+        String path = ctx.pathParam("path");
+        LOGGER.info("Request to get directory security configuration {}", path);
+        DirectorySecurityModel security = MessageBus.fireCall(
+                DirectorySecurityModel.CALL_GET_DIRECTORY_SECURITY,
+                path,
+                MessageOptions.Builder.newInstance()
+                        .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
+                        .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
+                        .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
+                        .deliveryCall().build(),
+                DirectorySecurityModel.class);
+        ctx.json(security);
     }
     
     @OpenApi(

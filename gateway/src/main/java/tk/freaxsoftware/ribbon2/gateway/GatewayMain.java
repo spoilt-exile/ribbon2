@@ -143,6 +143,9 @@ public class GatewayMain {
                         post(DirectoryRoutes::createDirectory);
                         put(DirectoryRoutes::updateDirectory);
                         get(DirectoryRoutes::getDirectoryPage);
+                        path("/access/security/{path}", () -> {
+                            get(DirectoryRoutes::getDirectorySecurity);
+                        });
                         path("/{path}", () -> {
                             get(DirectoryRoutes::getDirectory);
                             delete(DirectoryRoutes::deleteDirectory);

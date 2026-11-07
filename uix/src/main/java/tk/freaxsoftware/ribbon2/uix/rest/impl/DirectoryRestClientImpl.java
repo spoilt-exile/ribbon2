@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Set;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -52,10 +53,32 @@ public class DirectoryRestClientImpl implements DirectoryRestClient {
     
     @Override
     public DirectoryPage getDirectories(String jwtKey) throws URISyntaxException, IOException {
-        HttpGet request = new HttpGet(new URIBuilder(baseUrl).addParameter(PARAM_PAGE, "0").addParameter(PARAM_SIZE, "10000").build());
-        request.addHeader("x-ribbon2-auth", jwtKey);
-        HttpResponse response = clientBuilder.build().execute(request);
-        return ResponseUtil.handleResponse(response, new TypeToken<DirectoryPage>() {});
+        final int pageSize = 1000;
+        DirectoryPage combined = new DirectoryPage();
+        combined.setContent(new ArrayList<>());
+        int pageNumber = 0;
+        do {
+            HttpGet request = new HttpGet(new URIBuilder(baseUrl)
+                    .addParameter(PARAM_PAGE, Integer.toString(pageNumber))
+                    .addParameter(PARAM_SIZE, Integer.toString(pageSize))
+                    .addParameter("orderBy", "fullName")
+                    .addParameter("direction", "ASC")
+                    .build());
+            request.addHeader("x-ribbon2-auth", jwtKey);
+            HttpResponse response = clientBuilder.build().execute(request);
+            DirectoryPage page = ResponseUtil.handleResponse(response, new TypeToken<DirectoryPage>() {});
+            int loadedBeforePage = combined.getContent().size();
+            if (page.getContent() != null) {
+                combined.getContent().addAll(page.getContent());
+            }
+            combined.setTotalCount(page.getTotalCount());
+            if (combined.getContent().size() == loadedBeforePage
+                    && combined.getContent().size() < combined.getTotalCount()) {
+                throw new IOException("Directory pagination returned an empty page before all directories were loaded.");
+            }
+            pageNumber++;
+        } while (combined.getContent().size() < combined.getTotalCount());
+        return combined;
     }
     
     @Override
