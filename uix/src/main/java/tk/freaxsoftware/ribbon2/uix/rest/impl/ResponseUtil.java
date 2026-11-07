@@ -22,7 +22,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Objects;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -60,7 +59,7 @@ public class ResponseUtil {
         if (response.getStatusLine().getStatusCode() >= 400) {
             Header contentTypeHeader = response.getEntity().getContentType();
             String contentTypeStr = contentTypeHeader != null ? contentTypeHeader.getValue() : "null";
-            if (Objects.equals(contentTypeStr, "application/json")) {
+            if (contentTypeStr != null && contentTypeStr.toLowerCase().contains("application/json")) {
                 CoreError coreError = parseResponse(response, new TypeToken<CoreError>() {});
                 throw new CoreException(coreError.getCode(), coreError.getMessage());
             } else {

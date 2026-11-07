@@ -32,6 +32,7 @@ import tk.freaxsoftware.extras.bus.bridge.http.TypeResolver;
 import tk.freaxsoftware.ribbon2.gateway.io.data.IOModuleScheme;
 import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
 import tk.freaxsoftware.ribbon2.io.core.ModuleRegistration;
+import tk.freaxsoftware.ribbon2.io.core.ModuleType;
 import tk.freaxsoftware.ribbon2.io.core.SchemeInstance;
 import tk.freaxsoftware.ribbon2.io.core.SchemeStatusUpdate;
 
@@ -91,12 +92,23 @@ public class IOService {
         }
         return registration;
     }
+
+    public ModuleRegistration getByTypeAndProtocol(ModuleType type, String protocol) {
+        return registrations.stream()
+                .filter(registration -> Objects.equals(registration.getType(), type)
+                        && Objects.equals(registration.getProtocol(), protocol))
+                .findFirst().orElse(null);
+    }
     
     public Set<IOModuleScheme> getSchemesByExportDirectiry(String directory) {
         Set<IOModuleScheme> schemes = new HashSet();
         for (ModuleRegistration registration: registrations) {
+            if (registration.getType() != ModuleType.EXPORT) {
+                continue;
+            }
             for (Entry<String, SchemeInstance> entry: registration.getSchemes().entrySet()) {
-                if (entry.getValue().getExportDirectories().contains(directory)) {
+                if (entry.getValue().getExportDirectories() != null
+                        && entry.getValue().getExportDirectories().contains(directory)) {
                     schemes.add(new IOModuleScheme(registration, entry.getKey(), entry.getValue()));
                 }
             }

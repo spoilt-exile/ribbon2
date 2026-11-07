@@ -34,9 +34,10 @@ import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.gateway.io.IOService;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
-import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.exception.CoreError;
+import tk.freaxsoftware.ribbon2.core.exception.CoreException;
+import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.io.data.IOModuleScheme;
 import tk.freaxsoftware.ribbon2.gateway.io.data.IOProtocol;
@@ -44,7 +45,10 @@ import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
 import tk.freaxsoftware.ribbon2.gateway.utils.AdminAuthorization;
 import tk.freaxsoftware.ribbon2.gateway.watchdog.WatchdogRegistry;
 import tk.freaxsoftware.ribbon2.io.core.IOLocalIds;
+import tk.freaxsoftware.ribbon2.io.core.IOExportAssignment;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
+import tk.freaxsoftware.ribbon2.io.core.ModuleRegistration;
+import tk.freaxsoftware.ribbon2.io.core.ModuleType;
 
 /**
  * IO API routes.
@@ -140,6 +144,25 @@ public class IORoutes {
         LOGGER.info("Request to get export IO schemes by directory {}", dirName);
         ctx.json(IOService.getInstance().getSchemesByExportDirectiry(dirName));
     }
+
+    @OpenApi(
+        summary = "Get export schemes by directory",
+        operationId = "getExportSchemesByDirectoryQuery",
+        path = "/api/io/export/schemes",
+        methods = HttpMethod.GET,
+        tags = {"IO"},
+        security = {@OpenApiSecurity(name = "ribbonToken")},
+        queryParams = {@OpenApiParam(name = "directory", required = true, type = String.class)},
+        responses = {
+            @OpenApiResponse(status = "200", content = {@OpenApiContent(from = IOModuleScheme[].class)}),
+            @OpenApiResponse(status = "401", content = {@OpenApiContent(from = CoreError.class)})
+        }
+    )
+    public static void getExportSchemesByDirectoryQuery(Context ctx) {
+        AdminAuthorization.requireAdmin();
+        String directory = requireText(ctx.queryParam("directory"), "directory");
+        ctx.json(IOService.getInstance().getSchemesByExportDirectiry(directory));
+    }
     
     @OpenApi(
         summary = "Get full IO scheme",
@@ -165,13 +188,48 @@ public class IORoutes {
         String type = ctx.pathParam("type");
         String protocol = ctx.pathParam("protocol");
         String name = ctx.pathParam("name");
+        getScheme(ctx, type, protocol, name);
+    }
+
+    @OpenApi(
+        summary = "Get full IO scheme by query key",
+        operationId = "getSchemeByQuery",
+        path = "/api/io/scheme/detail",
+        methods = HttpMethod.GET,
+        tags = {"IO"},
+        security = {@OpenApiSecurity(name = "ribbonToken")},
+        queryParams = {
+            @OpenApiParam(name = "type", required = true, type = String.class),
+            @OpenApiParam(name = "protocol", required = true, type = String.class),
+            @OpenApiParam(name = "name", required = true, type = String.class)
+        },
+        responses = {
+            @OpenApiResponse(status = "200", content = {@OpenApiContent(from = IOScheme.class)}),
+            @OpenApiResponse(status = "401", content = {@OpenApiContent(from = CoreError.class)}),
+            @OpenApiResponse(status = "404", content = {@OpenApiContent(from = CoreError.class)})
+        }
+    )
+    public static void getSchemeByQuery(Context ctx) throws Exception {
+        AdminAuthorization.requireAdmin();
+        getScheme(ctx, ctx.queryParam("type"), ctx.queryParam("protocol"), ctx.queryParam("name"));
+    }
+
+    private static void getScheme(Context ctx, String type, String protocol, String name) throws Exception {
+        ModuleType moduleType = parseType(type);
+        requireText(protocol, "protocol");
+        requireText(name, "name");
+        ModuleRegistration registration = getRegistration(moduleType, protocol);
+        requireExistingScheme(registration, name);
         LOGGER.info("Request to get IO scheme {} for protocol {} with type {} with config.", name, protocol, type);
         IOScheme scheme = MessageBus.fireCall(String.format("%s.%s.%s", IOLocalIds.IO_SCHEME_GET_TOPIC, 
-            type.toLowerCase(), protocol), name, MessageOptions.Builder.newInstance()
+            moduleType.name().toLowerCase(), protocol), name, MessageOptions.Builder.newInstance()
                 .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
                 .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
                 .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
                 .deliveryCall().build(), IOScheme.class);
+        if (scheme == null) {
+            throw new CoreException(RibbonErrorCodes.IO_SCHEME_NOT_FOUND, "Can't find IO scheme " + name);
+        }
         ctx.json(scheme);
     }
     
@@ -193,6 +251,15 @@ public class IORoutes {
     public static void saveScheme(Context ctx) throws Exception {
         AdminAuthorization.requireAdmin();
         IOScheme scheme = GatewayMain.gson.fromJson(ctx.body(), IOScheme.class);
+        if (scheme == null || scheme.getType() == null) {
+            throw new CoreException(RibbonErrorCodes.INVALID_REQUEST, "Scheme type is required.");
+        }
+        requireText(scheme.getProtocol(), "protocol");
+        requireText(scheme.getName(), "name");
+        if (getRegistration(scheme.getType(), scheme.getProtocol()) == null) {
+            throw new CoreException(RibbonErrorCodes.IO_SCHEME_NOT_FOUND,
+                    "No IO module is registered for " + scheme.getType() + "/" + scheme.getProtocol());
+        }
         LOGGER.info("Request to save IO scheme {} for protocol {} with type {}.", scheme.getName(), scheme.getProtocol(), scheme.getType());
         IOScheme saved = MessageBus.fireCall(String.format("%s.%s.%s", IOLocalIds.IO_SCHEME_SAVE_TOPIC, 
             scheme.getType().name().toLowerCase(), scheme.getProtocol()), scheme, MessageOptions.Builder.newInstance()
@@ -226,17 +293,49 @@ public class IORoutes {
         String type = ctx.pathParam("type");
         String protocol = ctx.pathParam("protocol");
         String name = ctx.pathParam("name");
+        deleteScheme(type, protocol, name);
+        ctx.status(200);
+    }
+
+    @OpenApi(
+        summary = "Delete IO scheme by query key",
+        operationId = "deleteSchemeByQuery",
+        path = "/api/io/scheme",
+        methods = HttpMethod.DELETE,
+        tags = {"IO"},
+        security = {@OpenApiSecurity(name = "ribbonToken")},
+        queryParams = {
+            @OpenApiParam(name = "type", required = true, type = String.class),
+            @OpenApiParam(name = "protocol", required = true, type = String.class),
+            @OpenApiParam(name = "name", required = true, type = String.class)
+        },
+        responses = {
+            @OpenApiResponse(status = "200", content = {@OpenApiContent(from = Void.class)}),
+            @OpenApiResponse(status = "401", content = {@OpenApiContent(from = CoreError.class)}),
+            @OpenApiResponse(status = "404", content = {@OpenApiContent(from = CoreError.class)})
+        }
+    )
+    public static void deleteSchemeByQuery(Context ctx) throws Exception {
+        AdminAuthorization.requireAdmin();
+        deleteScheme(ctx.queryParam("type"), ctx.queryParam("protocol"), ctx.queryParam("name"));
+        ctx.status(200);
+    }
+
+    private static void deleteScheme(String type, String protocol, String name) throws Exception {
+        ModuleType moduleType = parseType(type);
+        requireText(protocol, "protocol");
+        requireText(name, "name");
+        ModuleRegistration registration = getRegistration(moduleType, protocol);
+        requireExistingScheme(registration, name);
         LOGGER.info("Request to delete IO scheme {} for protocol {} with type {}.", name, protocol, type);
         Boolean deleted = MessageBus.fireCall(String.format("%s.%s.%s", IOLocalIds.IO_SCHEME_DELETE_TOPIC, 
-            type.toLowerCase(), protocol), name, MessageOptions.Builder.newInstance()
+            moduleType.name().toLowerCase(), protocol), name, MessageOptions.Builder.newInstance()
                 .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
                 .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
                 .deliveryCall().build(), Boolean.class);
-        if (deleted != null && deleted) {
-            ctx.status(200);
-        } else {
-            ctx.status(404);
-        };
+        if (deleted == null || !deleted) {
+            throw new CoreException(RibbonErrorCodes.IO_SCHEME_NOT_FOUND, "Can't delete IO scheme " + name);
+        }
     }
     
     @OpenApi(
@@ -263,17 +362,75 @@ public class IORoutes {
         String dir = ctx.pathParam("dir");
         String protocol = ctx.pathParam("protocol");
         String name = ctx.pathParam("name");
-        LOGGER.info("Request to assign directory {} to export scheme {} by protocol {}", dir, name, protocol);
-        Boolean assigned = MessageBus.fireCall(String.format("%s.%s", IOLocalIds.IO_SCHEME_EXPORT_ASSIGN_TOPIC, 
-            protocol), dir, MessageOptions.Builder.newInstance()
+        assignExportScheme(protocol, name, dir, true);
+        ctx.status(200);
+    }
+
+    @OpenApi(
+        summary = "Assign export scheme using a JSON request",
+        operationId = "assignExportSchemeRequest",
+        path = "/api/io/export/assignment",
+        methods = HttpMethod.POST,
+        tags = {"IO"},
+        security = {@OpenApiSecurity(name = "ribbonToken")},
+        requestBody = @OpenApiRequestBody(required = true, content = {@OpenApiContent(from = IOExportAssignment.class)}),
+        responses = {
+            @OpenApiResponse(status = "200", content = {@OpenApiContent(from = Void.class)}),
+            @OpenApiResponse(status = "401", content = {@OpenApiContent(from = CoreError.class)}),
+            @OpenApiResponse(status = "404", content = {@OpenApiContent(from = CoreError.class)})
+        }
+    )
+    public static void assignExportSchemeRequest(Context ctx) throws Exception {
+        AdminAuthorization.requireAdmin();
+        IOExportAssignment assignment = GatewayMain.gson.fromJson(ctx.body(), IOExportAssignment.class);
+        if (assignment == null) {
+            throw new CoreException(RibbonErrorCodes.INVALID_REQUEST, "Assignment request is required.");
+        }
+        assignExportScheme(assignment.getProtocol(), assignment.getScheme(), assignment.getDirectory(), true);
+        ctx.status(200);
+    }
+
+    @OpenApi(
+        summary = "Dismiss export scheme using query parameters",
+        operationId = "dismissExportSchemeQuery",
+        path = "/api/io/export/assignment",
+        methods = HttpMethod.DELETE,
+        tags = {"IO"},
+        security = {@OpenApiSecurity(name = "ribbonToken")},
+        queryParams = {
+            @OpenApiParam(name = "protocol", required = true, type = String.class),
+            @OpenApiParam(name = "scheme", required = true, type = String.class),
+            @OpenApiParam(name = "directory", required = true, type = String.class)
+        },
+        responses = {
+            @OpenApiResponse(status = "200", content = {@OpenApiContent(from = Void.class)}),
+            @OpenApiResponse(status = "401", content = {@OpenApiContent(from = CoreError.class)}),
+            @OpenApiResponse(status = "404", content = {@OpenApiContent(from = CoreError.class)})
+        }
+    )
+    public static void dismissExportSchemeQuery(Context ctx) throws Exception {
+        AdminAuthorization.requireAdmin();
+        assignExportScheme(ctx.queryParam("protocol"), ctx.queryParam("scheme"), ctx.queryParam("directory"), false);
+        ctx.status(200);
+    }
+
+    private static void assignExportScheme(String protocol, String name, String directory, boolean assign) throws Exception {
+        requireText(protocol, "protocol");
+        requireText(name, "scheme");
+        requireText(directory, "directory");
+        ModuleRegistration registration = getRegistration(ModuleType.EXPORT, protocol);
+        requireExistingScheme(registration, name);
+        LOGGER.info("Request to {} directory {} on export scheme {} by protocol {}",
+                assign ? "assign" : "dismiss", directory, name, protocol);
+        String topic = assign ? IOLocalIds.IO_SCHEME_EXPORT_ASSIGN_TOPIC : IOLocalIds.IO_SCHEME_EXPORT_DISMISS_TOPIC;
+        Boolean result = MessageBus.fireCall(String.format("%s.%s", topic, protocol), directory, MessageOptions.Builder.newInstance()
                 .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
                 .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
                 .header(IOLocalIds.IO_SCHEME_NAME_HEADER, name)
                 .deliveryCall().build(), Boolean.class);
-        if (assigned != null && assigned) {
-            ctx.status(200);
-        } else {
-            ctx.status(400);
+        if (result == null || !result) {
+            throw new CoreException(RibbonErrorCodes.IO_SCHEME_NOT_FOUND,
+                    String.format("Unable to %s scheme '%s' for directory '%s'.", assign ? "assign" : "dismiss", name, directory));
         }
     }
     
@@ -301,18 +458,39 @@ public class IORoutes {
         String dir = ctx.pathParam("dir");
         String protocol = ctx.pathParam("protocol");
         String name = ctx.pathParam("name");
-        LOGGER.info("Request to dismiss directory {} from export scheme {} by protocol {}", dir, name, protocol);
-        Boolean assigned = MessageBus.fireCall(String.format("%s.%s", IOLocalIds.IO_SCHEME_EXPORT_DISMISS_TOPIC, 
-            protocol), dir, MessageOptions.Builder.newInstance()
-                .header(UserModel.AUTH_HEADER_USERNAME, UserContext.getUser().getLogin())
-                .header(UserModel.AUTH_HEADER_FULLNAME, UserContext.getUser().getFirstname() + " " + UserContext.getUser().getLastname())
-                .header(IOLocalIds.IO_SCHEME_NAME_HEADER, name)
-                .deliveryCall().build(), Boolean.class);
-        if (assigned != null && assigned) {
-            ctx.status(200);
-        } else {
-            ctx.status(400);
+        assignExportScheme(protocol, name, dir, false);
+        ctx.status(200);
+    }
+
+    private static ModuleType parseType(String rawType) {
+        requireText(rawType, "type");
+        try {
+            return ModuleType.valueOf(rawType.toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new CoreException(RibbonErrorCodes.INVALID_REQUEST, "Unknown IO scheme type: " + rawType);
         }
+    }
+
+    private static ModuleRegistration getRegistration(ModuleType type, String protocol) {
+        ModuleRegistration registration = IOService.getInstance().getByTypeAndProtocol(type, protocol);
+        if (registration == null) {
+            throw new CoreException(RibbonErrorCodes.IO_SCHEME_NOT_FOUND,
+                    "No IO module is registered for " + type + "/" + protocol);
+        }
+        return registration;
+    }
+
+    private static void requireExistingScheme(ModuleRegistration registration, String name) {
+        if (registration.getSchemes() == null || !registration.getSchemes().containsKey(name)) {
+            throw new CoreException(RibbonErrorCodes.IO_SCHEME_NOT_FOUND, "Can't find IO scheme " + name);
+        }
+    }
+
+    private static String requireText(String value, String field) {
+        if (value == null || value.isBlank()) {
+            throw new CoreException(RibbonErrorCodes.INVALID_REQUEST, "Missing required field: " + field);
+        }
+        return value;
     }
     
     /** Kept for existing callers; new code should use AdminAuthorization directly. */

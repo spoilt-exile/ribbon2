@@ -28,6 +28,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -36,9 +37,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
-import tk.freaxsoftware.ribbon2.core.exception.CoreException;
-import tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes;
 import tk.freaxsoftware.ribbon2.io.core.IOScheme;
+import tk.freaxsoftware.ribbon2.io.core.IOExportAssignment;
 import tk.freaxsoftware.ribbon2.uix.model.io.IOModuleScheme;
 import tk.freaxsoftware.ribbon2.uix.model.io.IOProtocol;
 import tk.freaxsoftware.ribbon2.uix.rest.IORestClient;
@@ -77,7 +77,8 @@ public class IORestClientImpl implements IORestClient {
 
     @Override
     public List<IOModuleScheme> getExportSchemesByDirectory(String jwtKey, String directory) throws URISyntaxException, IOException {
-        HttpGet request = new HttpGet(baseUrl + "/export/scheme/" + directory);
+        HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/export/schemes")
+                .addParameter("directory", directory).build());
         request.addHeader("x-ribbon2-auth", jwtKey);
         HttpResponse response = clientBuilder.build().execute(request);
         return ResponseUtil.handleResponse(response, new TypeToken<List<IOModuleScheme>>() {});
@@ -85,7 +86,11 @@ public class IORestClientImpl implements IORestClient {
 
     @Override
     public Optional<IOScheme> getScheme(String jwtKey, String type, String protocol, String name) throws URISyntaxException, IOException {
-        HttpGet request = new HttpGet(baseUrl + "/scheme/" + type + "/" + protocol + "/" + name);
+        HttpGet request = new HttpGet(new URIBuilder(baseUrl + "/scheme/detail")
+                .addParameter("type", type)
+                .addParameter("protocol", protocol)
+                .addParameter("name", name)
+                .build());
         request.addHeader("x-ribbon2-auth", jwtKey);
         HttpResponse response = clientBuilder.build().execute(request);
         if (response.getStatusLine().getStatusCode() == 404) {
@@ -106,32 +111,39 @@ public class IORestClientImpl implements IORestClient {
 
     @Override
     public void deleteScheme(String jwtKey, String type, String protocol, String name) throws URISyntaxException, IOException {
-        HttpDelete request = new HttpDelete(baseUrl + "/scheme/" + type + "/" + protocol + "/" + name);
+        HttpDelete request = new HttpDelete(new URIBuilder(baseUrl + "/scheme")
+                .addParameter("type", type)
+                .addParameter("protocol", protocol)
+                .addParameter("name", name)
+                .build());
         request.addHeader("x-ribbon2-auth", jwtKey);
         HttpResponse response = clientBuilder.build().execute(request);
-        if (response.getStatusLine().getStatusCode() != 200) {
-            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Delete IO scheme request failed with status: " + response.getStatusLine().toString());
-        }
+        ResponseUtil.handleResponseRaw(response);
     }
 
     @Override
     public void assignExportScheme(String jwtKey, String protocol, String name, String dir) throws URISyntaxException, IOException {
-        HttpPost request = new HttpPost(baseUrl + "/export/scheme/" + protocol + "/" + name + "/assign/" + dir);
+        HttpPost request = new HttpPost(baseUrl + "/export/assignment");
         request.addHeader("x-ribbon2-auth", jwtKey);
+        IOExportAssignment assignment = new IOExportAssignment();
+        assignment.setProtocol(protocol);
+        assignment.setScheme(name);
+        assignment.setDirectory(dir);
+        request.setEntity(new StringEntity(gson.toJson(assignment), ContentType.APPLICATION_JSON));
         HttpResponse response = clientBuilder.build().execute(request);
-        if (response.getStatusLine().getStatusCode() != 200) {
-            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Assign IO scheme request failed with status: " + response.getStatusLine().toString());
-        }
+        ResponseUtil.handleResponseRaw(response);
     }
 
     @Override
     public void dismissExportScheme(String jwtKey, String protocol, String name, String dir) throws URISyntaxException, IOException {
-        HttpDelete request = new HttpDelete(baseUrl + "/export/scheme/" + protocol + "/" + name + "/dismiss/" + dir);
+        HttpDelete request = new HttpDelete(new URIBuilder(baseUrl + "/export/assignment")
+                .addParameter("protocol", protocol)
+                .addParameter("scheme", name)
+                .addParameter("directory", dir)
+                .build());
         request.addHeader("x-ribbon2-auth", jwtKey);
         HttpResponse response = clientBuilder.build().execute(request);
-        if (response.getStatusLine().getStatusCode() != 200) {
-            throw new CoreException(RibbonErrorCodes.CALL_ERROR, "Assign IO scheme request failed with status: " + response.getStatusLine().toString());
-        }
+        ResponseUtil.handleResponseRaw(response);
     }
     
 }

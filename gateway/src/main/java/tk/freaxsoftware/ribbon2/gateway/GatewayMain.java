@@ -194,6 +194,10 @@ public class GatewayMain {
                         path("/scheme", () -> {
                             post(IORoutes::saveScheme);
                             get(IORoutes::getSchemes);
+                            delete(IORoutes::deleteSchemeByQuery);
+                        });
+                        path("/scheme/detail", () -> {
+                            get(IORoutes::getSchemeByQuery);
                         });
                         path("/scheme/{type}/{protocol}/{name}", () -> {
                             get(IORoutes::getScheme);
@@ -207,6 +211,13 @@ public class GatewayMain {
                         });
                         path("/export/scheme/{dirName}", () -> {
                             get(IORoutes::getExportSchemesByDirectory);
+                        });
+                        path("/export/schemes", () -> {
+                            get(IORoutes::getExportSchemesByDirectoryQuery);
+                        });
+                        path("/export/assignment", () -> {
+                            post(IORoutes::assignExportSchemeRequest);
+                            delete(IORoutes::dismissExportSchemeQuery);
                         });
                     });
 
