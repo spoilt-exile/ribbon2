@@ -39,7 +39,7 @@ import tk.freaxsoftware.ribbon2.io.core.importer.Importer;
             @IOModule.ConfigEntry(name = "mailPop3Debug", type = ConfigEntryType.BOOLEAN, defaultValue = "false"),
             @IOModule.ConfigEntry(name = "mailPop3PostAction", type = ConfigEntryType.TEXT, defaultValue = "DELETE"),
             @IOModule.ConfigEntry(name = "mailReadFromList", type = ConfigEntryType.TEXT),
-            @IOModule.ConfigEntry(name = "mailDirectoryList", type = ConfigEntryType.TEXT),
+            @IOModule.ConfigEntry(name = "mailDirectoryList", type = ConfigEntryType.DIRECTORY_LIST),
             @IOModule.ConfigEntry(name = "mailCopyright", type = ConfigEntryType.TEXT),
             @IOModule.ConfigEntry(name = "mailSendReportBack", type = ConfigEntryType.BOOLEAN, defaultValue = "false"),
             @IOModule.ConfigEntry(name = "mailReportAdminAddress", type = ConfigEntryType.TEXT),
