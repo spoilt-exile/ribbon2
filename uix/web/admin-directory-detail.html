@@ -11,7 +11,7 @@
             <section class="tab-pane fade" id="dir-security">
                 <#if securityError??><div class="alert alert-danger" role="alert">${securityError?html}</div></#if>
                 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-                    <span class="badge ${security.accessMode?string == 'CUSTOM'?then('text-bg-primary','text-bg-secondary')}">${security.accessMode?html}</span>
+                    <span class="badge ${(security.accessMode?string == 'CUSTOM')?then('text-bg-primary','text-bg-secondary')}">${security.accessMode?html}</span>
                     <#if security.accessMode?string == "INHERIT"><span class="text-body-secondary">Inherited from <strong>${security.accessSourcePath!"permission defaults"?html}</strong></span><#else><span class="text-body-secondary">Custom local rules<#if security.accessEntries?has_content == false> (empty ruleset)</#if></span></#if>
                 </div>
                 <p class="small text-body-secondary">A matching USER or GROUP allow grants access; an explicit deny blocks it unless another matching rule grants it. Missing rule permissions defer to the default policy.</p>

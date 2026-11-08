@@ -14,9 +14,9 @@
             <tbody>
             <#list schemes as item>
                 <tr class="io-scheme-row" data-type="${item.type?html}" data-protocol="${item.protocol?html}" data-status="${item.status?html}" data-name="${item.scheme?html}">
-                    <td><span class="badge ${item.type?string == 'IMPORT'?then('text-bg-info','text-bg-primary')}">${item.type?html}</span></td>
+                    <td><span class="badge ${(item.type?string == 'IMPORT')?then('text-bg-info','text-bg-primary')}">${item.type?html}</span></td>
                     <td>${item.protocol?html}</td><td>${item.scheme?html}</td>
-                    <td><span class="badge ${item.status?string == 'OK'?then('text-bg-success','text-bg-warning')}">${item.status?html}</span>
+                    <td><span class="badge ${(item.status?string == 'OK')?then('text-bg-success','text-bg-warning')}">${item.status?html}</span>
                         <#if item.raisingAdminError?? && item.raisingAdminError><span class="badge text-bg-danger">Admin alert</span></#if>
                         <#if item.errorDescription??><div class="small text-danger">${item.errorDescription?html}</div></#if>
                     </td>
