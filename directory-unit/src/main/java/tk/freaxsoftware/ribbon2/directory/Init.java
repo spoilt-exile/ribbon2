@@ -29,6 +29,8 @@ import io.ebean.platform.postgres.PostgresPlatformProvider;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import liquibase.Liquibase;
 import liquibase.database.DatabaseConnection;
@@ -44,7 +46,9 @@ import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.extras.bus.exceptions.ExceptionServices;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryPermissionHolder;
+import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryPermissionModel;
+import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.data.messagestorage.DbMessage;
 import tk.freaxsoftware.ribbon2.core.exception.RibbonMessageExceptionHandler;
 import tk.freaxsoftware.ribbon2.directory.config.DirectoryUnitConfig;
@@ -52,6 +56,8 @@ import tk.freaxsoftware.ribbon2.directory.entity.Directory;
 import tk.freaxsoftware.ribbon2.directory.entity.GroupEntity;
 import tk.freaxsoftware.ribbon2.directory.entity.Permission;
 import tk.freaxsoftware.ribbon2.directory.entity.UserEntity;
+import tk.freaxsoftware.ribbon2.directory.repo.DirectoryRepository;
+import tk.freaxsoftware.ribbon2.directory.service.AuthService;
 
 /**
  * Main init of the directory unit.
@@ -94,6 +100,7 @@ public class Init {
                 } catch (InterruptedException ex) {
                     //Do nothing;
                 }
+                safePopulateMandatoryDirectories(List.of(config.getDirectory().getErrorDir(), config.getDirectory().getLostFoundDir()), appendixMessages);
                 for (MessageHolder holder: appendixMessages) {
                     LOGGER.info("Sending appendix message {}", holder.getTopic());
                     MessageBus.fire(holder);
@@ -131,5 +138,34 @@ public class Init {
         config.addClass(UserEntity.class);
         config.addClass(Permission.class);
         Database database = DatabaseFactory.create(config);
+    }
+
+    private static void safePopulateMandatoryDirectories(List<String> directories, List<MessageHolder> appendixMessages) {
+        DirectoryRepository repo = new DirectoryRepository();
+        MessageOptions options = MessageOptions.Builder.newInstance().header(UserModel.AUTH_HEADER_USERNAME, AuthService.ROOT_LOGIN).deliveryCall().build();
+        for (String mandatoryDir: directories) {
+            Optional<DirectoryModel> createDirectory = appendixMessages.stream()
+                .filter(mh -> Objects.equals(mh.getTopic(), DirectoryModel.CALL_CREATE_DIRECTORY))
+                .map(mh -> (DirectoryModel) mh.getContent())
+                .filter(dm -> Objects.equals(dm.getFullName(), mandatoryDir))
+                .findAny();
+            if (createDirectory.isPresent()) {
+                LOGGER.info("Mandatory directory " + mandatoryDir + " listed in created dirs, skipping.");
+                continue;
+            }
+            Directory found = repo.findDirectoryByPath(mandatoryDir);
+            if (found != null) {
+                LOGGER.info("Mandatory directory " + mandatoryDir + " already created, skipping.");
+                continue;
+            }
+            appendixMessages.add(new MessageHolder(DirectoryModel.CALL_CREATE_DIRECTORY, options, createDirectoryModel(mandatoryDir)));
+        }
+    }
+
+    public static DirectoryModel createDirectoryModel(String fullPath) {
+        DirectoryModel newDirectory = new DirectoryModel();
+        newDirectory.setFullName(fullPath);
+        newDirectory.setDescription("Created by default.");
+        return newDirectory;
     }
 }
