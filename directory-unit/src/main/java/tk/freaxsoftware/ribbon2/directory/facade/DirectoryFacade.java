@@ -109,4 +109,10 @@ public class DirectoryFacade {
         getErrorDirMessage.setResponse(new ResponseHolder());
         getErrorDirMessage.getResponse().setContent(DirectoryUnit.config.getDirectory().getErrorDir());
     }
+
+    @Receive(DirectoryModel.CALL_GET_LOSTFOUND_DIRECTORY)
+    public void getLostFoundDirectory(MessageHolder<Void> getLostFoundDirMessage) {
+        getLostFoundDirMessage.setResponse(new ResponseHolder());
+        getLostFoundDirMessage.getResponse().setContent(DirectoryUnit.config.getDirectory().getLostFoundDir());
+    }
 }

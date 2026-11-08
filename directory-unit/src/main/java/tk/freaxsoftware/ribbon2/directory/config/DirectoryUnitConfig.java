@@ -56,6 +56,7 @@ public class DirectoryUnitConfig {
         private Set<String> createDirs;
         private Set<DirectoryPermissionModel> permissions;
         private String errorDir;
+        private String lostFoundDir;
 
         public Set<String> getCreateDirs() {
             return createDirs;
@@ -81,9 +82,17 @@ public class DirectoryUnitConfig {
             this.errorDir = errorDir;
         }
 
+        public String getLostFoundDir() {
+            return lostFoundDir;
+        }
+
+        public void setLostFoundDir(String lostFoundDir) {
+            this.lostFoundDir = lostFoundDir;
+        }
+
         @Override
         public String toString() {
-            return "{" + "createDirs=" + createDirs + ", permissions=" + permissions + ", errorDirectory=" + errorDir + '}';
+            return "{" + "createDirs=" + createDirs + ", permissions=" + permissions + ", errorDirectory=" + errorDir + ", lostFoundDir=" + lostFoundDir + '}';
         }
     }
     

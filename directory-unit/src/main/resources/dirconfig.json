@@ -2,6 +2,7 @@
     "directory": {
         "createDirs": [
             "System.Test",
+            "System.LostFound",
             "System.Error",
             "Inbox.Agencies",
             "Inbox.Reporters",
@@ -33,7 +34,8 @@
                 "defaultValue": false
             }
         ],
-        "errorDir": "System.Error"
+        "errorDir": "System.Error",
+        "lostFoundDir": "System.LostFound"
     },
     "db": {
         "jdbcUrl": "jdbc:postgresql://localhost:5432/ribbon2-directory",
