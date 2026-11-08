@@ -42,8 +42,8 @@ import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.config.ApplicationConfig;
 import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.converters.UserConverter;
+import tk.freaxsoftware.ribbon2.gateway.utils.BCryptHash;
 import tk.freaxsoftware.ribbon2.gateway.utils.JWTTokenService;
-import tk.freaxsoftware.ribbon2.gateway.utils.SHAHash;
 import tk.freaxsoftware.ribbon2.gateway.utils.UserContext;
 
 /**
@@ -94,7 +94,7 @@ public class AuthRoutes {
         UserEntity loginedUser = DB.getDefault().find(UserEntity.class).where().eq("login", authRequest.getLogin()).findOne();
         if (loginedUser != null 
                 && loginedUser.getEnabled()
-                && Objects.equals(SHAHash.hashPassword(authRequest.getPassword()), loginedUser.getPassword())) {
+                && BCryptHash.checkPassword(authRequest.getPassword(), loginedUser.getPassword())) {
             LOGGER.debug("Proceed JWT auth: " + loginedUser.getLogin());
             JWTTokenService tokenService = JWTTokenService.getInstance();
             String token = tokenService.encryptToken(loginedUser);

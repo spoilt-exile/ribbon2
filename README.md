@@ -24,7 +24,6 @@ Current version: **3.3**
  - Async API for critical operations;
 
 ### Known issues
- - Weak password hashing algorithm;
  - Absent validation of error dir. Directory specified in config should be already created or present in list of directories for creation;
  - Undefined behavior on directory deletion. System should check if after delete message will be available on other directories, if there is no directories left - move to lost and found;
 

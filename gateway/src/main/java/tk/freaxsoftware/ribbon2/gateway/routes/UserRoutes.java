@@ -47,7 +47,7 @@ import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.converters.UserConverter;
 import tk.freaxsoftware.ribbon2.gateway.entity.converters.UserWithPasswordConverter;
 import tk.freaxsoftware.ribbon2.gateway.utils.AdminAuthorization;
-import tk.freaxsoftware.ribbon2.gateway.utils.SHAHash;
+import tk.freaxsoftware.ribbon2.gateway.utils.BCryptHash;
 
 /**
  * Routes for CRUD operations with users.
@@ -108,7 +108,7 @@ public class UserRoutes {
         if (updateUser != null) {
             updateUser.setLogin(user.getLogin());
             if (!StringUtils.isEmpty(user.getPassword())) {
-                updateUser.setPassword(SHAHash.hashPassword(user.getPassword()));
+                updateUser.setPassword(BCryptHash.hashPassword(user.getPassword()));
             }
             updateUser.setFirstname(user.getFirstName());
             updateUser.setLastname(user.getLastName());

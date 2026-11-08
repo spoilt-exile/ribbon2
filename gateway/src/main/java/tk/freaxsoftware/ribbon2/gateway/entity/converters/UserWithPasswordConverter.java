@@ -25,7 +25,7 @@ import tk.freaxsoftware.ribbon2.core.data.convert.Converter;
 import tk.freaxsoftware.ribbon2.core.data.UserWithPassword;
 import tk.freaxsoftware.ribbon2.gateway.entity.GroupEntity;
 import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
-import tk.freaxsoftware.ribbon2.gateway.utils.SHAHash;
+import tk.freaxsoftware.ribbon2.gateway.utils.BCryptHash;
 
 /**
  * User converter for create/update operations.
@@ -46,7 +46,7 @@ public class UserWithPasswordConverter implements Converter<UserWithPassword, Us
         Set<GroupEntity> groups = DB.getDefault().find(GroupEntity.class).where().in("name", source.getGroups()).findSet();
         user.setGroups(groups);
         if (!StringUtils.isEmpty(source.getPassword())) {
-            user.setPassword(SHAHash.hashPassword(source.getPassword()));
+            user.setPassword(BCryptHash.hashPassword(source.getPassword()));
         }
         return user;
     }

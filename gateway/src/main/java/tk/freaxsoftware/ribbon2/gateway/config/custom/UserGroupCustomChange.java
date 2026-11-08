@@ -32,7 +32,7 @@ import tk.freaxsoftware.extras.bus.MessageOptions;
 import tk.freaxsoftware.ribbon2.core.data.GroupModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.gateway.Init;
-import tk.freaxsoftware.ribbon2.gateway.utils.SHAHash;
+import tk.freaxsoftware.ribbon2.gateway.utils.BCryptHash;
 
 /**
  * Custom change for Liquibase to add messages for populated users/groups;
@@ -77,7 +77,7 @@ public class UserGroupCustomChange implements CustomSqlChange {
                 .addColumnValue("description", rootUser.getDescription())
                 .addColumnValue("email", rootUser.getEmail())
                 .addColumnValue("enabled", rootUser.getEnabled())
-                .addColumnValue("password", SHAHash.hashPassword("root"));
+                .addColumnValue("password", BCryptHash.hashPassword("root"));
         
         statements[1] = new InsertStatement(null, null, "group_entity")
                 .addColumnValue("name", admGroup.getName())
@@ -92,7 +92,7 @@ public class UserGroupCustomChange implements CustomSqlChange {
                 .addColumnValue("description", testUser.getDescription())
                 .addColumnValue("email", testUser.getEmail())
                 .addColumnValue("enabled", testUser.getEnabled())
-                .addColumnValue("password", SHAHash.hashPassword("user"));
+                .addColumnValue("password", BCryptHash.hashPassword("user"));
         
         statements[4] = new InsertStatement(null, null, "group_entity")
                 .addColumnValue("name", usersGroup.getName())
