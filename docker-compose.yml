@@ -5,6 +5,7 @@ services:
         image: freax/ribbon2-uix:3.0
         environment:
             - GATEWAY_URL=http://ribbon2-gateway:9000
+            - GATEWAY_DUMMY=false
         ports:
             - 9999:9999
 
