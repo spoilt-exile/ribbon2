@@ -28,6 +28,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryAccessModel;
+import tk.freaxsoftware.ribbon2.core.data.DirectorySecurityModel;
+import tk.freaxsoftware.ribbon2.core.data.GroupModel;
+import tk.freaxsoftware.ribbon2.core.data.request.DirectoryEditAccessRequest;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.directory.entity.Directory;
 import tk.freaxsoftware.ribbon2.directory.entity.GroupEntity;
@@ -226,5 +229,49 @@ public class AuthServiceUnitTest {
         Assert.assertTrue(accessPermNames2.contains("canCreateMessage"));
         Assert.assertTrue(accessPermNames2.contains("canUpdateMessage"));
         
+    }
+
+    @Test
+    public void shouldDistinguishInheritedAccessFromCustomEmptyRules() {
+        Directory parent = new Directory(null, "System", "System", null,
+                Set.of(new DirectoryAccessModel("users", DirectoryAccessModel.Type.GROUP, Map.of("canReadMessage", true))));
+        Directory inheritedChild = new Directory(null, "Inherited", "System.Inherited", null, null);
+        Directory customEmptyChild = new Directory(null, "CustomEmpty", "System.CustomEmpty", null, Collections.emptySet());
+
+        Mockito.when(directoryRepository.findDirectoryByPath("System.Inherited")).thenReturn(inheritedChild);
+        Mockito.when(directoryRepository.findDirByPathsReverse(new String[]{"System", "System.Inherited"}))
+                .thenReturn(Set.of(parent, inheritedChild));
+        DirectorySecurityModel inherited = authService.getDirectorySecurity("System.Inherited");
+        Assert.assertEquals(DirectorySecurityModel.AccessMode.INHERIT, inherited.getAccessMode());
+        Assert.assertNull(inherited.getAccessEntries());
+        Assert.assertEquals("System", inherited.getAccessSourcePath());
+
+        Mockito.when(directoryRepository.findDirectoryByPath("System.CustomEmpty")).thenReturn(customEmptyChild);
+        Mockito.when(directoryRepository.findDirByPathsReverse(new String[]{"System", "System.CustomEmpty"}))
+                .thenReturn(Set.of(parent, customEmptyChild));
+        DirectorySecurityModel customEmpty = authService.getDirectorySecurity("System.CustomEmpty");
+        Assert.assertEquals(DirectorySecurityModel.AccessMode.CUSTOM, customEmpty.getAccessMode());
+        Assert.assertNotNull(customEmpty.getAccessEntries());
+        Assert.assertTrue(customEmpty.getAccessEntries().isEmpty());
+        Assert.assertEquals("System.CustomEmpty", customEmpty.getAccessSourcePath());
+    }
+
+    @Test
+    public void shouldRejectMoreThanOneAllRule() {
+        Directory target = new Directory(null, "System", "System", null, null);
+        Mockito.when(userRespository.findByLogin("admin"))
+                .thenReturn(new UserEntity(null, "admin", Set.of(new GroupEntity(null, GroupModel.ADMIN_GROUP))));
+        Mockito.when(directoryRepository.findDirectoryByPath("System")).thenReturn(target);
+        Mockito.when(permissionRepository.findAllPermissionNames()).thenReturn(Set.of("canReadMessage"));
+
+        try {
+            authService.editDirAccess(new DirectoryEditAccessRequest("System", Set.of(
+                    new DirectoryAccessModel(null, DirectoryAccessModel.Type.ALL, Map.of("canReadMessage", true)),
+                    new DirectoryAccessModel(null, DirectoryAccessModel.Type.ALL, Map.of("canReadMessage", false)))), "admin");
+            Assert.fail("Expected duplicate ALL validation to fail");
+        } catch (CoreException expected) {
+            // Duplicate wildcard rules are rejected before persistence.
+        }
+        Mockito.verify(directoryRepository, Mockito.never()).save(Mockito.any(Directory.class));
     }
 }
