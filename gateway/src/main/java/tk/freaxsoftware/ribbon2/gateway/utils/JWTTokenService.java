@@ -21,10 +21,11 @@ package tk.freaxsoftware.ribbon2.gateway.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+
 import java.time.ZonedDateTime;
 import java.util.Date;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import tk.freaxsoftware.ribbon2.gateway.GatewayMain;
 import tk.freaxsoftware.ribbon2.gateway.entity.UserEntity;
 
@@ -53,7 +54,7 @@ public class JWTTokenService {
      */
     private JWTTokenService(String secret, Integer validDays) {
         byte[] jwtSecret = secret.getBytes();
-        jwtKey = new SecretKeySpec(jwtSecret, SignatureAlgorithm.HS512.getJcaName());
+        jwtKey = Keys.hmacShaKeyFor(jwtSecret);
         this.validDays = validDays;
     }
     
@@ -63,7 +64,7 @@ public class JWTTokenService {
      * @return encrypted token;
      */
     public String encryptToken(UserEntity user) {
-        return Jwts.builder().setId(user.getLogin()).setExpiration(Date.from(ZonedDateTime.now().plusDays(validDays).toInstant())).signWith(SignatureAlgorithm.HS256, jwtKey).compact();
+        return Jwts.builder().id(user.getLogin()).expiration(Date.from(ZonedDateTime.now().plusDays(validDays).toInstant())).signWith(SignatureAlgorithm.HS256, jwtKey).compact();
     }
     
     /**
