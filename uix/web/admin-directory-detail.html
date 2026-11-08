@@ -1,0 +1,49 @@
+<div id="directory-detail" class="card bg-body-tertiary">
+    <div class="card-header"><div class="fw-semibold">${directory.fullName?html}</div><div class="small text-body-secondary">${directory.description!""?html}</div></div>
+    <div class="card-body">
+        <ul class="nav nav-pills mb-3" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#dir-details" type="button">Details</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#dir-security" type="button">Security</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#dir-io" type="button">IO</button></li>
+        </ul>
+        <div class="tab-content">
+            <section class="tab-pane fade show active" id="dir-details"><dl class="row mb-0"><dt class="col-sm-3">Path</dt><dd class="col-sm-9">${directory.fullName?html}</dd><dt class="col-sm-3">Name</dt><dd class="col-sm-9">${directory.name?html}</dd><dt class="col-sm-3">Description</dt><dd class="col-sm-9">${directory.description!""?html}</dd></dl></section>
+            <section class="tab-pane fade" id="dir-security">
+                <#if securityError??><div class="alert alert-danger" role="alert">${securityError?html}</div></#if>
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                    <span class="badge ${security.accessMode?string == 'CUSTOM'?then('text-bg-primary','text-bg-secondary')}">${security.accessMode?html}</span>
+                    <#if security.accessMode?string == "INHERIT"><span class="text-body-secondary">Inherited from <strong>${security.accessSourcePath!"permission defaults"?html}</strong></span><#else><span class="text-body-secondary">Custom local rules<#if security.accessEntries?has_content == false> (empty ruleset)</#if></span></#if>
+                </div>
+                <p class="small text-body-secondary">A matching USER or GROUP allow grants access; an explicit deny blocks it unless another matching rule grants it. Missing rule permissions defer to the default policy.</p>
+                <form hx-post="/admin/directory/security" hx-target="#directory-detail" hx-swap="outerHTML">
+                    <input type="hidden" name="path" value="${directory.fullName?html}">
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle"><thead><tr><th>Principal type</th><th>Principal</th><th>Permission overrides</th></tr></thead><tbody>
+                        <#list ruleRows as row>
+                            <tr>
+                                <td><select class="form-select form-select-sm" name="ruleType"><#list ["USER","GROUP","ALL"] as type><option value="${type}" <#if row.type == type>selected</#if>>${type}</option></#list></select></td>
+                                <td><input class="form-control form-control-sm" name="ruleName" list="security-principals" value="${row.name?html}" aria-label="Principal name" placeholder="login, group, or *"></td>
+                                <td><details><summary class="small text-info">Set overrides (${permissions?size})</summary><div class="row g-2 pt-2">
+                                    <#list permissions as permission><div class="col-md-6 col-xl-4"><label class="form-label small mb-1" title="${permission.description!""?html}">${permission.tag!"General"?html} · ${permission.key?html}</label><select class="form-select form-select-sm" name="perm_${row?index}_${permission?index}"><option value="inherit" <#if row.permissionStates[permission?index] == "inherit">selected</#if>>No override</option><option value="allow" <#if row.permissionStates[permission?index] == "allow">selected</#if>>Allow</option><option value="deny" <#if row.permissionStates[permission?index] == "deny">selected</#if>>Deny</option></select></div></#list>
+                                </div></details></td>
+                            </tr>
+                        </#list>
+                        </tbody></table>
+                    </div>
+                    <datalist id="security-principals"><#list users as item><option value="${item.login?html}">User · ${item.login?html}</option></#list><#list groups as item><option value="${item.name?html}">Group · ${item.name?html}</option></#list><option value="*">All users and groups</option></datalist>
+                    <div class="d-flex gap-2"><button class="btn btn-sm btn-primary" name="mode" value="custom" type="submit">Save custom rules</button><button class="btn btn-sm btn-outline-warning" name="mode" value="inherit" type="submit" hx-confirm="Remove local rules and inherit from the parent directory?">Inherit from parent</button></div>
+                </form>
+            </section>
+            <section class="tab-pane fade" id="dir-io">
+                <h2 class="h6">Export schemes assigned to this directory</h2>
+                <#if assigned?has_content><ul class="list-group mb-3"><#list assigned as item><li class="list-group-item bg-body d-flex justify-content-between align-items-center"><span><strong>${item.scheme?html}</strong> <span class="text-body-secondary">(${item.protocol?html})</span></span><button class="btn btn-sm btn-outline-danger" hx-delete="/admin/io/assignment?protocol=${item.protocol?url}&amp;scheme=${item.scheme?url}&amp;directory=${directory.fullName?url}" hx-target="#directory-detail" hx-swap="outerHTML" hx-confirm="Remove this export assignment?">Remove</button></li></#list></ul><#else><p class="text-body-secondary">No export schemes are assigned to this directory.</p></#if>
+                <form class="row g-2 align-items-end" hx-post="/admin/io/assignment" hx-target="#directory-detail" hx-swap="outerHTML">
+                    <input type="hidden" name="directory" value="${directory.fullName?html}">
+                    <div class="col-md-8"><label class="form-label" for="export-scheme">Assign export scheme</label><select id="export-scheme" class="form-select" name="scheme" required><option value="">Choose scheme</option><#list exportSchemes as item><option value="${item.scheme?html}" data-protocol="${item.protocol?html}">${item.scheme?html} · ${item.protocol?html}</option></#list></select><input type="hidden" name="protocol" id="export-protocol"></div>
+                    <div class="col-md-4"><button class="btn btn-primary" type="submit">Assign</button><a class="btn btn-outline-info" href="#io-pane" data-bs-toggle="tab" data-bs-target="#io-pane">Manage schemes</a></div>
+                </form>
+                <script>(function(){const es=document.getElementById('export-scheme');if(es)es.addEventListener('change',()=>document.getElementById('export-protocol').value=es.selectedOptions[0]?.dataset.protocol||'');})();</script>
+            </section>
+        </div>
+    </div>
+</div>

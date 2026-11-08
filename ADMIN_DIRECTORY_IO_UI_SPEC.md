@@ -92,7 +92,7 @@ Skip this step for the prototype. Keep the current module metadata and import be
 ### Step 6 — Build the HTMX/Bootstrap admin pages
 
 1. Add an admin route class and register it in `Uix.main`; add `/admin` access gating based on current account groups. Gate both full pages and fragment/action routes.
-2. Add navigation in `index.html` only for admins and an `/admin` entry point. Keep existing message workspace unchanged for non-admins.
+2. Add navigation in `index.html` only for admins and an `/admin` entry point. Keep existing message workspace unchanged for non-admins. Render the administration area with Bootstrap's dark theme.
 3. Build the directory tree and directory detail fragments; wire the **Security** tab to fetch/edit rule fragments and submit replacements/inherit actions.
 4. Build the system-wide **IO schemes** table, protocol picker, metadata-driven config form, create/edit/delete actions, and status/error presentation.
 5. Build export assignment controls with a directory tree picker and live assigned-directory list. Provide the same controls from a selected directory's **IO** tab.

@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.gateway.io.IOService;
 import tk.freaxsoftware.extras.bus.MessageBus;
 import tk.freaxsoftware.extras.bus.MessageOptions;
+import tk.freaxsoftware.extras.bus.storage.StorageInterceptor;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.core.exception.CoreError;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;

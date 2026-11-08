@@ -1,0 +1,47 @@
+<div class="card bg-body-tertiary">
+    <div class="card-header fw-semibold"><#if editing>Configure scheme<#else>New IO scheme</#if></div>
+    <div class="card-body">
+        <#if editor.protocol?? == false>
+            <form class="row g-2 align-items-end mb-3" hx-get="/admin/io/editor" hx-target="#io-editor">
+                <div class="col-md-3"><label class="form-label" for="module-type">Module type</label><select class="form-select" id="module-type" name="type" required><option value="">Select type</option><option value="IMPORT">Import</option><option value="EXPORT">Export</option></select></div>
+                <div class="col-md-5"><label class="form-label" for="module-protocol">Protocol</label><select class="form-select" id="module-protocol" name="protocol" required><option value="">Select protocol</option><#list protocols as item><option value="${item.protocol?html}" data-module-type="${item.type?html}">${item.type?html} · ${item.protocol?html}</option></#list></select></div>
+                <div class="col-md-2"><button class="btn btn-outline-primary" type="submit">Configure</button></div>
+            </form>
+            <script>
+                (function(){const t=document.getElementById('module-type'),p=document.getElementById('module-protocol');if(!t||!p)return;const filter=()=>{for(const o of p.options){if(!o.value)continue;o.hidden=!!t.value&&o.dataset.moduleType!==t.value;}if(p.selectedOptions[0]?.hidden)p.value='';};t.addEventListener('change',filter);filter();})();
+            </script>
+        <#else>
+            <form hx-post="/admin/io/scheme" hx-target="#io-schemes-panel" hx-swap="innerHTML" class="row g-3">
+                <input type="hidden" name="type" value="${selectedType?html}">
+                <input type="hidden" name="protocol" value="${selectedProtocol?html}">
+                <input type="hidden" name="originalName" value="<#if editing>${editor.scheme.name?html}</#if>">
+                <div class="col-md-3"><label class="form-label">Type</label><input class="form-control" value="${selectedType?html}" disabled></div>
+                <div class="col-md-3"><label class="form-label">Protocol</label><input class="form-control" value="${selectedProtocol?html}" disabled></div>
+                <div class="col-md-3"><label class="form-label" for="scheme-name">Name</label><input class="form-control" id="scheme-name" name="name" required value="<#if editing>${editor.scheme.name?html}</#if>"></div>
+                <div class="col-md-3"><label class="form-label" for="scheme-description">Description</label><input class="form-control" id="scheme-description" name="description" value="<#if editing && editor.scheme.description??>${editor.scheme.description?html}</#if>"></div>
+                <#if editor.protocol.configEntries??>
+                    <#list editor.protocol.configEntries as entry>
+                        <#assign currentValue="">
+                        <#if editing && editor.scheme.config?? && editor.scheme.config[entry.name]??><#assign currentValue=editor.scheme.config[entry.name]?string></#if>
+                        <#assign secretConfigured=entry.type?string == "SECRET" && editor.configuredSecretFields?seq_contains(entry.name)>
+                        <#if entry.type?string == "SECRET"><#assign currentValue=""><#elseif editing == false && entry.defaultValue??><#assign currentValue=entry.defaultValue></#if>
+                        <div class="col-md-6">
+                            <label class="form-label" for="cfg-${entry?index}">${entry.name?html}<#if entry.required> <span class="text-danger">*</span></#if></label>
+                            <#if entry.type?string == "BOOLEAN">
+                                <select class="form-select" id="cfg-${entry?index}" name="config_${entry.name?html}" <#if entry.required>required</#if>><option value="">Select…</option><option value="true" <#if currentValue == "true">selected</#if>>Yes</option><option value="false" <#if currentValue == "false">selected</#if>>No</option></select>
+                            <#elseif entry.type?string == "DIRECTORY">
+                                <select class="form-select" id="cfg-${entry?index}" name="config_${entry.name?html}" <#if entry.required>required</#if>><option value="">Select directory…</option><#list directoryPaths as directoryPath><option value="${directoryPath?html}" <#if currentValue == directoryPath>selected</#if>>${directoryPath?html}</option></#list></select>
+                            <#elseif entry.type?string == "DIRECTORY_LIST">
+                                <select class="form-select" id="cfg-${entry?index}" name="config_${entry.name?html}" multiple size="5"><#list directoryPaths as directoryPath><option value="${directoryPath?html}" <#if selectedDirectoryLists[entry.name]?? && selectedDirectoryLists[entry.name]?seq_contains(directoryPath)>selected</#if>>${directoryPath?html}</option></#list></select>
+                            <#else>
+                                <input class="form-control" id="cfg-${entry?index}" name="config_${entry.name?html}" type="<#if entry.type?string == 'SECRET'>password<#elseif entry.type?string == 'NUMBER'>number<#else>text</#if>" value="${currentValue?html}" placeholder="<#if secretConfigured>Configured; leave blank to keep current value<#elseif entry.defaultValue??>${entry.defaultValue?html}</#if>" <#if entry.required && secretConfigured == false>required</#if>>
+                            </#if>
+                            <#if secretConfigured><div class="form-text">Secret value is configured and kept when left blank.</div></#if>
+                        </div>
+                    </#list>
+                </#if>
+                <div class="col-12 d-flex gap-2"><button class="btn btn-primary" type="submit">Save scheme</button><button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('io-editor').innerHTML=''">Close</button></div>
+            </form>
+        </#if>
+    </div>
+</div>

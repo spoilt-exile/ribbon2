@@ -20,6 +20,7 @@ package tk.freaxsoftware.ribbon2.uix.routes;
 
 import io.javalin.Javalin;
 import java.util.Map;
+import java.util.Map;
 import tk.freaxsoftware.ribbon2.core.data.GroupModel;
 import tk.freaxsoftware.ribbon2.core.data.UserModel;
 import tk.freaxsoftware.ribbon2.uix.Uix;
@@ -53,6 +54,8 @@ public class LoginRoutes {
                 if (!ctx.req().getPathInfo().equals("/login")
                         && !ctx.req().getPathInfo().startsWith("/web/static")) {
                     ctx.redirect("/login");
+                    ctx.skipRemainingHandlers();
+                    return;
                 }
             } else {
                 UserSessionModelContext.setUser(logined);
@@ -60,7 +63,9 @@ public class LoginRoutes {
                         || ctx.req().getPathInfo().startsWith("/admin/")) {
                     if (logined.getGroups() == null
                             || !logined.getGroups().contains(GroupModel.ADMIN_GROUP)) {
-                        ctx.redirect("/");
+                        ctx.status(403);
+                        ctx.render("admin-denied.html", Map.of());
+                        ctx.skipRemainingHandlers();
                         return;
                     }
                 }

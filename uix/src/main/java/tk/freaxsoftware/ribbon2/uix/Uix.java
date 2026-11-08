@@ -37,6 +37,7 @@ import tk.freaxsoftware.ribbon2.uix.config.UixConfig;
 import tk.freaxsoftware.ribbon2.uix.config.UixConfig.HttpConfig;
 import tk.freaxsoftware.ribbon2.uix.rest.GatewayService;
 import tk.freaxsoftware.ribbon2.uix.routes.EditorRoutes;
+import tk.freaxsoftware.ribbon2.uix.routes.AdminRoutes;
 import tk.freaxsoftware.ribbon2.uix.routes.LoginRoutes;
 import tk.freaxsoftware.ribbon2.uix.routes.MainRoutes;
 
@@ -75,6 +76,9 @@ public class Uix {
         Configuration freeMarkerConfiguration = new Configuration(VERSION_2_3_32);
         freeMarkerConfiguration.setDirectoryForTemplateLoading(new File("web"));
         freeMarkerConfiguration.setObjectWrapper(new Java8ObjectWrapper(VERSION_2_3_32));
+        freeMarkerConfiguration.setDefaultEncoding("UTF-8");
+        freeMarkerConfiguration.setOutputEncoding("UTF-8");
+        freeMarkerConfiguration.setURLEscapingCharset("UTF-8");
         
         Javalin app = Javalin.create(javalinConfig -> {
             javalinConfig.staticFiles.add((statConfig) -> {
@@ -88,6 +92,7 @@ public class Uix {
         LoginRoutes.init(app, gatewayService);
         MainRoutes.init(app, gatewayService);
         EditorRoutes.init(app, gatewayService);
+        AdminRoutes.init(app, gatewayService);
         
         app.exception(Exception.class, (ex, ctx) -> {
             LOGGER.error("Error occurred:", ex);

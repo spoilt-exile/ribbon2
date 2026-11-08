@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <title>Administration - Ribbon 2</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://unpkg.com/htmx.org@1.9.4"></script>
+    <script src="/web/static/bootstrap.bundle.min.js" defer></script>
+    <link href="/web/static/bootstrap.min.css" rel="stylesheet">
+    <link href="/web/static/main.css" rel="stylesheet">
+</head>
+<body class="min-vh-100 overflow-auto">
+<header class="navbar navbar-dark bg-dark border-bottom border-secondary px-3">
+    <a class="navbar-brand fw-semibold" href="/">Ribbon 2</a>
+    <div class="d-flex align-items-center gap-3">
+        <span class="text-body-secondary">Administration · ${user.login?html}</span>
+        <a class="btn btn-sm btn-outline-light" href="/">Workspace</a>
+        <button type="button" hx-post="/logout" class="btn btn-sm btn-outline-light">Logout</button>
+    </div>
+</header>
+<main class="container-fluid py-4">
+    <h1 class="h3 mb-4">Administration</h1>
+    <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#directories-pane" type="button" role="tab">Directories</button></li>
+        <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#io-pane" type="button" role="tab">IO schemes</button></li>
+    </ul>
+    <div class="tab-content border border-top-0 border-secondary rounded-bottom p-3">
+        <section class="tab-pane fade show active" id="directories-pane" role="tabpanel">
+            <div class="row g-3">
+                <aside class="col-12 col-xl-3">
+                    <div class="card bg-body-tertiary">
+                        <div class="card-header fw-semibold">Directory tree</div>
+                        <div class="card-body p-2">
+                            <#macro tree nodes>
+                                <ul class="list-unstyled ms-2 mb-1">
+                                    <#list nodes as node>
+                                        <li class="my-1">
+                                            <a href="#" class="link-body-emphasis text-decoration-none"
+                                               hx-get="/admin/directory?path=${node.parentDirectory.fullName?url}"
+                                               hx-target="#directory-detail" hx-indicator="#admin-loading">▸ ${node.parentDirectory.name?html}</a>
+                                            <#if node.directoryChildren?has_content><@tree node.directoryChildren /></#if>
+                                        </li>
+                                    </#list>
+                                </ul>
+                            </#macro>
+                            <@tree directories.directoryChildren />
+                        </div>
+                    </div>
+                </aside>
+                <div class="col-12 col-xl-9">
+                    <div id="admin-loading" class="htmx-indicator text-info small mb-2">Loading…</div>
+                    <div id="directory-detail" class="card bg-body-tertiary">
+                        <div class="card-body text-body-secondary">Select a directory to view its security and IO settings.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="tab-pane fade" id="io-pane" role="tabpanel">
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="card bg-body-tertiary">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <span class="fw-semibold">Registered IO schemes</span>
+                            <button class="btn btn-sm btn-primary" hx-get="/admin/io/editor" hx-target="#io-editor">New scheme</button>
+                        </div>
+                        <div id="io-schemes-panel" class="card-body">
+                            <#include "admin-io-schemes.html">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12"><div id="io-editor"></div></div>
+            </div>
+        </section>
+    </div>
+</main>
+</body>
+</html>

@@ -26,6 +26,7 @@ import static java.util.Objects.nonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.data.GroupModel;
 import tk.freaxsoftware.ribbon2.core.data.MessageModel;
 import tk.freaxsoftware.ribbon2.core.data.response.DefaultPage;
 import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
@@ -45,7 +46,9 @@ public class MainRoutes {
     public static void init(Javalin app, GatewayService gatewayService) {
         app.get("/", (ctx) -> {
             LOGGER.info("UIX request {}", ctx.path());
-            ctx.render("index.html", Map.of("user", UserSessionModelContext.getUser()));
+            boolean admin = UserSessionModelContext.getUser().getGroups() != null
+                    && UserSessionModelContext.getUser().getGroups().contains(GroupModel.ADMIN_GROUP);
+            ctx.render("index.html", Map.of("user", UserSessionModelContext.getUser(), "admin", admin));
         });
         
         app.get("/directories", (ctx) -> {

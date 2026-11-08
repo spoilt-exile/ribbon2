@@ -1,0 +1,38 @@
+<#if savedScheme??>
+    <div class="alert alert-success py-2" role="status">Saved ${savedScheme.type?html} scheme <strong>${savedScheme.name?html}</strong>.</div>
+</#if>
+<#if schemes?has_content>
+    <div class="row g-2 mb-3">
+        <div class="col-sm-3"><label class="form-label small" for="filter-scheme-type">Type</label><select class="form-select form-select-sm" id="filter-scheme-type" onchange="filterAdminSchemes()"><option value="">All types</option><option>IMPORT</option><option>EXPORT</option></select></div>
+        <div class="col-sm-4"><label class="form-label small" for="filter-scheme-protocol">Protocol</label><select class="form-select form-select-sm" id="filter-scheme-protocol" onchange="filterAdminSchemes()"><option value="">All protocols</option><#list protocols as protocol><option value="${protocol.protocol?html}">${protocol.protocol?html}</option></#list></select></div>
+        <div class="col-sm-3"><label class="form-label small" for="filter-scheme-status">Status</label><select class="form-select form-select-sm" id="filter-scheme-status" onchange="filterAdminSchemes()"><option value="">All statuses</option><option>OK</option><option>ERROR</option><option>DELETED</option></select></div>
+        <div class="col-sm-2"><label class="form-label small" for="filter-scheme-text">Name</label><input class="form-control form-control-sm" id="filter-scheme-text" oninput="filterAdminSchemes()" placeholder="Filter"></div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle mb-0">
+            <thead><tr><th>Type</th><th>Protocol</th><th>Scheme</th><th>Status</th><th>Assigned directories</th><th class="text-end">Actions</th></tr></thead>
+            <tbody>
+            <#list schemes as item>
+                <tr class="io-scheme-row" data-type="${item.type?html}" data-protocol="${item.protocol?html}" data-status="${item.status?html}" data-name="${item.scheme?html}">
+                    <td><span class="badge ${item.type?string == 'IMPORT'?then('text-bg-info','text-bg-primary')}">${item.type?html}</span></td>
+                    <td>${item.protocol?html}</td><td>${item.scheme?html}</td>
+                    <td><span class="badge ${item.status?string == 'OK'?then('text-bg-success','text-bg-warning')}">${item.status?html}</span>
+                        <#if item.raisingAdminError?? && item.raisingAdminError><span class="badge text-bg-danger">Admin alert</span></#if>
+                        <#if item.errorDescription??><div class="small text-danger">${item.errorDescription?html}</div></#if>
+                    </td>
+                    <td><#if item.exportDirectories?? && item.exportDirectories?has_content>${item.exportDirectories?join(", ")?html}<#else><span class="text-body-secondary">—</span></#if></td>
+                    <td class="text-end text-nowrap">
+                        <button class="btn btn-sm btn-outline-info" hx-get="/admin/io/scheme?type=${item.type?url}&amp;protocol=${item.protocol?url}&amp;name=${item.scheme?url}" hx-target="#io-editor">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger" hx-delete="/admin/io/scheme?type=${item.type?url}&amp;protocol=${item.protocol?url}&amp;name=${item.scheme?url}" hx-target="#io-schemes-panel" hx-confirm="Delete ${item.type?html} / ${item.protocol?html} / ${item.scheme?html}? Assigned exports will stop.">Delete</button>
+                    </td>
+                </tr>
+            </#list>
+            </tbody>
+        </table>
+    </div>
+    <script>
+        window.filterAdminSchemes=function(){const type=document.getElementById('filter-scheme-type')?.value||'',protocol=document.getElementById('filter-scheme-protocol')?.value||'',status=document.getElementById('filter-scheme-status')?.value||'',name=(document.getElementById('filter-scheme-text')?.value||'').toLowerCase();document.querySelectorAll('.io-scheme-row').forEach(r=>{r.hidden=!!((type&&r.dataset.type!==type)||(protocol&&r.dataset.protocol!==protocol)||(status&&r.dataset.status!==status)||(name&&!r.dataset.name.toLowerCase().includes(name)));});};
+    </script>
+<#else>
+    <p class="text-body-secondary mb-0">No IO schemes are currently registered.</p>
+</#if>
