@@ -257,10 +257,14 @@ public class IORoutes {
         }
         requireText(scheme.getProtocol(), "protocol");
         requireText(scheme.getName(), "name");
-        if (getRegistration(scheme.getType(), scheme.getProtocol()) == null) {
+        ModuleRegistration registration = getRegistration(scheme.getType(), scheme.getProtocol());
+        if (registration == null) {
             throw new CoreException(RibbonErrorCodes.IO_SCHEME_NOT_FOUND,
                     "No IO module is registered for " + scheme.getType() + "/" + scheme.getProtocol());
         }
+        // The module registration owns the canonical id (for example, "import:rss").
+        // Use it even if a client omitted or supplied a stale id.
+        scheme.setId(registration.getId());
         LOGGER.info("Request to save IO scheme {} for protocol {} with type {}.", scheme.getName(), scheme.getProtocol(), scheme.getType());
         IOScheme saved = MessageBus.fireCall(String.format("%s.%s.%s", IOLocalIds.IO_SCHEME_SAVE_TOPIC, 
             scheme.getType().name().toLowerCase(), scheme.getProtocol()), scheme, MessageOptions.Builder.newInstance()

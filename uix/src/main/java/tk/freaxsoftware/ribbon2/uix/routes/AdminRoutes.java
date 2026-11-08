@@ -313,6 +313,7 @@ public final class AdminRoutes {
                 .filter(item -> item.getType() == type && Objects.equals(item.getProtocol(), protocolName))
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Selected IO module is unavailable."));
         IOScheme scheme = new IOScheme();
+        scheme.setId(protocol.getId());
         scheme.setType(type);
         scheme.setProtocol(protocolName);
         scheme.setName(name);
