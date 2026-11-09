@@ -23,9 +23,12 @@ import org.slf4j.LoggerFactory;
 import tk.freaxsoftware.extras.bus.MessageHolder;
 import tk.freaxsoftware.extras.bus.annotation.Receive;
 import tk.freaxsoftware.ribbon2.core.data.DirectoryModel;
+import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import tk.freaxsoftware.ribbon2.message.entity.Directory;
 import tk.freaxsoftware.ribbon2.message.entity.converters.DirectoryConverter;
 import tk.freaxsoftware.ribbon2.message.repo.DirectoryRepository;
+import tk.freaxsoftware.ribbon2.message.service.MessageService;
+import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.DIRECTORY_NOT_FOUND;
 
 /**
  * Directory facade to receive notification from directory unit.
@@ -34,12 +37,15 @@ import tk.freaxsoftware.ribbon2.message.repo.DirectoryRepository;
 public class DirectoryFacade {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(DirectoryFacade.class);
+
+    private final MessageService messageService;
     
     private final DirectoryRepository directoryRepository;
     
     private final DirectoryConverter converter;
 
-    public DirectoryFacade(DirectoryRepository directoryRepository, DirectoryConverter converter) {
+    public DirectoryFacade(MessageService messageService, DirectoryRepository directoryRepository, DirectoryConverter converter) {
+        this.messageService = messageService;
         this.directoryRepository = directoryRepository;
         this.converter = converter;
     }
@@ -64,6 +70,11 @@ public class DirectoryFacade {
     public void directoryDeleted(MessageHolder<DirectoryModel> holder) {
         Directory deleted = converter.convert(holder.getContent());
         LOGGER.info("Handling notification, directory {} deleted;", deleted.getFullName());
+        try {
+            messageService.scanAndRelocateMessagesOnDirectoryDelete(deleted.getFullName());
+        } catch (Exception ex) {
+            throw new CoreException(DIRECTORY_NOT_FOUND, "Can't init lost and found directory", ex);
+        }
         directoryRepository.deleteByFullname(holder.getContent().getFullName());
     }
     

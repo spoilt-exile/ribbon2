@@ -18,6 +18,8 @@
  */
 package tk.freaxsoftware.ribbon2.message.repo;
 
+import java.util.List;
+
 import io.ebean.DB;
 import io.ebean.PagedList;
 import io.ebean.Query;

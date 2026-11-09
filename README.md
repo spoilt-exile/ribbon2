@@ -23,9 +23,6 @@ Current version: **3.3**
 ### Planned features
  - Async API for critical operations;
 
-### Known issues
- - Undefined behavior on directory deletion. System should check if after delete message will be available on other directories, if there is no directories left - move to lost and found;
-
 ### Tech stack
 System based on Javalin (REST API provider), MessageBus 6.0, Ebean and HTMX.
 

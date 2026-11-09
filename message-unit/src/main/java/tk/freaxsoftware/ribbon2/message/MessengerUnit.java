@@ -76,9 +76,10 @@ public class MessengerUnit {
 
         Init.init(config);
 
+        MessageService messageService = new MessageService(new DirectoryRepository(), new MessageRepository(), new PropertyTypeRepository());
         AnnotationUtil.subscribeReceiverInstance(new PropertyTypeFacade(new PropertyTypeService(new PropertyTypeRepository())));
-        AnnotationUtil.subscribeReceiverInstance(new DirectoryFacade(new DirectoryRepository(), new DirectoryConverter()));
-        AnnotationUtil.subscribeReceiverInstance(new MessageFacade(new MessageService(new DirectoryRepository(), new MessageRepository(), new PropertyTypeRepository())));
+        AnnotationUtil.subscribeReceiverInstance(new DirectoryFacade(messageService, new DirectoryRepository(), new DirectoryConverter()));
+        AnnotationUtil.subscribeReceiverInstance(new MessageFacade(messageService));
     }
     
     private static void processConfig(MessengerUnitConfig config) {

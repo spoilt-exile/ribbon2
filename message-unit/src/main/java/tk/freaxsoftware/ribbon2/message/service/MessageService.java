@@ -69,6 +69,7 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final PropertyTypeRepository propertyTypeRepository;
     private final Map<String, Instant> permissionCache;
+    private String lostFoundDir;
 
     public MessageService(DirectoryRepository directoryRepository, 
             MessageRepository messageRepository, 
@@ -323,7 +324,64 @@ public class MessageService {
                 directoryRepository.save(newDir);
             }
         }
-        //TODO make clean deletion and relocation of directory
-        existingDirs.stream().filter(dir -> !actualDirNames.contains(dir.getFullName())).forEach(delDir -> delDir.delete());
+        existingDirs.stream()
+            .filter(dir -> !actualDirNames.contains(dir.getFullName()))
+            .forEach(delDir -> {
+                try {
+                    scanAndRelocateMessagesOnDirectoryDelete(delDir.getFullName());
+                } catch (Exception ex) {
+                    throw new CoreException(DIRECTORY_NOT_FOUND, "Can't init lost and found directory", ex);
+                }
+                delDir.delete();
+            });
+    }
+
+    /**
+     * Init lost and found directory value.
+     * @throws Exception exception on messaging;
+     */
+    public void initLostFoundDir() throws Exception {
+        if (this.lostFoundDir == null) {
+            lostFoundDir = MessageBus.fireCall(DirectoryModel.CALL_GET_LOSTFOUND_DIRECTORY, null, MessageOptions.Builder.newInstance()
+                .header(StorageInterceptor.IGNORE_STORAGE_HEADER, "true")
+                .deliveryCall().build(), String.class);
+        }
+    }
+
+    /**
+     * Scan messages on deleted directory and relocate if there is no more directories assigned to message.
+     * @param fullName name of the directory;
+     * @param directory for lost and found messages;
+     * @throws Exception exception on initialization of lost and found directory;
+     */
+    public void scanAndRelocateMessagesOnDirectoryDelete(String fullName) throws Exception {
+        initLostFoundDir();
+        LOGGER.warn("Scanning and relocation messages on dir {}, fallback is {}", fullName, lostFoundDir);
+        PaginationRequest request = new PaginationRequest();
+        int page = 0;
+        request.setSize(1000);
+        request.setPage(page);
+        PagedList<Message> messages = messageRepository.findPage(fullName, request);
+        LOGGER.info("SCAN&RELOCATE: page {} loaded {}", page, messages.getList().size());
+        while (messages.hasNext()) {
+            for (Message message: messages.getList()) {
+                LOGGER.info("SCAN&RELOCATE: message {} directories {}", message.getId(), message.getDirectories());
+                message.getDirectories().remove(fullName);
+                if (message.getDirectories().isEmpty()) {
+                    LOGGER.info("SCAN&RELOCATE: message {} no directories left, relocating", message.getId());
+                    message.getDirectories().add(lostFoundDir);
+                    MessagePropertyModel property = new MessagePropertyModel();
+                    property.setUid(UUID.randomUUID().toString());
+                    property.setCreated(ZonedDateTime.now());
+                    property.setCreatedBy("root");
+                    property.setType("RELOCATED");
+                    message.getProperties().add(property);
+                }
+                messageRepository.save(message);
+            }
+            page++;
+            messages = messageRepository.findPage(fullName, request);
+            LOGGER.info("SCAN&RELOCATE: page {} loaded {}", page, messages.getList().size());
+        }
     }
 }
