@@ -101,6 +101,8 @@ public class DirectoryUnit {
                 DirectoryUnitConfig.DirectoryConfig.class, (conf, property) -> conf.setCreateDirs(Set.of(property.split("$")))));
         overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DirectoryUnitConfig.DirectoryConfig>("DIRECTORY_ERROR_DIR",
                 DirectoryUnitConfig.DirectoryConfig.class, (conf, property) -> conf.setErrorDir(property)));
+        overrider.registerOverride(new EnvironmentOverrider.OverrideEntry<DirectoryUnitConfig.DirectoryConfig>("DIRECTORY_LOST_FOUND_DIR",
+                DirectoryUnitConfig.DirectoryConfig.class, (conf, property) -> conf.setLostFoundDir(property)));
         
         overrider.processConfig(config.getDb());
         overrider.processConfig(config.getDirectory());
