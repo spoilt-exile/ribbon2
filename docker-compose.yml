@@ -54,12 +54,42 @@ services:
             ribbon2-messenger:
                 condition: service_started
 
+    ribbon2-exc-import-tg:
+        image: freax/ribbon2-exchanger:3.0
+        environment:
+            - EXCHANGER_TYPE=IMPORT
+            - EXCHANGER_CLASS=tk.freaxsoftware.ribbon2.io.importer.telegram.TelegramImporter
+            - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-exc-import-tg
+            - BRIDGE_CLIENT_ADDRESS=ribbon2-gateway
+        depends_on:
+            ribbon2-gateway:
+                condition: service_started
+            ribbon2-directory:
+                condition: service_started
+            ribbon2-messenger:
+                condition: service_started
+
+    ribbon2-exc-export-mail:
+        image: freax/ribbon2-exchanger:3.0
+        environment:
+            - EXCHANGER_TYPE=EXPORT
+            - EXCHANGER_CLASS=tk.freaxsoftware.ribbon2.io.exporter.mail.MailExporter
+            - DB_JDBC_URL=jdbc:postgresql://ribbon2-postgresql:5432/ribbon2-exc-export-mail
+            - BRIDGE_CLIENT_ADDRESS=ribbon2-gateway
+        depends_on:
+            ribbon2-gateway:
+                condition: service_started
+            ribbon2-directory:
+                condition: service_started
+            ribbon2-messenger:
+                condition: service_started
+
     ribbon2-postgresql:
         image: postgres:11
         environment:
             - POSTGRES_USER=ribbon2
             - POSTGRES_PASSWORD=ribbon2
-            - POSTGRES_MULTIPLE_DATABASES="ribbon2-gateway","ribbon2-directory","ribbon2-messenger","ribbon2-exc-import-rss"
+            - POSTGRES_MULTIPLE_DATABASES="ribbon2-gateway","ribbon2-directory","ribbon2-messenger","ribbon2-exc-import-rss","ribbon2-exc-import-tg","ribbon2-exc-export-mail"
         volumes:
             - ./pg-multiple-db:/docker-entrypoint-initdb.d
         healthcheck:

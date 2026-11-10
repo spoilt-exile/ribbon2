@@ -20,7 +20,8 @@
             "Ribbon.Global.CheckDirectoryAccess",
             "Ribbon.Global.InitPermissions",
             "Ribbon.Global.GetDirectoryAll",
-            "Ribbon.Global.GetErrorDirectory"
+            "Ribbon.Global.GetErrorDirectory",
+            "Ribbon.Global.GetLostFoundDirectory"
         ]
     },
     "storage": {
