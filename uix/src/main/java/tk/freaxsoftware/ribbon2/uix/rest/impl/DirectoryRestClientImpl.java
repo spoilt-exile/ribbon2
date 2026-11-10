@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.HttpResponse;
@@ -86,6 +88,34 @@ public class DirectoryRestClientImpl implements DirectoryRestClient {
             pageNumber++;
         } while (combined.getContent().size() < combined.getTotalCount());
         return combined;
+    }
+
+    @Override
+    public DirectoryModel createDirectory(String jwtKey, DirectoryModel directory) throws URISyntaxException, IOException {
+        HttpPost request = new HttpPost(baseUrl);
+        request.addHeader("x-ribbon2-auth", jwtKey);
+        request.setEntity(new StringEntity(gson.toJson(directory), ContentType.APPLICATION_JSON));
+        HttpResponse response = clientBuilder.build().execute(request);
+        return ResponseUtil.handleResponse(response, new TypeToken<DirectoryModel>() {});
+    }
+
+    @Override
+    public DirectoryModel updateDirectory(String jwtKey, DirectoryModel directory) throws URISyntaxException, IOException {
+        HttpPut request = new HttpPut(baseUrl);
+        request.addHeader("x-ribbon2-auth", jwtKey);
+        request.setEntity(new StringEntity(gson.toJson(directory), ContentType.APPLICATION_JSON));
+        HttpResponse response = clientBuilder.build().execute(request);
+        return ResponseUtil.handleResponse(response, new TypeToken<DirectoryModel>() {});
+    }
+
+    @Override
+    public void deleteDirectory(String jwtKey, String dirPath) throws URISyntaxException, IOException {
+        HttpDelete request = new HttpDelete(new URIBuilder(baseUrl + "/" + dirPath).build());
+        request.addHeader("x-ribbon2-auth", jwtKey);
+        HttpResponse response = clientBuilder.build().execute(request);
+        if (response.getStatusLine().getStatusCode() >= 400) {
+            ResponseUtil.handleResponse(response, new TypeToken<Boolean>() {});
+        }
     }
 
     @Override

@@ -31,6 +31,15 @@
                     <div class="card bg-body-tertiary">
                         <div class="card-header fw-semibold">Directory tree</div>
                         <div class="card-body p-2">
+                            <form class="p-2 mb-2 border-bottom border-secondary" hx-post="/admin/directory" hx-target="#directory-detail" hx-swap="outerHTML"
+                                  hx-on::after-request="if(event.detail.xhr.getResponseHeader('X-Directory-Changed')) window.location.reload()">
+                                <div class="fw-semibold small mb-2">Create directory</div>
+                                <label class="form-label small" for="new-directory-path">Full path</label>
+                                <input class="form-control form-control-sm mb-2" id="new-directory-path" name="fullName" required placeholder="News.World">
+                                <label class="form-label small" for="new-directory-description">Description</label>
+                                <input class="form-control form-control-sm mb-2" id="new-directory-description" name="description" placeholder="Optional">
+                                <button class="btn btn-sm btn-primary" type="submit">Create</button>
+                            </form>
                             <#macro tree nodes>
                                 <ul class="list-unstyled ms-2 mb-1">
                                     <#list nodes as node>

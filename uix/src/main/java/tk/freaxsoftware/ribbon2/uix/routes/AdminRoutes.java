@@ -61,6 +61,50 @@ public final class AdminRoutes {
             renderDirectoryDetail(ctx, gatewayService, ctx.queryParam("path"));
         });
 
+        app.post("/admin/directory", ctx -> {
+            if (!guard(ctx)) return;
+            try {
+                DirectoryModel directory = new DirectoryModel();
+                directory.setFullName(ctx.formParam("fullName").trim());
+                directory.setDescription(ctx.formParam("description"));
+                DirectoryModel created = gatewayService.getDirectoryRestClient().createDirectory(
+                        UserSessionModelContext.getUser().getJwtKey(), directory);
+                ctx.header("X-Directory-Changed", "true");
+                renderDirectoryDetail(ctx, gatewayService, created.getFullName());
+            } catch (Exception ex) {
+                renderError(ctx, "Could not create directory: " + ex.getMessage(), ex);
+            }
+        });
+
+        app.put("/admin/directory", ctx -> {
+            if (!guard(ctx)) return;
+            String path = ctx.formParam("path");
+            try {
+                DirectoryModel directory = new DirectoryModel();
+                directory.setFullName(path);
+                directory.setDescription(ctx.formParam("description"));
+                gatewayService.getDirectoryRestClient().updateDirectory(
+                        UserSessionModelContext.getUser().getJwtKey(), directory);
+                ctx.header("X-Directory-Changed", "true");
+                renderDirectoryDetail(ctx, gatewayService, path);
+            } catch (Exception ex) {
+                renderError(ctx, "Could not update directory description: " + ex.getMessage(), ex);
+            }
+        });
+
+        app.delete("/admin/directory", ctx -> {
+            if (!guard(ctx)) return;
+            String path = ctx.queryParam("path");
+            try {
+                gatewayService.getDirectoryRestClient().deleteDirectory(
+                        UserSessionModelContext.getUser().getJwtKey(), path);
+                ctx.header("X-Directory-Changed", "true");
+                ctx.render("admin-alert.html", Map.of("message", "Directory and its descendants were deleted."));
+            } catch (Exception ex) {
+                renderError(ctx, "Could not delete directory: " + ex.getMessage(), ex);
+            }
+        });
+
         app.post("/admin/directory/security", ctx -> {
             if (!guard(ctx)) return;
             String path = ctx.formParam("path");

@@ -7,7 +7,18 @@
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#dir-io" type="button">IO</button></li>
         </ul>
         <div class="tab-content">
-            <section class="tab-pane fade show active" id="dir-details"><dl class="row mb-0"><dt class="col-sm-3">Path</dt><dd class="col-sm-9">${directory.fullName?html}</dd><dt class="col-sm-3">Name</dt><dd class="col-sm-9">${directory.name?html}</dd><dt class="col-sm-3">Description</dt><dd class="col-sm-9">${directory.description!""?html}</dd></dl></section>
+            <section class="tab-pane fade show active" id="dir-details">
+                <dl class="row"><dt class="col-sm-3">Path</dt><dd class="col-sm-9">${directory.fullName?html}</dd><dt class="col-sm-3">Name</dt><dd class="col-sm-9">${directory.name?html}</dd></dl>
+                <form class="row g-2 align-items-end mb-3" hx-put="/admin/directory" hx-target="#directory-detail" hx-swap="outerHTML"
+                      hx-on::after-request="if(event.detail.xhr.getResponseHeader('X-Directory-Changed')) window.location.reload()">
+                    <input type="hidden" name="path" value="${directory.fullName?html}">
+                    <div class="col-md-9"><label class="form-label" for="directory-description">Description</label><input class="form-control" id="directory-description" name="description" value="${directory.description!""?html}"></div>
+                    <div class="col-md-3"><button class="btn btn-primary" type="submit">Save description</button></div>
+                </form>
+                <button class="btn btn-sm btn-outline-danger" hx-delete="/admin/directory?path=${directory.fullName?url}" hx-target="#directory-detail" hx-swap="outerHTML"
+                        hx-confirm="Delete ${directory.fullName?html} and all of its descendants? This cannot be undone."
+                        hx-on::after-request="if(event.detail.xhr.getResponseHeader('X-Directory-Changed')) window.location.reload()">Delete directory</button>
+            </section>
             <section class="tab-pane fade" id="dir-security">
                 <#if securityError??><div class="alert alert-danger" role="alert">${securityError?html}</div></#if>
                 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">

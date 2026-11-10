@@ -43,6 +43,15 @@ public interface DirectoryRestClient {
      */
     DirectoryPage getDirectories(String jwtKey) throws URISyntaxException, IOException;
 
+    /** Create a directory. The service derives its name from the full path. */
+    DirectoryModel createDirectory(String jwtKey, DirectoryModel directory) throws URISyntaxException, IOException;
+
+    /** Update only the description of an existing directory. */
+    DirectoryModel updateDirectory(String jwtKey, DirectoryModel directory) throws URISyntaxException, IOException;
+
+    /** Delete a directory and all of its descendants. */
+    void deleteDirectory(String jwtKey, String dirPath) throws URISyntaxException, IOException;
+
     /** Read the directory's local access mode and inheritance source (admin API). */
     DirectorySecurityModel getDirectorySecurity(String jwtKey, String dirPath) throws URISyntaxException, IOException;
 

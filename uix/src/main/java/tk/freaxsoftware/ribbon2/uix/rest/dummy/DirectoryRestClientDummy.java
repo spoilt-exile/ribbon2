@@ -70,6 +70,22 @@ public class DirectoryRestClientDummy implements DirectoryRestClient {
     }
 
     @Override
+    public DirectoryModel createDirectory(String jwtKey, DirectoryModel directory) throws URISyntaxException, IOException {
+        directory.setId(1001L);
+        directory.setName(directory.getFullName().substring(directory.getFullName().lastIndexOf('.') + 1));
+        return directory;
+    }
+
+    @Override
+    public DirectoryModel updateDirectory(String jwtKey, DirectoryModel directory) throws URISyntaxException, IOException {
+        return directory;
+    }
+
+    @Override
+    public void deleteDirectory(String jwtKey, String dirPath) throws URISyntaxException, IOException {
+    }
+
+    @Override
     public DirectorySecurityModel getDirectorySecurity(String jwtKey, String dirPath) throws URISyntaxException, IOException {
         DirectorySecurityModel security = new DirectorySecurityModel();
         security.setDirectoryPath(dirPath);
