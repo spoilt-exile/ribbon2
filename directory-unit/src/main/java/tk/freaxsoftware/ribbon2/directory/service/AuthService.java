@@ -87,9 +87,6 @@ public class AuthService {
      */
     public boolean checkDirAccess(String userLogin, String dirFullName, String permission) {
         LOGGER.info("Checking directory {} for user {} by permission {}", dirFullName, userLogin, permission);
-        if (Objects.equals(userLogin, ROOT_LOGIN)) {
-            return true;
-        }
         UserEntity user = userRespository.findByLogin(userLogin);
         if (user == null) {
             throw new CoreException(USER_NOT_FOUND, "Can't find user " + userLogin);
