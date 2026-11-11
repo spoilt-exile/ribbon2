@@ -41,6 +41,7 @@ import tk.freaxsoftware.ribbon2.core.data.MessagePropertyModel;
 import tk.freaxsoftware.ribbon2.core.data.convert.GsonCopier;
 import tk.freaxsoftware.ribbon2.core.data.request.DirectoryCheckAccessRequest;
 import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest;
+import tk.freaxsoftware.ribbon2.core.data.request.PaginationRequest.Order;
 import tk.freaxsoftware.ribbon2.core.data.response.DirectoryPage;
 import tk.freaxsoftware.ribbon2.core.exception.CoreException;
 import static tk.freaxsoftware.ribbon2.core.exception.RibbonErrorCodes.ACCESS_DENIED;
@@ -361,6 +362,8 @@ public class MessageService {
         int page = 0;
         request.setSize(1000);
         request.setPage(page);
+        request.setOrderBy("id");
+        request.setDirection(Order.ASC);
         PagedList<Message> messages = messageRepository.findPage(fullName, request);
         LOGGER.info("SCAN&RELOCATE: page {} loaded {}", page, messages.getList().size());
         while (messages.hasNext()) {
@@ -379,7 +382,7 @@ public class MessageService {
                 }
                 messageRepository.save(message);
             }
-            page++;
+            request.setPage(page++);
             messages = messageRepository.findPage(fullName, request);
             LOGGER.info("SCAN&RELOCATE: page {} loaded {}", page, messages.getList().size());
         }
