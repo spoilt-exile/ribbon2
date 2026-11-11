@@ -351,7 +351,7 @@ public class MessageService {
 
     /**
      * Scan messages on deleted directory and relocate if there is no more directories assigned to message.
-     * @param fullName name of the directory;
+     * @param fullName name of the directory which were removed from system;
      * @param directory for lost and found messages;
      * @throws Exception exception on initialization of lost and found directory;
      */
@@ -366,7 +366,7 @@ public class MessageService {
         request.setDirection(Order.ASC);
         PagedList<Message> messages = messageRepository.findPage(fullName, request);
         LOGGER.info("SCAN&RELOCATE: page {} loaded {}", page, messages.getList().size());
-        while (messages.hasNext()) {
+        do {
             for (Message message: messages.getList()) {
                 LOGGER.info("SCAN&RELOCATE: message {} directories {}", message.getId(), message.getDirectories());
                 message.getDirectories().remove(fullName);
@@ -378,13 +378,13 @@ public class MessageService {
                     property.setCreated(ZonedDateTime.now());
                     property.setCreatedBy("root");
                     property.setType("RELOCATED");
+                    property.setContent(fullName);
                     message.getProperties().add(property);
                 }
                 messageRepository.save(message);
             }
-            request.setPage(page++);
             messages = messageRepository.findPage(fullName, request);
             LOGGER.info("SCAN&RELOCATE: page {} loaded {}", page, messages.getList().size());
-        }
+        } while (messages.getList().size() > 0);
     }
 }
