@@ -8,6 +8,7 @@ Current version: **3.3**
  - `message-unit` - unit for holding messages;
  - `exchanger-unit` - unit for launcing IO modules;
  - `uix` - basic UI written on HTMX;
+ - `ribbon-server` - basic implementation of original Ribbon server including networking protocol;
 
 ### Key features
  - Docker support;

@@ -12,6 +12,7 @@
         <module>directory-unit</module>
         <module>IO</module>
         <module>uix</module>
+        <module>ribbon-server</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
