@@ -1,0 +1,14 @@
+{
+    "port": 3003,
+    "access": {
+        "enableSessions": true,
+        "allowRemote": true,
+        "remoteGroup": "REM"
+    },
+    "db": {
+        "jdbcUrl": "jdbc:postgresql://localhost:5432/ribbon2-ribbon-server",
+        "driver": "org.postgresql.Driver",
+        "username": "ribbon2",
+        "password": "ribbon2"
+    }
+}

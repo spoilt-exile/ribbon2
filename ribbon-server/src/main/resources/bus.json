@@ -1,0 +1,29 @@
+{
+    "threadPoolConfig": {
+        "type": "FIXED_POOL",
+        "threadCount": 8
+    },
+    "bridgeServer": {
+        "httpPort": 9103
+    },
+    "bridgeClient": {
+        "address": "127.0.0.1",
+        "port": 8000,
+        "heartbeatRate": 30,
+        "tag": "ribbon-server",
+        "crossConnectionsSends": [
+            "TBD"
+        ],
+        "crossConnectionsReceives": [
+            "TBD"
+        ]
+    },
+    "storage": {
+        "storageClass": "tk.freaxsoftware.ribbon2.core.data.messagestorage.DBMessageStorage",
+        "redeliveryPeriod": 15,
+        "topicPattern": "Ribbon.*",
+        "storeCalls": true,
+        "removeProcessed": false,
+        "redeliveryOnlyIfReceiversExists": true
+    }
+}
