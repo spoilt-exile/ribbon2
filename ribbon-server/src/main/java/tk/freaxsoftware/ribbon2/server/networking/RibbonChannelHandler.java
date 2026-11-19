@@ -45,6 +45,15 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
+        if (state.getCollectionBuffer() != null && state.getCurrentCommand() != null && state.getCurrentCommandArgs() != null) {
+            if (Objects.equals(msg, ProtocolUtils.END_COMMAND)) {
+                executeCommand(ctx, state.getCurrentCommand(), state, state.getCurrentCommandArgs());
+            } else {
+                state.getCollectionBuffer().append(msg);
+                state.getCollectionBuffer().append('\n');
+            }
+            return;
+        }
         String[] parsedCommand = ProtocolUtils.parseCommand(msg);
         if (parsedCommand == null || (parsedCommand != null && parsedCommand.length != 2)) {
             LOGGER.warn("[{}]: command format error: {}", state.getId(), msg);
@@ -57,7 +66,11 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
             ctx.writeAndFlush(ProtocolUtils.ERROR_RESPONSE + "Невідома команда!");
             return;
         }
-        String response = commandOpt.get().exec(state, parsedCommand[1]);
+        executeCommand(ctx, commandOpt.get(), state, parsedCommand[0]);
+    }
+
+    private void executeCommand(ChannelHandlerContext ctx, RibbonCommand command, HandlerState state, String args) {
+        String response = command.exec(state, args);
         if (response != null) {
             ctx.writeAndFlush(response);
         }

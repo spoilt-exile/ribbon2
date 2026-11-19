@@ -59,4 +59,14 @@ public abstract class RibbonCommand {
         state.setCurrentCommandArgs(args);
         state.setCollectionBuffer(new StringBuffer());
     }
+
+    /**
+     * Reset handler state after full message was collected.
+     * @param state state of handler
+     */
+    protected void resetCollection(HandlerState state) {
+        state.setCurrentCommand(null);
+        state.setCurrentCommandArgs(null);
+        state.setCollectionBuffer(null);
+    }
 }
