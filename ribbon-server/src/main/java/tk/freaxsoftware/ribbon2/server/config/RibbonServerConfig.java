@@ -20,6 +20,10 @@ package tk.freaxsoftware.ribbon2.server.config;
 
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 
+/**
+ * Ribbon server config class.
+ * @author Stanislav Nepochatov
+ */
 public class RibbonServerConfig {
     private Integer port;
     private DbConfig db;

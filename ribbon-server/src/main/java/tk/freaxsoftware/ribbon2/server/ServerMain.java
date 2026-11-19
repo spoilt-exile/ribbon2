@@ -38,7 +38,12 @@ import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 import tk.freaxsoftware.ribbon2.core.config.EnvironmentOverrider;
 import tk.freaxsoftware.ribbon2.server.config.RibbonServerConfig;
 import tk.freaxsoftware.ribbon2.server.config.RibbonServerConfig.AccessConfig;
+import tk.freaxsoftware.ribbon2.server.networking.TCPInitializer;
 
+/**
+ * Ribbon server implementation main class.
+ * @author Stanislav Nepochatov
+ */
 public class ServerMain {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ServerMain.class);

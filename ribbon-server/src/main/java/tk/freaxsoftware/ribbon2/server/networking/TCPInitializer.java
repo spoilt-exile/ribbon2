@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package tk.freaxsoftware.ribbon2.server;
+package tk.freaxsoftware.ribbon2.server.networking;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
@@ -24,6 +24,10 @@ import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 
+/**
+ * Ribbon TCP server pipeline.
+ * @author Stanislav Nepochatov
+ */
 public class TCPInitializer extends ChannelInitializer<SocketChannel> {
 
     @Override
@@ -31,7 +35,7 @@ public class TCPInitializer extends ChannelInitializer<SocketChannel> {
         socketChannel.pipeline().addLast("frameDecoder", new LineBasedFrameDecoder(102400));
         socketChannel.pipeline().addLast("stringDecoder", new StringDecoder());
         socketChannel.pipeline().addLast("stringEncoder", new StringEncoder());
-        socketChannel.pipeline().addLast("handler", new TcpChannelHandler());
+        socketChannel.pipeline().addLast("handler", new RibbonChannelHandler());
     }
     
 }

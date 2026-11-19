@@ -20,6 +20,10 @@ package tk.freaxsoftware.ribbon2.server;
 
 import tk.freaxsoftware.ribbon2.server.config.RibbonServerConfig;
 
+/**
+ * Init class for Ribbon protocol server.
+ * @author Stanislav Nepochatov
+ */
 public class Init {
     
     public static void init(RibbonServerConfig config) {
