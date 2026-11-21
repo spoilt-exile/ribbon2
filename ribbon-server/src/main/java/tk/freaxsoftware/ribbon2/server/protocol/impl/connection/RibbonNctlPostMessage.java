@@ -30,7 +30,7 @@ public class RibbonNctlPostMessage extends RibbonCommand {
 
     @Override
     public String exec(HandlerState state, String args) {
-        if (state.getCollectionBuffer() == null) {
+        if (state.isInCollectionState()) {
             collectMessage(state, args);
             return null;
         } else {

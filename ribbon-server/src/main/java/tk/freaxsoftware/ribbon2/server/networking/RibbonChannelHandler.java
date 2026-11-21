@@ -20,7 +20,9 @@ package tk.freaxsoftware.ribbon2.server.networking;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +47,7 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
-        if (state.getCollectionBuffer() != null && state.getCurrentCommand() != null && state.getCurrentCommandArgs() != null) {
+        if (state.isInCollectionState()) {
             if (Objects.equals(msg, ProtocolUtils.END_COMMAND)) {
                 executeCommand(ctx, state.getCurrentCommand(), state, state.getCurrentCommandArgs());
             } else {
@@ -73,6 +75,15 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
         String response = command.exec(state, args);
         if (response != null) {
             ctx.writeAndFlush(response);
+        }
+        //Reset state of the state on the end of command, also sends broadcast messages.
+        if (!state.isInCollectionState()) {
+            state.setCurrentCommand(null);
+            state.setCurrentCommandArgs(null);
+            state.getBroadcastBuffer().forEach(bm -> ctx.writeAndFlush(bm));
+            if (state.isRemoteAuthUsed) {
+                state.setIsRemoteAuthUsed(false);
+            }
         }
     }
     
@@ -102,11 +113,16 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
         private Boolean isRemote;
 
         /**
-         * Temporary authenticated user. 
+         * Flag indicates that remote authentication is used for running commands.
+         */
+        private Boolean isRemoteAuthUsed;
+
+        /**
+         * Remote authenticated user. 
          * Used for remote mode to switch command execution context. 
          * Lasts only for one command.
          */
-        private String tempAuthUser;
+        private String remouteAuthUser;
 
         /**
          * Instance of current command. If this field is populated 
@@ -125,10 +141,18 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
         private StringBuffer collectionBuffer;
 
         /**
-         * Buffer for broadcast messages from other connections. Once command execution 
+         * Queue for broadcast messages from other connections. Once command execution 
          * is complete it will send all it's content to client.
          */
-        private StringBuffer broadcastBuffer;
+        private Queue<String> broadcastBuffer = new ConcurrentLinkedQueue<>();
+
+        /**
+         * Check if handler is busy by collection command body and waiting for another line of input or END: command;
+         * @return true if channel is busy, false - if channel is open for commands;
+         */
+        public Boolean isInCollectionState() {
+            return this.currentCommand != null && this.currentCommandArgs != null && this.collectionBuffer != null;
+        }
 
         public String getId() {
             return id;
@@ -154,11 +178,17 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
         public void setIsRemote(Boolean isRemote) {
             this.isRemote = isRemote;
         }
-        public String getTempAuthUser() {
-            return tempAuthUser;
+        public Boolean getIsRemoteAuthUsed() {
+            return isRemoteAuthUsed;
         }
-        public void setTempAuthUser(String tempAuthUser) {
-            this.tempAuthUser = tempAuthUser;
+        public void setIsRemoteAuthUsed(Boolean isRemoteAuthUsed) {
+            this.isRemoteAuthUsed = isRemoteAuthUsed;
+        }
+        public String getRemouteAuthUser() {
+            return remouteAuthUser;
+        }
+        public void setRemouteAuthUser(String tempAuthUser) {
+            this.remouteAuthUser = tempAuthUser;
         }
         public RibbonCommand getCurrentCommand() {
             return currentCommand;
@@ -178,10 +208,10 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
         public void setCollectionBuffer(StringBuffer collectionBuffer) {
             this.collectionBuffer = collectionBuffer;
         }
-        public StringBuffer getBroadcastBuffer() {
+        public Queue<String> getBroadcastBuffer() {
             return broadcastBuffer;
         }
-        public void setBroadcastBuffer(StringBuffer broadcastBuffer) {
+        public void setBroadcastBuffer(Queue<String> broadcastBuffer) {
             this.broadcastBuffer = broadcastBuffer;
         }
     }
