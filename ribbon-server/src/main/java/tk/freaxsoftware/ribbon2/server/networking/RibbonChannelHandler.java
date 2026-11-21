@@ -18,6 +18,7 @@
  */
 package tk.freaxsoftware.ribbon2.server.networking;
 
+import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,6 +30,8 @@ import org.slf4j.LoggerFactory;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import tk.freaxsoftware.ribbon2.server.protocol.ConnectionTypes;
 import tk.freaxsoftware.ribbon2.server.protocol.ProtocolBinder;
 import tk.freaxsoftware.ribbon2.server.protocol.ProtocolUtils;
@@ -113,13 +116,13 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
             ctx.writeAndFlush(ProtocolUtils.ERROR_RESPONSE + "Невідома команда!");
             return;
         }
-        executeCommand(ctx, commandOpt.get(), state, parsedCommand[0]);
+        executeCommand(ctx, commandOpt.get(), state, parsedCommand[1]);
     }
 
     private void executeCommand(ChannelHandlerContext ctx, RibbonCommand command, HandlerState state, String args) {
         String response = command.exec(state, args);
         if (response != null) {
-            ctx.writeAndFlush(response);
+            ctx.writeAndFlush(response + "\n");
         }
         //Reset state of the state on the end of command, also sends broadcast messages.
         if (!state.isInCollectionState()) {
@@ -129,9 +132,12 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
             while ((pendingBroadcast = state.getBroadcastBuffer().poll()) != null) {
                 writeBroadcast(ctx, pendingBroadcast);
             }
-            if (state.isRemoteAuthUsed) {
-                state.setIsRemoteAuthUsed(false);
-            }
+        }
+        //Support chaning connection charset for RIBBON_NCTL_INIT command.
+        if (state.getCharset() != null) {
+            ctx.pipeline().replace("stringDecoder", "stringDecoder", new StringDecoder(state.getCharset()));
+            ctx.pipeline().replace("stringEncoder", "stringEncoder", new StringEncoder(state.getCharset()));
+            state.setCharset(null);
         }
     }
     
@@ -148,7 +154,12 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
         /**
          * Type of the connection (NEW, CLIENT or CONTROL).
          */
-        private ConnectionTypes type;
+        private ConnectionTypes type = ConnectionTypes.NEW;
+
+        /**
+         * Custom charset for connection.
+         */
+        private Charset charset;
 
         /**
          * Authenticated user name.
@@ -213,6 +224,12 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
         }
         public void setType(ConnectionTypes type) {
             this.type = type;
+        }
+        public Charset getCharset() {
+            return charset;
+        }
+        public void setCharset(Charset charset) {
+            this.charset = charset;
         }
         public String getAuthUser() {
             return authUser;

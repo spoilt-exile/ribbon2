@@ -18,6 +18,11 @@
  */
 package tk.freaxsoftware.ribbon2.server.protocol.impl.connection;
 
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
+
 import tk.freaxsoftware.ribbon2.server.networking.RibbonChannelHandler.HandlerState;
 import tk.freaxsoftware.ribbon2.server.protocol.ConnectionTypes;
 import tk.freaxsoftware.ribbon2.server.protocol.ProtocolUtils;
@@ -36,7 +41,39 @@ public class RibbonNctlInit extends RibbonCommand {
 
     @Override
     public String exec(HandlerState state, String args) {
-        state.setType(ConnectionTypes.CLIENT);
+        //Return warning if connection is already initalized.
+        if (state.getType() != ConnectionTypes.NEW) {
+            return "RIBBON_WARNING:З'єднання вже ініціьовано!";
+        }
+        //Parsing and checning arguments
+        String[] parsed = ProtocolUtils.parseBasicArguments(args, 3);
+        if (parsed == null) {
+            return ProtocolUtils.ERROR_RESPONSE + "Помилка команди!";
+        }
+        //Type initialization
+        Optional<ConnectionTypes> typeOpt = Arrays.stream(ConnectionTypes.values())
+            .filter(ct -> Objects.equals(ct.name(), parsed[0])).findAny();
+        if (typeOpt.isEmpty()) {
+            return ProtocolUtils.ERROR_RESPONSE + "Невідомий тип з'єднання!";
+        }
+        ConnectionTypes initType = typeOpt.get();
+        if (!initType.getAvailableForInit()) {
+            return ProtocolUtils.ERROR_RESPONSE + "Помилка команди: тип з'єднання " + parsed[0] + " не можна використовувати!";
+        }
+        //Protocol init
+        if (!ProtocolUtils.RIBBON_PROTOCOL_VERSION.equals(parsed[1])) {
+            return ProtocolUtils.ERROR_RESPONSE + "Невідомий ідентефікатор протокола.";
+        }
+        //Codepage init
+        Charset charset = null;
+        if (!ProtocolUtils.RIBBON_PROTOCOL_DEFAULT_CHARSET.equals(parsed[2])) {
+            if (!Charset.isSupported(parsed[2])) {
+                return ProtocolUtils.ERROR_RESPONSE + "Невідомий ідентефікатор кодової сторінки.";
+            }
+            charset = Charset.forName(parsed[2]);
+        }
+        state.setType(initType);
+        state.setCharset(charset);
         return ProtocolUtils.OK_RESPONSE;
     }
     

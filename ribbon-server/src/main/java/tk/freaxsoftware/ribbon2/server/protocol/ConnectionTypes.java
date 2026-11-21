@@ -50,4 +50,8 @@ public enum ConnectionTypes {
     ConnectionTypes(Boolean availableForInit) {
         this.availableForInit = availableForInit;
     }
+
+    public Boolean getAvailableForInit() {
+        return availableForInit;
+    }
 }

@@ -24,6 +24,7 @@ package tk.freaxsoftware.ribbon2.server.protocol;
  */
 public class ProtocolUtils {
     public static String RIBBON_PROTOCOL_VERSION = "a2";
+    public static String RIBBON_PROTOCOL_DEFAULT_CHARSET = "UTF-8";
 
     public static String COMMAND_DELIMETER = ":";
     public static String OK_RESPONSE = "OK:";
@@ -32,9 +33,28 @@ public class ProtocolUtils {
     public static String END_COMMAND = "END:";
     public static String COMMIT_CLOSE_COMMAND = "COMMIT_CLOSE:";
 
+    /**
+     * Parse raw command, returns command name and it's arguments.
+     * @param rawCommand raw command;
+     * @return array with command name and arguments;
+     */
     public static String[] parseCommand(String rawCommand) {
         if (rawCommand != null && !rawCommand.isEmpty()) {
             return rawCommand.split(COMMAND_DELIMETER);
+        }
+        return null;
+    }
+
+    /**
+     * Parse basic CSV command and validate cound of arguments.
+     * @param args string with all arguments;
+     * @param count count of arguments after parsing;
+     * @return parsed arguments or null if count is incorrect;
+     */
+    public static String[] parseBasicArguments(String args, int count) {
+        if (args != null && !args.isEmpty()) {
+            String[] parsed = args.split(",");
+            return parsed.length == count ? parsed : null;
         }
         return null;
     }
