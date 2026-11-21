@@ -28,16 +28,21 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import tk.freaxsoftware.extras.bus.bridge.http.util.GsonUtils;
 import tk.freaxsoftware.ribbon2.core.config.DbConfig;
 import tk.freaxsoftware.ribbon2.core.config.EnvironmentOverrider;
 import tk.freaxsoftware.ribbon2.server.config.RibbonServerConfig;
 import tk.freaxsoftware.ribbon2.server.config.RibbonServerConfig.AccessConfig;
+import tk.freaxsoftware.ribbon2.server.networking.RibbonChannelHandler;
 import tk.freaxsoftware.ribbon2.server.networking.TCPInitializer;
 
 /**
@@ -57,6 +62,23 @@ public class ServerMain {
      * Current application config;
      */
     public static RibbonServerConfig config;
+
+    /** Active client channels, shared by all protocol handlers. */
+    public static final ChannelGroup CLIENT_CHANNELS =
+            new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+
+    /**
+     * Publish one protocol frame to every connected client. Each channel handler
+     * decides whether to write it now or defer it until its current command ends.
+     */
+    public static void broadcast(String frame) {
+        for (Channel channel : CLIENT_CHANNELS) {
+            RibbonChannelHandler handler = channel.pipeline().get(RibbonChannelHandler.class);
+            if (handler != null) {
+                handler.offerBroadcast(frame);
+            }
+        }
+    }
 
     public static void main(String[] args) throws InterruptedException, IOException {
         LOGGER.info("\n{}", IOUtils.toString(ServerMain.class.getClassLoader().getResourceAsStream("header")), Charset.defaultCharset());

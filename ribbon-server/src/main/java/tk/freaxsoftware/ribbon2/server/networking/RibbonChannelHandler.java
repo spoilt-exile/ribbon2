@@ -18,11 +18,11 @@
  */
 package tk.freaxsoftware.ribbon2.server.networking;
 
+import java.util.ArrayDeque;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +44,51 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
     private final static Logger LOGGER = LoggerFactory.getLogger(RibbonChannelHandler.class);
 
     private final HandlerState state = new HandlerState();
+    private volatile ChannelHandlerContext context;
+
+    @Override
+    public void handlerAdded(ChannelHandlerContext ctx) {
+        this.context = ctx;
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        tk.freaxsoftware.ribbon2.server.ServerMain.CLIENT_CHANNELS.add(ctx.channel());
+        super.channelActive(ctx);
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        tk.freaxsoftware.ribbon2.server.ServerMain.CLIENT_CHANNELS.remove(ctx.channel());
+        super.channelInactive(ctx);
+    }
+
+    /**
+     * Deliver a broadcast on this connection's event loop. Handler state and its
+     * pending queue are only accessed from that event loop.
+     */
+    public void offerBroadcast(String frame) {
+        ChannelHandlerContext ctx = context;
+        if (ctx == null) {
+            return;
+        }
+
+        ctx.executor().execute(() -> {
+            if (!ctx.channel().isActive()) {
+                return;
+            }
+            if (state.isInCollectionState()) {
+                state.getBroadcastBuffer().add(frame);
+            } else {
+                writeBroadcast(ctx, frame);
+            }
+        });
+    }
+
+    private void writeBroadcast(ChannelHandlerContext ctx, String frame) {
+        String line = frame.endsWith("\n") ? frame : frame + "\n";
+        ctx.writeAndFlush(line);
+    }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
@@ -80,7 +125,10 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
         if (!state.isInCollectionState()) {
             state.setCurrentCommand(null);
             state.setCurrentCommandArgs(null);
-            state.getBroadcastBuffer().forEach(bm -> ctx.writeAndFlush(bm));
+            String pendingBroadcast;
+            while ((pendingBroadcast = state.getBroadcastBuffer().poll()) != null) {
+                writeBroadcast(ctx, pendingBroadcast);
+            }
             if (state.isRemoteAuthUsed) {
                 state.setIsRemoteAuthUsed(false);
             }
@@ -144,7 +192,7 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
          * Queue for broadcast messages from other connections. Once command execution 
          * is complete it will send all it's content to client.
          */
-        private Queue<String> broadcastBuffer = new ConcurrentLinkedQueue<>();
+        private Queue<String> broadcastBuffer = new ArrayDeque<>();
 
         /**
          * Check if handler is busy by collection command body and waiting for another line of input or END: command;
