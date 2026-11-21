@@ -40,7 +40,14 @@ public class ProtocolUtils {
      */
     public static String[] parseCommand(String rawCommand) {
         if (rawCommand != null && !rawCommand.isEmpty()) {
-            return rawCommand.split(COMMAND_DELIMETER);
+            int splitIndex = rawCommand.indexOf(':');
+            if (splitIndex == -1) {
+                return null;
+            }
+            String[] parsed = new String[2];
+            parsed[0] = rawCommand.substring(0, splitIndex);
+            parsed[1] = rawCommand.substring(splitIndex + 1);
+            return parsed;
         }
         return null;
     }

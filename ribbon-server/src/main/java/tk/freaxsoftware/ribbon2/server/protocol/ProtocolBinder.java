@@ -28,7 +28,11 @@ import tk.freaxsoftware.ribbon2.server.protocol.impl.connection.*;
  */
 public class ProtocolBinder {
     public static List<RibbonCommand> commands = List.of(
+        // Ribbon connection control commands [LEVEL_0]
         new RibbonNctlInit(),
-        new RibbonNctlPostMessage()
+        new RibbonNctlLogin(),
+        new RibbonNctlGetId(),
+        new RibbonNctlResume(),
+        new RibbonNctlGetUsername()
     );
 }

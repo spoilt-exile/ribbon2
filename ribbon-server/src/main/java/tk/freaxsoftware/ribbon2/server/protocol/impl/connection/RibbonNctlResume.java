@@ -23,20 +23,21 @@ import tk.freaxsoftware.ribbon2.server.protocol.ConnectionTypes;
 import tk.freaxsoftware.ribbon2.server.protocol.ProtocolUtils;
 import tk.freaxsoftware.ribbon2.server.protocol.RibbonCommand;
 
-public class RibbonNctlPostMessage extends RibbonCommand {
-    public RibbonNctlPostMessage() {
-        super("RIBBON_NCTL_POST_MESSAGE", ConnectionTypes.ANY);
+/**
+ * RIBBON_NCTL_RESUME command implementation.
+ * Resumes previous session by providing valid id.
+ * @author Statnislav Nepochatov
+ */
+public class RibbonNctlResume extends RibbonCommand {
+
+    public RibbonNctlResume() {
+        super("RIBBON_NCTL_RESUME", ConnectionTypes.ANY);
     }
 
     @Override
     public String exec(HandlerState state, String args) {
-        if (state.isInCollectionState()) {
-            collectMessage(state, args);
-            return null;
-        } else {
-            System.out.println(state.getCollectionBuffer().toString());
-            resetCollection(state);
-            return ProtocolUtils.OK_RESPONSE;
-        }
+        // TODO Client provides session id in the arguments, command should validate that session exists, contains valid JWT token and init auth state in handler state.
+        return ProtocolUtils.ERROR_RESPONSE + "Команда не реалізована!";
     }
+    
 }

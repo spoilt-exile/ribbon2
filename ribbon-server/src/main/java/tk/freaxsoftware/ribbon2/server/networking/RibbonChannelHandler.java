@@ -167,6 +167,16 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
         private String authUser;
 
         /**
+         * Id of the used session.
+         */
+        private String sessionid;
+
+        /**
+         * JWT token from server auth.
+         */
+        private String sessionJwt;
+
+        /**
          * Flag to enable remote mode of connection. Used primaraly for RibbonWeb.
          */
         private Boolean isRemote;
@@ -236,6 +246,18 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
         }
         public void setAuthUser(String authUser) {
             this.authUser = authUser;
+        }
+        public String getSessionid() {
+            return sessionid;
+        }
+        public void setSessionid(String sessionid) {
+            this.sessionid = sessionid;
+        }
+        public String getSessionJwt() {
+            return sessionJwt;
+        }
+        public void setSessionJwt(String sessionJwt) {
+            this.sessionJwt = sessionJwt;
         }
         public Boolean getIsRemote() {
             return isRemote;
