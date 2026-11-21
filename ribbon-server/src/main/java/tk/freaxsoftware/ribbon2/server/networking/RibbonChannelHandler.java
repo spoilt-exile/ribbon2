@@ -107,13 +107,13 @@ public class RibbonChannelHandler extends SimpleChannelInboundHandler<String>  {
         String[] parsedCommand = ProtocolUtils.parseCommand(msg);
         if (parsedCommand == null || (parsedCommand != null && parsedCommand.length != 2)) {
             LOGGER.warn("[{}]: command format error: {}", state.getId(), msg);
-            ctx.writeAndFlush(ProtocolUtils.ERROR_RESPONSE + "Помилка формату команди!");
+            ctx.writeAndFlush(ProtocolUtils.ERROR_RESPONSE + "Помилка формату команди!\n");
             return;
         }
         Optional<RibbonCommand> commandOpt = ProtocolBinder.commands.stream().filter(c -> Objects.equals(c.getName(), parsedCommand[0])).findAny();
         if (commandOpt.isEmpty()) {
             LOGGER.warn("[{}]: unknown command: {}", state.getId(), parsedCommand[0]);
-            ctx.writeAndFlush(ProtocolUtils.ERROR_RESPONSE + "Невідома команда!");
+            ctx.writeAndFlush(ProtocolUtils.ERROR_RESPONSE + "Невідома команда!\n");
             return;
         }
         executeCommand(ctx, commandOpt.get(), state, parsedCommand[1]);
